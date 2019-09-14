@@ -13,10 +13,6 @@
 `define DATA_BUS                31:0
 `define DATA_BUS_WIDTH          32
 
-// double size data bus
-`define DOUBLE_DATA_BUS         63:0
-`define DOUBLE_DATA_BUS_WIDTH   64
-
 // half size data bus
 `define HALF_DATA_BUS           15:0
 `define HALF_DATA_BUS_WIDTH     16
@@ -32,5 +28,9 @@
 `define FUNCT_BUS_WIDTH         6
 `define SHAMT_BUS               4:0
 `define SHAMT_BUS_WIDTH         5
+
+// memory byte selection bus
+`define MEM_SEL_BUS             3:0
+`define MEM_SEL_BUS_WIDTH       4
 
 `endif  // TINYMIPS_BUS_V_
