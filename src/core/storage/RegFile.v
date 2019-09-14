@@ -24,7 +24,7 @@ module RegFile(
 
   // writing
   always @(posedge clk) begin
-    if (!rst) begin
+    if (rst) begin
       integer i;
       for (i = 0; i < 32; i = i + 1) begin
         registers[i] <= 0;
@@ -37,7 +37,7 @@ module RegFile(
 
   // reading #1
   always @(*) begin
-    if (!rst) begin
+    if (rst) begin
       read_data_1 <= 0;
     end
     else if (read_addr_1 == write_addr && write_en && read_en_1) begin
@@ -54,7 +54,7 @@ module RegFile(
 
   // reading @2
   always @(*) begin
-    if (!rst) begin
+    if (rst) begin
       read_data_2 <= 0;
     end
     else if (read_addr_2 == write_addr && write_en && read_en_2) begin

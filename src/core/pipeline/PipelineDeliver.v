@@ -14,7 +14,7 @@ module PipelineDeliver #(
   reg[WIDTH - 1:0] out;
 
   always @(posedge clk) begin
-    if (!rst) begin
+    if (rst) begin
       out <= 0;
     end
     else if (stall_current_stage && !stall_next_stage) begin
