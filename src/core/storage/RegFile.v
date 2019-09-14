@@ -30,7 +30,7 @@ module RegFile(
         registers[i] <= 0;
       end
     end
-    else if (write_en && write_addr) begin
+    else if (write_en && |write_addr) begin
       registers[write_addr] <= write_data;
     end
   end
