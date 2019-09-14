@@ -9,12 +9,12 @@ module MemGen(
   output                  mem_read_flag,
   output                  mem_write_flag,
   output                  mem_sign_ext_flag,
-  output  [3:0]           mem_sel,
+  output  [`MEM_SEL_BUS]  mem_sel,
   output  [`DATA_BUS]     mem_write_data
 );
 
   reg mem_read_flag, mem_write_flag, mem_sign_ext_flag;
-  reg[3:0] mem_sel;
+  reg[`MEM_SEL_BUS] mem_sel;
   reg[`DATA_BUS] mem_write_data;
 
   // generate control signal of memory accessing

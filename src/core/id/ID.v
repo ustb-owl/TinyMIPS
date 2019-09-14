@@ -35,7 +35,7 @@ module ID(
   output                  mem_read_flag,
   output                  mem_write_flag,
   output                  mem_sign_ext_flag,
-  output  [3:0]           mem_sel,
+  output  [`MEM_SEL_BUS]  mem_sel,
   output  [`DATA_BUS]     mem_write_data,
   // to WB stage (write back to regfile)
   output                  reg_write_en,
