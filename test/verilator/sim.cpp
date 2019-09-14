@@ -38,7 +38,7 @@ int main(int argc, const char *argv[]) {
     // check if is interactive mode
     if (is_interactive) cin.get();
     // set reset signal
-    top->rst = reset;
+    top->rst_n = reset;
     if (!reset) reset = 1;
     // evaluate
     top->clk = 0;

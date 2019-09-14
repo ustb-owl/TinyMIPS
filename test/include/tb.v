@@ -6,7 +6,7 @@
 `define GEN_TICK(clk, rst)              \
     integer `TICK;                      \
     always @(posedge clk) begin         \
-      if (!rst) begin                   \
+      if (rst) begin                    \
         `TICK <= 0;                     \
       end                               \
       else begin                        \
