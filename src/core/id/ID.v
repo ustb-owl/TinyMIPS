@@ -6,7 +6,6 @@
 `include "funct.v"
 
 module ID(
-  input                   rst,
   // from IF stage (PC)
   input   [`ADDR_BUS]     addr,
   input   [`INST_BUS]     inst,
