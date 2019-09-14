@@ -3,31 +3,31 @@
 `include "bus.v"
 
 module EXMEM(
-  input clk,
-  input rst,
-  input stall_current_stage,
-  input stall_next_stage,
+  input                   clk,
+  input                   rst,
+  input                   stall_current_stage,
+  input                   stall_next_stage,
   // input from EX stage
-  input mem_read_flag_in,
-  input mem_write_flag_in,
-  input mem_sign_ext_flag_in,
-  input [`MEM_SEL_BUS] mem_sel_in,
-  input [`DATA_BUS] mem_write_data_in,
-  input [`DATA_BUS] result_in,
-  input  reg_write_en_in,
-  input [`REG_ADDR_BUS] reg_write_addr_in,
-  input [`ADDR_BUS] current_pc_addr_in,
+  input                   mem_read_flag_in,
+  input                   mem_write_flag_in,
+  input                   mem_sign_ext_flag_in,
+  input   [`MEM_SEL_BUS]  mem_sel_in,
+  input   [`DATA_BUS]     mem_write_data_in,
+  input   [`DATA_BUS]     result_in,
+  input                   reg_write_en_in,
+  input   [`REG_ADDR_BUS] reg_write_addr_in,
+  input   [`ADDR_BUS]     current_pc_addr_in,
   // output to MEM stage
-  output mem_read_flag_out,
-  output mem_write_flag_out,
-  output mem_sign_ext_flag_out,
-  output [`MEM_SEL_BUS] mem_sel_out,
-  output [`DATA_BUS] mem_write_data_out,
+  output                  mem_read_flag_out,
+  output                  mem_write_flag_out,
+  output                  mem_sign_ext_flag_out,
+  output  [`MEM_SEL_BUS]  mem_sel_out,
+  output  [`DATA_BUS]     mem_write_data_out,
   // output to WB stage
-  output [`DATA_BUS] result_out,
-  output reg_write_en_out,
-  output [`REG_ADDR_BUS] reg_write_addr_out,
-  output [`ADDR_BUS] current_pc_addr_out
+  output  [`DATA_BUS]     result_out,
+  output                  reg_write_en_out,
+  output  [`REG_ADDR_BUS] reg_write_addr_out,
+  output  [`ADDR_BUS]     current_pc_addr_out
 );
 
   PipelineDeliver #(1) ff_mem_read_flag(
