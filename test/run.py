@@ -51,8 +51,10 @@ def compile(dirs, file, mod_name):
       verilator, dirs, file, mod_name)
   run_cmd(cmd)
 
-def make(mod_name):
+def make(mod_name, define):
   cmd = '{} -f V{}.mk'.format(make_cmd, mod_name)
+  if define:
+    cmd += ' ' + define
   run_cmd(cmd)
 
 def run(mod_name, is_interactive=False):
@@ -74,6 +76,8 @@ if __name__ == '__main__':
                       help='lint only')
   parser.add_argument('-s', '--src', default='../src',
                       help='specify project\'s source file directory')
+  parser.add_argument('-D', '--define', default='',
+                      help='set additional arguments for "make" command')
   parser.add_argument('-v', '--version', action='version',
                       version='%(prog)s version 0.0.1')
   # parse arguments
@@ -93,5 +97,5 @@ if __name__ == '__main__':
       lint(dirs, file)
     else:
       compile(dirs, file, mod_name)
-      make(mod_name)
+      make(mod_name, args.define)
       run(mod_name, args.interactive)
