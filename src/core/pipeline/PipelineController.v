@@ -3,7 +3,6 @@
 `include "bus.v"
 
 module PipelineController(
-  input   rst,
   // stall request signals
   input   request_from_id,
   // stall signals for each mid-stage
