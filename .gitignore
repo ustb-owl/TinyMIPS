@@ -35,6 +35,7 @@ Temporary Items
 # Build & Debug
 build
 debug
+*.bin
 
 # python
 __pycache__
