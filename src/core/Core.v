@@ -82,7 +82,7 @@ module Core(
   wire[`REG_ADDR_BUS] id_reg_write_addr, idex_reg_write_addr;
   wire[`ADDR_BUS] id_current_pc_addr, idex_current_pc_addr;
 
-  ID id(
+  ID id_stage(
     .addr               (ifid_addr),
     .inst               (ifid_inst),
 
@@ -163,7 +163,7 @@ module Core(
   wire[`REG_ADDR_BUS] ex_reg_write_addr, exmem_reg_write_addr;
   wire[`ADDR_BUS] ex_current_pc_addr, exmem_current_pc_addr;
 
-  EX ex(
+  EX ex_stage(
     .funct                  (idex_funct),
     .shamt                  (idex_shamt),
     .operand_1              (idex_operand_1),
@@ -229,7 +229,7 @@ module Core(
   wire[`REG_ADDR_BUS] mem_reg_write_addr, memwb_reg_write_addr;
   wire[`ADDR_BUS] mem_current_pc_addr, memwb_current_pc_addr;
 
-  MEM mem(
+  MEM mem_stage(
     .mem_read_flag_in       (exmem_mem_read_flag),
     .mem_write_flag_in      (exmem_mem_write_flag),
     .mem_sign_ext_flag_in   (exmem_mem_sign_ext_flag),
@@ -296,7 +296,7 @@ module Core(
   assign debug_reg_write_addr = wb_reg_write_addr;
   assign debug_reg_write_data = wb_result;
 
-  WB wb(
+  WB wb_stage(
     .ram_read_data      (memwb_ram_read_data),
 
     .mem_read_flag      (memwb_mem_read_flag),
