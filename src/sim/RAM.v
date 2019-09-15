@@ -4,13 +4,13 @@
 `include "sim.v"
 
 module RAM(
-  input                   clk,
-  input                   rst,
-  input                   ram_en,
-  input   [`MEM_SEL_BUS]  ram_write_en,
-  input   [`ADDR_BUS]     ram_addr,
-  input   [`DATA_BUS]     ram_write_data,
-  output  [`DATA_BUS]     ram_read_data
+  input                       clk,
+  input                       rst,
+  input                       ram_en,
+  input       [`MEM_SEL_BUS]  ram_write_en,
+  input       [`ADDR_BUS]     ram_addr,
+  input       [`DATA_BUS]     ram_write_data,
+  output  reg [`DATA_BUS]     ram_read_data
 );
 
   reg[7:0] data_mem0[`DATA_MEM_BUS];
@@ -29,8 +29,6 @@ module RAM(
   end
 
   // read operation
-  reg[`DATA_BUS] ram_read_data;
-
   always @(*) begin
     if (!ram_en || |ram_write_en) begin
       ram_read_data <= 0;
