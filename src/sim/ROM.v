@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "bus.v"
+`include "pc.v"
 `include "sim.v"
 
 module ROM(
@@ -18,9 +19,11 @@ module ROM(
     $readmemh("inst_rom.bin", inst_mem);
   end
 
-  assign rom_read_data[7:0] = rom_en ? inst_mem[rom_addr[`INST_MEM_ADDR_WIDTH - 1:0] + 3] : 0;
-  assign rom_read_data[15:8] = rom_en ? inst_mem[rom_addr[`INST_MEM_ADDR_WIDTH - 1:0] + 2] : 0;
-  assign rom_read_data[23:16] = rom_en ? inst_mem[rom_addr[`INST_MEM_ADDR_WIDTH - 1:0] + 1] : 0;
-  assign rom_read_data[31:24] = rom_en ? inst_mem[rom_addr[`INST_MEM_ADDR_WIDTH - 1:0] + 0] : 0;
+  wire[`ADDR_BUS] addr = rom_addr - `INIT_PC;
+
+  assign rom_read_data[7:0] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 3] : 0;
+  assign rom_read_data[15:8] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 2] : 0;
+  assign rom_read_data[23:16] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 1] : 0;
+  assign rom_read_data[31:24] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 0] : 0;
 
 endmodule // ROM
