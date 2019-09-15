@@ -18,14 +18,10 @@ make_cmd = 'make -C build'
 def detect_dir(src):
   ans = set()
   ans.add('-I' + src)
-  for r, d, f in os.walk(src):
+  for r, _, f in os.walk(src):
     for i in f:
       if i.endswith('.v'):
-        if not d:
-          ans.add('-I' + r)
-        else:
-          for name in d:
-            ans.add('-I' + os.path.join(r, name))
+        ans.add('-I' + r)
         break
   return ' ' + ' '.join(ans)
 
