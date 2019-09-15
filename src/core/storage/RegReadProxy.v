@@ -4,32 +4,30 @@
 
 module RegReadProxy(
   // input from ID stage
-  input                   read_en_1,
-  input                   read_en_2,
-  input   [`REG_ADDR_BUS] read_addr_1,
-  input   [`REG_ADDR_BUS] read_addr_2,
+  input                       read_en_1,
+  input                       read_en_2,
+  input       [`REG_ADDR_BUS] read_addr_1,
+  input       [`REG_ADDR_BUS] read_addr_2,
   // input from regfile
-  input   [`DATA_BUS]     data_1_from_reg,
-  input   [`DATA_BUS]     data_2_from_reg,
+  input       [`DATA_BUS]     data_1_from_reg,
+  input       [`DATA_BUS]     data_2_from_reg,
   // input from EX stage (solve data hazards)
-  input                   ex_load_flag,
-  input                   reg_write_en_from_ex,
-  input   [`REG_ADDR_BUS] reg_write_addr_from_ex,
-  input   [`DATA_BUS]     data_from_ex,
+  input                       ex_load_flag,
+  input                       reg_write_en_from_ex,
+  input       [`REG_ADDR_BUS] reg_write_addr_from_ex,
+  input       [`DATA_BUS]     data_from_ex,
   // input from MEM stage (solve data hazards)
-  input                   mem_load_flag,
-  input                   reg_write_en_from_mem,
-  input   [`REG_ADDR_BUS] reg_write_addr_from_mem,
-  input   [`DATA_BUS]     data_from_mem,
+  input                       mem_load_flag,
+  input                       reg_write_en_from_mem,
+  input       [`REG_ADDR_BUS] reg_write_addr_from_mem,
+  input       [`DATA_BUS]     data_from_mem,
   // load related signals
-  output                  load_related_1,
-  output                  load_related_2,
+  output                      load_related_1,
+  output                      load_related_2,
   // reg data output (WB stage)
-  output  [`DATA_BUS]     read_data_1,
-  output  [`DATA_BUS]     read_data_2
+  output  reg [`DATA_BUS]     read_data_1,
+  output  reg [`DATA_BUS]     read_data_2
 );
-
-  reg[`DATA_BUS] read_data_1, read_data_2;
 
   // generate load related signals
   assign load_related_1 =

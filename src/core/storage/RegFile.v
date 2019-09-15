@@ -3,24 +3,23 @@
 `include "bus.v"
 
 module RegFile(
-  input                   clk,
-  input                   rst,
+  input                       clk,
+  input                       rst,
   // read channel #1
-  input                   read_en_1,
-  input   [`REG_ADDR_BUS] read_addr_1,
-  output  [`DATA_BUS]     read_data_1,
+  input                       read_en_1,
+  input       [`REG_ADDR_BUS] read_addr_1,
+  output  reg [`DATA_BUS]     read_data_1,
   // read channel #2
-  input                   read_en_2,
-  input   [`REG_ADDR_BUS] read_addr_2,
-  output  [`DATA_BUS]     read_data_2,
+  input                       read_en_2,
+  input       [`REG_ADDR_BUS] read_addr_2,
+  output  reg [`DATA_BUS]     read_data_2,
   // write channel
-  input                   write_en,
-  input   [`REG_ADDR_BUS] write_addr,
-  input   [`DATA_BUS]     write_data
+  input                       write_en,
+  input       [`REG_ADDR_BUS] write_addr,
+  input       [`DATA_BUS]     write_data
 );
 
   reg[`DATA_BUS] registers[0:31];
-  reg[`DATA_BUS] read_data_1, read_data_2;
 
   // writing
   always @(posedge clk) begin

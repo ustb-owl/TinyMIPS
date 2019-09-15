@@ -3,15 +3,13 @@
 module PipelineDeliver #(
   parameter WIDTH = 1
 ) (
-  input                 clk,
-  input                 rst,
-  input                 stall_current_stage,
-  input                 stall_next_stage,
-  input   [WIDTH - 1:0] in,
-  output  [WIDTH - 1:0] out
+  input                     clk,
+  input                     rst,
+  input                     stall_current_stage,
+  input                     stall_next_stage,
+  input       [WIDTH - 1:0] in,
+  output  reg [WIDTH - 1:0] out
 );
-
-  reg[WIDTH - 1:0] out;
 
   always @(posedge clk) begin
     if (rst) begin

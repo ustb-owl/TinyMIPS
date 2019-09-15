@@ -5,13 +5,11 @@
 `include "funct.v"
 
 module FunctGen(
-  input   [`INST_OP_BUS]  op,
-  input   [`FUNCT_BUS]    funct_in,
-  input   [`REG_ADDR_BUS] rt,
-  output  [`FUNCT_BUS]    funct
+  input       [`INST_OP_BUS]  op,
+  input       [`FUNCT_BUS]    funct_in,
+  input       [`REG_ADDR_BUS] rt,
+  output  reg [`FUNCT_BUS]    funct
 );
-
-  reg[`FUNCT_BUS] funct;
 
   // generating FUNCT signal in order for the ALU to perform operations
   always @(*) begin

@@ -4,24 +4,23 @@
 `include "pc.v"
 
 module PC(
-  input                   clk,
-  input                   rst,
+  input                       clk,
+  input                       rst,
   // stall signal
-  input                   stall_pc,
+  input                       stall_pc,
   // branch control
-  input                   branch_flag,
-  input   [`ADDR_BUS]     branch_addr,
+  input                       branch_flag,
+  input       [`ADDR_BUS]     branch_addr,
   // to ID stage
-  output  [`ADDR_BUS]     pc,
+  output  reg [`ADDR_BUS]     pc,
   // ROM control
-  output                  rom_en,
-  output  [`MEM_SEL_BUS]  rom_write_en,
-  output  [`ADDR_BUS]     rom_addr,
-  output  [`DATA_BUS]     rom_write_data
+  output  reg                 rom_en,
+  output      [`MEM_SEL_BUS]  rom_write_en,
+  output      [`ADDR_BUS]     rom_addr,
+  output      [`DATA_BUS]     rom_write_data
 );
 
-  reg[`ADDR_BUS] pc, next_pc;
-  reg rom_en;
+  reg[`ADDR_BUS] next_pc;
 
   assign rom_addr = next_pc;
   assign rom_write_en = 0;

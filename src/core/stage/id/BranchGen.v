@@ -5,18 +5,15 @@
 `include "funct.v"
 
 module BranchGen(
-  input   [`ADDR_BUS]     addr,
-  input   [`INST_BUS]     inst,
-  input   [`INST_OP_BUS]  op,
-  input   [`FUNCT_BUS]    funct,
-  input   [`DATA_BUS]     reg_data_1,
-  input   [`DATA_BUS]     reg_data_2,
-  output                  branch_flag,
-  output  [`ADDR_BUS]     branch_addr
+  input       [`ADDR_BUS]     addr,
+  input       [`INST_BUS]     inst,
+  input       [`INST_OP_BUS]  op,
+  input       [`FUNCT_BUS]    funct,
+  input       [`DATA_BUS]     reg_data_1,
+  input       [`DATA_BUS]     reg_data_2,
+  output  reg                 branch_flag,
+  output  reg [`ADDR_BUS]     branch_addr
 );
-
-  reg branch_flag;
-  reg[`ADDR_BUS] branch_addr;
 
   wire[`ADDR_BUS] addr_plus_4 = addr + 4;
   wire[25:0] jump_addr = inst[25:0];

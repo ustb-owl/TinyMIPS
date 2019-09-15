@@ -5,17 +5,15 @@
 `include "funct.v"
 
 module OperandGen(
-  input   [`ADDR_BUS]       addr,
-  input   [`INST_OP_BUS]    op,
-  input   [`FUNCT_BUS]      funct,
-  input   [`HALF_DATA_BUS]  imm,
-  input   [`DATA_BUS]       reg_data_1,
-  input   [`DATA_BUS]       reg_data_2,
-  output  [`DATA_BUS]       operand_1,
-  output  [`DATA_BUS]       operand_2
+  input       [`ADDR_BUS]       addr,
+  input       [`INST_OP_BUS]    op,
+  input       [`FUNCT_BUS]      funct,
+  input       [`HALF_DATA_BUS]  imm,
+  input       [`DATA_BUS]       reg_data_1,
+  input       [`DATA_BUS]       reg_data_2,
+  output  reg [`DATA_BUS]       operand_1,
+  output  reg [`DATA_BUS]       operand_2
 );
-
-  reg[`DATA_BUS] operand_1, operand_2;
 
   // calculate link address
   wire[`ADDR_BUS] link_addr = addr + 8;

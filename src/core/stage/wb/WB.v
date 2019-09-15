@@ -4,24 +4,24 @@
 
 module WB(
   // RAM data
-  input   [`DATA_BUS]     ram_read_data,
+  input       [`DATA_BUS]     ram_read_data,
   // memory accessing signals
-  input                   mem_read_flag,
-  input                   mem_write_flag,
-  input                   mem_sign_ext_flag,
-  input   [`MEM_SEL_BUS]  mem_sel,
+  input                       mem_read_flag,
+  input                       mem_write_flag,
+  input                       mem_sign_ext_flag,
+  input       [`MEM_SEL_BUS]  mem_sel,
   // from MEM stage
-  input   [`DATA_BUS]     result_in,
-  input                   reg_write_en_in,
-  input   [`REG_ADDR_BUS] reg_write_addr_in,
-  input   [`ADDR_BUS]     current_pc_addr_in,
+  input       [`DATA_BUS]     result_in,
+  input                       reg_write_en_in,
+  input       [`REG_ADDR_BUS] reg_write_addr_in,
+  input       [`ADDR_BUS]     current_pc_addr_in,
   // regfile control
-  output  [`DATA_BUS]     result_out,
-  output                  reg_write_en_out,
-  output  [`REG_ADDR_BUS] reg_write_addr_out,
+  output  reg [`DATA_BUS]     result_out,
+  output                      reg_write_en_out,
+  output      [`REG_ADDR_BUS] reg_write_addr_out,
   // debug signals
-  output                  debug_reg_write_en,
-  output  [`ADDR_BUS]     debug_pc_addr_out
+  output                      debug_reg_write_en,
+  output      [`ADDR_BUS]     debug_pc_addr_out
 );
 
   assign reg_write_en_out = reg_write_en_in;
@@ -33,8 +33,6 @@ module WB(
 
   // generate result_out signal
   // because load instructions will use this signal
-  reg[`DATA_BUS] result_out;
-
   always @(*) begin
     if (mem_read_flag) begin
       if (mem_sel == 4'b0001) begin

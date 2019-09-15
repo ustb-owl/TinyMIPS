@@ -4,32 +4,32 @@
 
 module MEM(
   // memory accessing signals
-  input                   mem_read_flag_in,
-  input                   mem_write_flag_in,
-  input                   mem_sign_ext_flag_in,
-  input   [`MEM_SEL_BUS]  mem_sel_in,
-  input   [`DATA_BUS]     mem_write_data,
+  input                       mem_read_flag_in,
+  input                       mem_write_flag_in,
+  input                       mem_sign_ext_flag_in,
+  input       [`MEM_SEL_BUS]  mem_sel_in,
+  input       [`DATA_BUS]     mem_write_data,
   // from EX stage
-  input   [`DATA_BUS]     result_in,
-  input                   reg_write_en_in,
-  input   [`REG_ADDR_BUS] reg_write_addr_in,
-  input   [`ADDR_BUS]     current_pc_addr_in,
+  input       [`DATA_BUS]     result_in,
+  input                       reg_write_en_in,
+  input       [`REG_ADDR_BUS] reg_write_addr_in,
+  input       [`ADDR_BUS]     current_pc_addr_in,
   // RAM control signals
-  output                  ram_en,
-  output  [`MEM_SEL_BUS]  ram_write_en,
-  output  [`ADDR_BUS]     ram_addr,
-  output  [`DATA_BUS]     ram_write_data,
+  output                      ram_en,
+  output      [`MEM_SEL_BUS]  ram_write_en,
+  output      [`ADDR_BUS]     ram_addr,
+  output  reg [`DATA_BUS]     ram_write_data,
   // to ID stage
-  output                  mem_load_flag,
+  output                      mem_load_flag,
   // to WB stage
-  output                  mem_read_flag_out,
-  output                  mem_write_flag_out,
-  output                  mem_sign_ext_flag_out,
-  output  [`MEM_SEL_BUS]  mem_sel_out,
-  output  [`DATA_BUS]     result_out,
-  output                  reg_write_en_out,
-  output  [`REG_ADDR_BUS] reg_write_addr_out,
-  output  [`ADDR_BUS]     current_pc_addr_out
+  output                      mem_read_flag_out,
+  output                      mem_write_flag_out,
+  output                      mem_sign_ext_flag_out,
+  output      [`MEM_SEL_BUS]  mem_sel_out,
+  output      [`DATA_BUS]     result_out,
+  output                      reg_write_en_out,
+  output      [`REG_ADDR_BUS] reg_write_addr_out,
+  output      [`ADDR_BUS]     current_pc_addr_out
 );
 
   // internal ram_write_sel control signal
@@ -87,8 +87,6 @@ module MEM(
   end
 
   // generate ram_write_data signal
-  reg[`DATA_BUS] ram_write_data;
-
   always @(*) begin
     if (mem_write_flag_in) begin
       if (mem_sel_in == 4'b0001) begin

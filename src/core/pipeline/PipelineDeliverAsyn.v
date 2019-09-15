@@ -3,15 +3,14 @@
 module PipelineDeliverAsyn #(
   parameter WIDTH = 1
 ) (
-  input                 clk,
-  input                 rst,
-  input                 stall_current_stage_in,
-  input                 stall_next_stage_in,
-  input   [WIDTH - 1:0] in,
-  output  [WIDTH - 1:0] out
+  input                     clk,
+  input                     rst,
+  input                     stall_current_stage_in,
+  input                     stall_next_stage_in,
+  input       [WIDTH - 1:0] in,
+  output  reg [WIDTH - 1:0] out
 );
 
-  reg[WIDTH - 1:0] out;
   reg stall_current, stall_next;
   wire stall_current_stage, stall_next_stage;
 

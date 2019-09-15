@@ -4,20 +4,17 @@
 `include "opcode.v"
 
 module RegGen(
-  input   [`INST_OP_BUS]  op,
-  input   [`REG_ADDR_BUS] rs,
-  input   [`REG_ADDR_BUS] rt,
-  input   [`REG_ADDR_BUS] rd,
-  output                  reg_read_en_1,
-  output                  reg_read_en_2,
-  output  [`REG_ADDR_BUS] reg_addr_1,
-  output  [`REG_ADDR_BUS] reg_addr_2,
-  output                  reg_write_en,
-  output  [`REG_ADDR_BUS] reg_write_addr
+  input       [`INST_OP_BUS]  op,
+  input       [`REG_ADDR_BUS] rs,
+  input       [`REG_ADDR_BUS] rt,
+  input       [`REG_ADDR_BUS] rd,
+  output  reg                 reg_read_en_1,
+  output  reg                 reg_read_en_2,
+  output  reg [`REG_ADDR_BUS] reg_addr_1,
+  output  reg [`REG_ADDR_BUS] reg_addr_2,
+  output  reg                 reg_write_en,
+  output  reg [`REG_ADDR_BUS] reg_write_addr
 );
-
-  reg reg_read_en_1, reg_read_en_2, reg_write_en;
-  reg[`REG_ADDR_BUS] reg_addr_1, reg_addr_2, reg_write_addr;
 
   // generate read address
   always @(*) begin

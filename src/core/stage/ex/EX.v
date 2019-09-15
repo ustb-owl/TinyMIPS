@@ -5,31 +5,31 @@
 
 module EX(
   // from ID stage
-  input   [`FUNCT_BUS]    funct,
-  input   [`SHAMT_BUS]    shamt,
-  input   [`DATA_BUS]     operand_1,
-  input   [`DATA_BUS]     operand_2,
-  input                   mem_read_flag_in,
-  input                   mem_write_flag_in,
-  input                   mem_sign_ext_flag_in,
-  input   [`MEM_SEL_BUS]  mem_sel_in,
-  input   [`DATA_BUS]     mem_write_data_in,
-  input                   reg_write_en_in,
-  input   [`REG_ADDR_BUS] reg_write_addr_in,
-  input   [`ADDR_BUS]     current_pc_addr_in,
+  input       [`FUNCT_BUS]    funct,
+  input       [`SHAMT_BUS]    shamt,
+  input       [`DATA_BUS]     operand_1,
+  input       [`DATA_BUS]     operand_2,
+  input                       mem_read_flag_in,
+  input                       mem_write_flag_in,
+  input                       mem_sign_ext_flag_in,
+  input       [`MEM_SEL_BUS]  mem_sel_in,
+  input       [`DATA_BUS]     mem_write_data_in,
+  input                       reg_write_en_in,
+  input       [`REG_ADDR_BUS] reg_write_addr_in,
+  input       [`ADDR_BUS]     current_pc_addr_in,
   // to ID stage (solve data hazards)
-  output                  ex_load_flag,
+  output                      ex_load_flag,
   // to MEM stage
-  output                  mem_read_flag_out,
-  output                  mem_write_flag_out,
-  output                  mem_sign_ext_flag_out,
-  output  [`MEM_SEL_BUS]  mem_sel_out,
-  output  [`DATA_BUS]     mem_write_data_out,
+  output                      mem_read_flag_out,
+  output                      mem_write_flag_out,
+  output                      mem_sign_ext_flag_out,
+  output      [`MEM_SEL_BUS]  mem_sel_out,
+  output      [`DATA_BUS]     mem_write_data_out,
   // to WB stage
-  output  [`DATA_BUS]     result,
-  output                  reg_write_en_out,
-  output  [`REG_ADDR_BUS] reg_write_addr_out,
-  output  [`ADDR_BUS]     current_pc_addr_out
+  output  reg [`DATA_BUS]     result,
+  output                      reg_write_en_out,
+  output      [`REG_ADDR_BUS] reg_write_addr_out,
+  output      [`ADDR_BUS]     current_pc_addr_out
 );
 
   // to ID stage
@@ -64,8 +64,6 @@ module EX(
       : (operand_1 < operand_2);
 
   // calculate result
-  reg[`DATA_BUS] result;
-
   always @(*) begin
     case (funct)
       // jump with link & logic
