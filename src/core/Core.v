@@ -339,29 +339,29 @@ module Core(
   );
 
   RegReadProxy reg_read_proxy(
-    .read_en_1(id_reg_read_en_1),
-    .read_en_2(id_reg_read_en_2),
-    .read_addr_1(id_reg_addr_1),
-    .read_addr_2(id_reg_addr_2),
+    .read_en_1                (id_reg_read_en_1),
+    .read_en_2                (id_reg_read_en_2),
+    .read_addr_1              (id_reg_addr_1),
+    .read_addr_2              (id_reg_addr_2),
 
-    .data_1_from_reg(regfile_read_data_1),
-    .data_2_from_reg(regfile_read_data_2),
+    .data_1_from_reg          (regfile_read_data_1),
+    .data_2_from_reg          (regfile_read_data_2),
 
-    .ex_load_flag(ex_ex_load_flag),
-    .reg_write_en_from_ex(ex_reg_write_en),
-    .reg_write_addr_from_ex(ex_reg_write_addr),
-    .data_from_ex(ex_result),
+    .ex_load_flag             (ex_ex_load_flag),
+    .reg_write_en_from_ex     (ex_reg_write_en),
+    .reg_write_addr_from_ex   (ex_reg_write_addr),
+    .data_from_ex             (ex_result),
 
-    .mem_load_flag(mem_mem_load_flag),
-    .reg_write_en_from_mem(mem_reg_write_en),
-    .reg_write_addr_from_mem(mem_reg_write_addr),
-    .data_from_mem(mem_result),
+    .mem_load_flag            (mem_mem_load_flag),
+    .reg_write_en_from_mem    (mem_reg_write_en),
+    .reg_write_addr_from_mem  (mem_reg_write_addr),
+    .data_from_mem            (mem_result),
 
-    .load_related_1(id_load_related_1),
-    .load_related_2(id_load_related_2),
+    .load_related_1           (id_load_related_1),
+    .load_related_2           (id_load_related_2),
 
-    .read_data_1(id_reg_data_1),
-    .read_data_2(id_reg_data_2)
+    .read_data_1              (id_reg_data_1),
+    .read_data_2              (id_reg_data_2)
   );
 
 
