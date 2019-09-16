@@ -29,7 +29,7 @@ module RAM(
   end
 
   // read operation
-  always @(*) begin
+  always @(posedge clk) begin
     if (!ram_en || |ram_write_en) begin
       ram_read_data <= 0;
     end
