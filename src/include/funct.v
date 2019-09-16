@@ -2,7 +2,7 @@
 `define TINYMIPS_FUNCT_V_
 
 // shift
-`define FUNCT_SRA       6'b000011
+`define FUNCT_SLL       6'b000000
 `define FUNCT_SLLV      6'b000100
 `define FUNCT_SRLV      6'b000110
 `define FUNCT_SRAV      6'b000111

@@ -75,7 +75,7 @@ module EX(
       // arithmetic
       `FUNCT_ADDU, `FUNCT_SUBU: result <= result_sum;
       // shift
-      `FUNCT_SRA: result <= ({32{operand_2[31]}} << (6'd32 - {1'b0, shamt})) | operand_2 >> shamt;
+      `FUNCT_SLL: result <= operand_2 << shamt;
       `FUNCT_SLLV: result <= operand_2 << operand_1[4:0];
       `FUNCT_SRLV: result <= operand_2 >> operand_1[4:0];
       `FUNCT_SRAV: result <= ({32{operand_2[31]}} << (6'd32 - {1'b0, operand_1[4:0]})) | operand_2 >> operand_1[4:0];
