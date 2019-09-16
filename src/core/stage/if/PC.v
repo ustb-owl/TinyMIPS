@@ -22,7 +22,7 @@ module PC(
 
   reg[`ADDR_BUS] next_pc;
 
-  assign rom_addr = next_pc;
+  assign rom_addr = pc;
   assign rom_write_en = 0;
   assign rom_write_data = 0;
 
