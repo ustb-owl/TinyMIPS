@@ -70,7 +70,8 @@ module Core_tb(
     `DISPLAY("debug_reg_write_data", debug_reg_write_data);
     `DISPLAY("debug_pc_addr       ", debug_pc_addr);
     $display("");
-    `END_AT_TICK(15);
+    // `END_AT_TICK(15);
+    if (debug_reg_write_data == 32'habcd0000) $finish;
   end
 
 endmodule // Core_tb
