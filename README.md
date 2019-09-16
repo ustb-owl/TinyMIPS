@@ -15,9 +15,9 @@ Implementation of TinyMIPS processor for USTB computer composition principle cou
 | LUI     | N/A         |
 | OR      | N/A         |
 | XOR     | N/A         |
+| SLL     | N/A         |
 | SLLV    | N/A         |
 | SRAV    | N/A         |
-| SRA     | N/A         |
 | SRLV    | N/A         |
 | BEQ     | N/A         |
 | BNE     | N/A         |
