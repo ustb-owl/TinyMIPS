@@ -37,18 +37,18 @@ class AssignAST : public BaseAST {
 };
 
 // variable definition
-class VarDefVAST : public BaseAST {
+class VarDefAST : public BaseAST {
  public:
-  VarDefVAST(ASTPtrList defs) : defs_(std::move(defs)) {}
+  VarDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
 
  private:
   ASTPtrList defs_;
 };
 
 // constant definition
-class LetDefVAST : public BaseAST {
+class LetDefAST : public BaseAST {
  public:
-  LetDefVAST(ASTPtrList defs) : defs_(std::move(defs)) {}
+  LetDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
 
  private:
   ASTPtrList defs_;
