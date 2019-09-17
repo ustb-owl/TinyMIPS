@@ -69,9 +69,9 @@ class FunDefAST : public BaseAST {
 };
 
 // function call
-class FunCallVAST : public BaseAST {
+class FunCallAST : public BaseAST {
  public:
-  FunCallVAST(const std::string &id, ASTPtrList args)
+  FunCallAST(const std::string &id, ASTPtrList args)
       : id_(id), args_(std::move(args)) {}
 
  private:
