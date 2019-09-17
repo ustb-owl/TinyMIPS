@@ -18,9 +18,10 @@ if        ::= "if" expr block ["else" (if | block)];
 while     ::= "while" expr block;
 control   ::= "break" | "continue" | ("return" [expr]);
 
-assign_op ::= "="   | "+="    | "-="  | "*="  | "/="  | "%="
-              "&="  | "|="    | "^="  | "<<=" | ">>=";
-type      ::= "i32" | "i32*"  | "i8"  | "i8*";
+assign_op ::= "="     | "+="    | "-="  | "*="  | "/="  | "%="
+              "&="    | "|="    | "^="  | "<<=" | ">>=";
+type      ::= "i32"   | "i32*"  | "i8"  | "i8*"
+            | "ui32"  | "ui32*" | "ui8" | "ui8*";
 arg_def   ::= id ":" type {"," id ":" type};
 block     ::= "{" program "}";
 
