@@ -16,9 +16,9 @@ enum class Token {
 enum class Keyword {
   // var, let, def, as
   Var, Let, Def, As,
-  // i32, i8, i32*, i8*
+  // i32, i8, i32p, i8p
   Int32, Int8, Int32Ptr, Int8Ptr,
-  // ui32, ui8, ui32*, ui8*
+  // ui32, ui8, ui32p, ui8p
   UInt32, UInt8, UInt32Ptr, UInt8Ptr,
   // if, else, while
   If, Else, While,
