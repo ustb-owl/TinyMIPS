@@ -22,8 +22,8 @@ assign_op ::= "="     | "+="    | "-="  | "*="  | "/="  | "%="
               "&="    | "|="    | "^="  | "<<=" | ">>=";
 var_elem  ::= id ":" type ["=" expr]
 let_elem  ::= id ":" type "=" expr
-type      ::= "i32"   | "i32*"  | "i8"  | "i8*"
-            | "ui32"  | "ui32*" | "ui8" | "ui8*";
+type      ::= "i32"   | "i32p"  | "i8"  | "i8p"
+            | "ui32"  | "ui32p" | "ui8" | "ui8p";
 arg_def   ::= id ":" type {"," id ":" type};
 block     ::= "{" program "}";
 
