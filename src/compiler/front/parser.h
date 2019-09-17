@@ -66,7 +66,7 @@ class Parser {
   define::ASTPtr ParseVarElem();
   define::ASTPtr ParseLetElem();
   define::ASTPtr ParseType();
-  define::ASTPtr ParseArgDef();
+  define::ASTPtr ParseArgElem();
   define::ASTPtr ParseBlock();
 
   define::ASTPtr ParseExpression();

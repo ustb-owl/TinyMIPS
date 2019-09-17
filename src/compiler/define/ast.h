@@ -132,9 +132,9 @@ class TypeAST : public BaseAST {
 };
 
 // argument definition
-class ArgDefAST : public BaseAST {
+class ArgElemAST : public BaseAST {
  public:
-  ArgDefAST(const std::string &id, ASTPtr type)
+  ArgElemAST(const std::string &id, ASTPtr type)
       : id_(id), type_(std::move(type)) {}
 
  private:
