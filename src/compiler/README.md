@@ -10,8 +10,8 @@ stmt      ::= assign  | var_def | let_def | fun_def | fun_call
               if      | while   | control;
 
 assign    ::= id assign_op expr;
-var_def   ::= "var" id ":" type ["=" expr];
-let_def   ::= "let" id ":" type "=" expr;
+var_def   ::= "var" var_elem {"," var_elem};
+let_def   ::= "let" let_elem {"," let_elem};
 fun_def   ::= "def" id "(" [arg_def] ")" [":" type] block;
 fun_call  ::= id "(" [expr {"," expr}] ")";
 if        ::= "if" expr block ["else" (if | block)];
@@ -20,6 +20,8 @@ control   ::= "break" | "continue" | ("return" [expr]);
 
 assign_op ::= "="     | "+="    | "-="  | "*="  | "/="  | "%="
               "&="    | "|="    | "^="  | "<<=" | ">>=";
+var_elem  ::= id ":" type ["=" expr]
+let_elem  ::= id ":" type "=" expr
 type      ::= "i32"   | "i32*"  | "i8"  | "i8*"
             | "ui32"  | "ui32*" | "ui8" | "ui8*";
 arg_def   ::= id ":" type {"," id ":" type};
