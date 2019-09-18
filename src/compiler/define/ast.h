@@ -206,12 +206,13 @@ class CastAST : public BaseAST {
 // unary expression
 class UnaryAST : public BaseAST {
  public:
-  UnaryAST(front::Keyword op, ASTPtr opr) : op_(op), opr_(std::move(opr)) {}
+  UnaryAST(front::Operator op, ASTPtr opr)
+      : op_(op), opr_(std::move(opr)) {}
 
   void Dump(std::ostream &os) override;
 
  private:
-  front::Keyword op_;
+  front::Operator op_;
   ASTPtr opr_;
 };
 
