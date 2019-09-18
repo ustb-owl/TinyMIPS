@@ -131,7 +131,7 @@ TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
 
 TypePtr TypeAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
-  return ana.AnalyzeType(line_pos(), type_);
+  return ana.AnalyzeType(line_pos(), type_, ptr_);
 }
 
 TypePtr ArgElemAST::SemaAnalyze(Analyzer &ana) {
