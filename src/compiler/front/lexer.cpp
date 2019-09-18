@@ -16,8 +16,7 @@ enum class NumberType {
 
 const char *keywords[] = {
   "var", "let", "def", "as",
-  "i32", "i8", "i32p", "i8p",
-  "ui32", "ui8", "ui32p", "ui8p",
+  "i32", "i8", "ui32", "ui8",
   "if", "else", "while",
   "break", "continue", "return",
 };

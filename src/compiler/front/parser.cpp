@@ -315,15 +315,19 @@ ASTPtr Parser::ParseType() {
   if (cur_token_ != Token::Keyword) return LogError("expected type");
   switch (lexer_.key_val()) {
     case Keyword::Int32: case Keyword::Int8:
-    case Keyword::Int32Ptr: case Keyword::Int8Ptr:
     case Keyword::UInt32: case Keyword::UInt8:
-    case Keyword::UInt32Ptr: case Keyword::UInt8Ptr: break;
     default: return LogError("expected type");
   }
   // get type
   auto type = lexer_.key_val();
   NextToken();
-  return MakeAST<TypeAST>(line_pos, type);
+  // get pointer count
+  unsigned int ptr = 0;
+  while (IsTokenOperator(Operator::Mul)) {
+    NextToken();
+    ++ptr;
+  }
+  return MakeAST<TypeAST>(line_pos, type, ptr);
 }
 
 ASTPtr Parser::ParseArgElem() {
