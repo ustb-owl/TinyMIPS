@@ -31,7 +31,8 @@ class Analyzer {
                                  const std::string &id,
                                  const define::TypePtr &type,
                                  const define::TypePtr &init);
-  define::TypePtr AnalyzeType(unsigned int line_pos, Keyword type);
+  define::TypePtr AnalyzeType(unsigned int line_pos, Keyword type,
+                              unsigned int ptr);
   define::TypePtr AnalyzeArgElem(unsigned int line_pos,
                                  const std::string &id,
                                  const define::TypePtr &type);
