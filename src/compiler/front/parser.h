@@ -14,6 +14,7 @@ class Parser {
   void Reset() {
     lexer_.Reset();
     error_num_ = 0;
+    NextToken();
   }
 
   // get next AST from token stream
