@@ -14,25 +14,13 @@ class Analyzer {
   define::TypePtr AnalyzeAssign(unsigned int line_pos,
                                 const std::string &id,
                                 const define::TypePtr &expr);
-  define::TypePtr AnalyzeVarDef(unsigned int line_pos,
-                                const define::TypePtrList &defs);
-  define::TypePtr AnalyzeLetDef(unsigned int line_pos,
-                                const define::TypePtrList &defs);
   define::TypePtr AnalyzeFunDef(unsigned int line_pos,
                                 const std::string &id,
                                 const define::TypePtrList &args,
-                                const define::TypePtr &type,
-                                const define::TypePtr &body);
+                                const define::TypePtr &type);
   define::TypePtr AnalyzeFunCall(unsigned int line_pos,
                                  const std::string &id,
                                  const define::TypePtrList &args);
-  define::TypePtr AnalyzeIf(unsigned int line_pos,
-                            const define::TypePtr &cond,
-                            const define::TypePtr &then,
-                            const define::TypePtr &else_then);
-  define::TypePtr AnalyzeWhile(unsigned int line_pos,
-                               const define::TypePtr &cond,
-                               const define::TypePtr &body);
   define::TypePtr AnalyzeControl(unsigned int line_pos, Keyword type,
                                  const define::TypePtr &expr);
   define::TypePtr AnalyzeVarElem(unsigned int line_pos,
@@ -47,8 +35,6 @@ class Analyzer {
   define::TypePtr AnalyzeArgElem(unsigned int line_pos,
                                  const std::string &id,
                                  const define::TypePtr &type);
-  define::TypePtr AnalyzeBlock(unsigned int line_pos,
-                               const define::TypePtrList &stmts);
   define::TypePtr AnalyzeBinary(unsigned int line_pos, Operator op,
                                 const define::TypePtr &lhs,
                                 const define::TypePtr &rhs);
