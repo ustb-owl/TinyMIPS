@@ -8,17 +8,17 @@ namespace tinylang::define {
 
 // definition of base class of all types
 class BaseType;
-using TypePtr = std::unique_ptr<BaseType>;
-using TypeRef = const BaseType *;
+using TypePtr = std::shared_ptr<BaseType>;
 using TypePtrList = std::vector<TypePtr>;
-using TypeRefList = std::vector<TypeRef>;
 
 class BaseType {
  public:
   virtual ~BaseType() = default;
 
-  virtual bool IsPlain() const = 0;
-  virtual bool IsEqual(TypeRef type) const = 0;
+  virtual bool IsConst() const = 0;
+  virtual bool CanCastTo(const TypePtr &type) const = 0;
+  virtual TypePtr GetReturnType(const TypePtrList &args) const = 0;
+  virtual TypePtr GetDerefedType() const = 0;
 };
 
 class PlainType : public BaseType {
@@ -31,11 +31,20 @@ class PlainType : public BaseType {
 
   PlainType(Type type) : type_(type) {}
 
-  bool IsPlain() const override { return true; }
-  bool IsEqual(TypeRef type) const override;
+  //
 
  private:
   Type type_;
+};
+
+class ConstType : public BaseType {
+ public:
+  ConstType(TypePtr type) : type_(std::move(type)) {}
+
+  //
+
+ private:
+  TypePtr type_;
 };
 
 class FuncType : public BaseType {
@@ -43,8 +52,7 @@ class FuncType : public BaseType {
   FuncType(TypePtrList args, TypePtr ret)
       : args_(std::move(args)), ret_(std::move(ret)) {}
 
-  bool IsPlain() const override { return false; }
-  bool IsEqual(TypeRef type) const override;
+  //
 
  private:
   TypePtrList args_;
