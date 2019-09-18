@@ -1,0 +1,206 @@
+#include "define/ast.h"
+
+using namespace tinylang::front;
+using namespace tinylang::define;
+
+TypePtr AssignAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  auto expr = expr_->SemaAnalyze(ana);
+  if (!expr) return nullptr;
+  return ana.AnalyzeAssign(line_pos(), id_, expr);
+}
+
+TypePtr VarDefAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtrList defs;
+  for (const auto &i : defs_) {
+    auto type = i->SemaAnalyze(ana);
+    if (!type) return nullptr;
+    defs.push_back(type);
+  }
+  return MakeVoidType();
+}
+
+TypePtr LetDefAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtrList defs;
+  for (const auto &i : defs_) {
+    auto type = i->SemaAnalyze(ana);
+    if (!type) return nullptr;
+    defs.push_back(type);
+  }
+  return MakeVoidType();
+}
+
+TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
+  /*
+   * env structure:
+   *    root
+   *    |
+   *    +-- arguments
+   *        |
+   *        +-- body
+   */
+
+  set_env(ana.env());
+  // create argument env
+  ana.NewEnvironment();
+  // analyze arguments
+  TypePtrList args;
+  for (const auto &i : args_) {
+    auto type = i->SemaAnalyze(ana);
+    if (!type) return nullptr;
+    args.push_back(type);
+  }
+  // analyze function definition
+  TypePtr type;
+  if (type_) {
+    type = type_->SemaAnalyze(ana);
+    if (!type) return nullptr;
+  }
+  auto ret = ana.AnalyzeFunDef(line_pos(), id_, args, type);
+  // analyze body
+  auto body = body_->SemaAnalyze(ana);
+  if (!body) return nullptr;
+  // restore env
+  ana.RestoreEnvironment();
+  return ret;
+}
+
+TypePtr FunCallAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtrList args;
+  for (const auto &i : args_) {
+    auto type = i->SemaAnalyze(ana);
+    if (!type) return nullptr;
+    args.push_back(type);
+  }
+  return ana.AnalyzeFunCall(line_pos(), id_, args);
+}
+
+TypePtr IfAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  if (!cond_->SemaAnalyze(ana)) return nullptr;
+  if (!then_->SemaAnalyze(ana)) return nullptr;
+  if (else_then_ && !else_then_->SemaAnalyze(ana)) return nullptr;
+  return MakeVoidType();
+}
+
+TypePtr WhileAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  if (!cond_->SemaAnalyze(ana)) return nullptr;
+  if (!body_->SemaAnalyze(ana)) return nullptr;
+  return MakeVoidType();
+}
+
+TypePtr ControlAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtr expr;
+  if (expr_) {
+    expr = expr_->SemaAnalyze(ana);
+    if (!expr) return nullptr;
+  }
+  return ana.AnalyzeControl(line_pos(), type_, expr);
+}
+
+TypePtr VarElemAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtr type, init;
+  if (type_) {
+    type = type_->SemaAnalyze(ana);
+    if (!type) return nullptr;
+  }
+  if (init_) {
+    init = init_->SemaAnalyze(ana);
+    if (!init) return nullptr;
+  }
+  return ana.AnalyzeVarElem(line_pos(), id_, type, init);
+}
+
+TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  TypePtr type;
+  if (type_) {
+    type = type_->SemaAnalyze(ana);
+    if (!type) return nullptr;
+  }
+  auto init = init_->SemaAnalyze(ana);
+  if (!init) return nullptr;
+  return ana.AnalyzeLetElem(line_pos(), id_, type, init);
+}
+
+TypePtr TypeAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  return ana.AnalyzeType(line_pos(), type_);
+}
+
+TypePtr ArgElemAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  auto type = type_->SemaAnalyze(ana);
+  if (!type) return nullptr;
+  return ana.AnalyzeArgElem(line_pos(), id_, type);
+}
+
+TypePtr BlockAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
+  ana.NewEnvironment();
+  for (const auto &i : stmts_) {
+    if (!i->SemaAnalyze(ana)) return nullptr;
+  }
+  ana.RestoreEnvironment();
+  return MakeVoidType();
+}
+
+TypePtr BinaryAST::SemaAnalyze(Analyzer &ana) {
+  auto lhs = lhs_->SemaAnalyze(ana);
+  if (!lhs) return nullptr;
+  auto rhs = rhs_->SemaAnalyze(ana);
+  if (!rhs) return nullptr;
+  return ana.AnalyzeBinary(line_pos(), op_, lhs, rhs);
+}
+
+TypePtr CastAST::SemaAnalyze(Analyzer &ana) {
+  auto expr = expr_->SemaAnalyze(ana);
+  if (!expr) return nullptr;
+  auto type = type_->SemaAnalyze(ana);
+  if (!type) return nullptr;
+  return ana.AnalyzeCast(line_pos(), expr, type);
+}
+
+TypePtr UnaryAST::SemaAnalyze(Analyzer &ana) {
+  auto opr = opr_->SemaAnalyze(ana);
+  if (!opr) return nullptr;
+  return ana.AnalyzeUnary(line_pos(), op_, opr);
+}
+
+TypePtr IdAST::SemaAnalyze(Analyzer &ana) {
+  return ana.AnalyzeId(line_pos(), id_);
+}
+
+TypePtr NumAST::SemaAnalyze(Analyzer &ana) {
+  return ana.AnalyzeNum();
+}
+
+TypePtr StringAST::SemaAnalyze(Analyzer &ana) {
+  return ana.AnalyzeString();
+}
+
+TypePtr CharAST::SemaAnalyze(Analyzer &ana) {
+  return ana.AnalyzeChar();
+}
+
+TypePtr ArrayAST::SemaAnalyze(Analyzer &ana) {
+  TypePtrList elems;
+  for (const auto &i : elems_) {
+    auto type = i->SemaAnalyze(ana);
+    if (!type) return nullptr;
+    elems.push_back(type);
+  }
+  return ana.AnalyzeArray(line_pos(), elems);
+}
+
+TypePtr IndexAST::SemaAnalyze(Analyzer &ana) {
+  auto index = index_->SemaAnalyze(ana);
+  if (!index) return nullptr;
+  return ana.AnalyzeIndex(line_pos(), id_, index);
+}
