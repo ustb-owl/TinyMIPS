@@ -39,6 +39,10 @@ class Analyzer {
                                  const std::string &id,
                                  const define::TypeRef &type,
                                  const define::TypeRef &init);
+  define::TypeRef AnalyzeLetElem(unsigned int line_pos,
+                                 const std::string &id,
+                                 const define::TypeRef &type,
+                                 const define::TypeRef &init);
   define::TypeRef AnalyzeType(unsigned int line_pos, Keyword type);
   define::TypeRef AnalyzeArgElem(unsigned int line_pos,
                                  const std::string &id,

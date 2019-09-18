@@ -297,7 +297,7 @@ ASTPtr Parser::ParseLetElem() {
   NextToken();
   init = ParseExpression();
   if (!init) return nullptr;
-  return MakeAST<VarElemAST>(line_pos, id, std::move(type),
+  return MakeAST<LetElemAST>(line_pos, id, std::move(type),
                              std::move(init));
 }
 
