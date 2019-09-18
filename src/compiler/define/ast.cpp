@@ -32,9 +32,10 @@ void AssignAST::Dump(std::ostream &os) {
   os << indent << "AssignAST {" << std::endl;
   ++indent_count;
   os << indent << "id: " << id_ << std::endl;
-  os << indent << "expr: ";
+  os << indent << "expr:" << std::endl;
+  ++indent_count;
   expr_->Dump(os);
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -67,16 +68,19 @@ void FunDefAST::Dump(std::ostream &os) {
   for (const auto &i : args_) i->Dump(os);
   --indent_count;
   os << indent << "}" << std::endl;
-  os << indent << "type: ";
+  os << indent << "type:" << std::endl;
+  ++indent_count;
   if (type_) {
     type_->Dump(os);
   }
   else {
-    os << "void" << std::endl;
+    os << indent << "void" << std::endl;
   }
-  os << indent << "body: ";
-  body_->Dump(os);
   --indent_count;
+  os << indent << "body:" << std::endl;
+  ++indent_count;
+  body_->Dump(os);
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -96,24 +100,32 @@ void FunCallAST::Dump(std::ostream &os) {
 void IfAST::Dump(std::ostream &os) {
   os << indent << "IfAST {" << std::endl;
   ++indent_count;
-  os << indent << "cond: ";
+  os << indent << "cond:" << std::endl;
+  ++indent_count;
   cond_->Dump(os);
-  os << indent << "then: ";
-  then_->Dump(os);
-  os << indent << "else_then: ";
-  else_then_->Dump(os);
   --indent_count;
+  os << indent << "then:" << std::endl;
+  ++indent_count;
+  then_->Dump(os);
+  --indent_count;
+  os << indent << "else_then:" << std::endl;
+  ++indent_count;
+  else_then_->Dump(os);
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
 void WhileAST::Dump(std::ostream &os) {
   os << indent << "WhileAST {" << std::endl;
   ++indent_count;
-  os << indent << "cond: ";
+  os << indent << "cond:" << std::endl;
+  ++indent_count;
   cond_->Dump(os);
-  os << indent << "body: ";
-  body_->Dump(os);
   --indent_count;
+  os << indent << "body:" << std::endl;
+  ++indent_count;
+  body_->Dump(os);
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -128,14 +140,15 @@ void ControlAST::Dump(std::ostream &os) {
     default: assert(false);
   }
   os << std::endl;
-  os << indent << "expr: ";
+  os << indent << "expr:" << std::endl;
+  ++indent_count;
   if (expr_) {
     expr_->Dump(os);
   }
   else {
-    os << "none" << std::endl;
+    os << indent << "none" << std::endl;
   }
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -143,16 +156,19 @@ void VarElemAST::Dump(std::ostream &os) {
   os << indent << "VarElemAST {" << std::endl;
   ++indent_count;
   os << indent << "id: " << id_ << std::endl;
-  os << indent << "type: ";
+  os << indent << "type:" << std::endl;
+  ++indent_count;
   type_->Dump(os);
-  os << indent << "init: ";
+  --indent_count;
+  os << indent << "init:" << std::endl;
+  ++indent_count;
   if (init_) {
     init_->Dump(os);
   }
   else {
-    os << "none" << std::endl;
+    os << indent << "none" << std::endl;
   }
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -180,9 +196,10 @@ void ArgElemAST::Dump(std::ostream &os) {
   os << indent << "ArgElemAST {" << std::endl;
   ++indent_count;
   os << indent << "id: " << id_ << std::endl;
-  os << indent << "type: ";
+  os << indent << "type:" << std::endl;
+  ++indent_count;
   type_->Dump(os);
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -198,22 +215,28 @@ void BinaryAST::Dump(std::ostream &os) {
   os << indent << "BinaryAST {" << std::endl;
   ++indent_count;
   os << indent << "op: " << operators[static_cast<int>(op_)] << std::endl;
-  os << indent << "lhs: ";
+  os << indent << "lhs:" << std::endl;
+  ++indent_count;
   lhs_->Dump(os);
-  os << indent << "rhs: ";
-  rhs_->Dump(os);
   --indent_count;
+  os << indent << "rhs:" << std::endl;
+  ++indent_count;
+  rhs_->Dump(os);
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
 void CastAST::Dump(std::ostream &os) {
   os << indent << "CastAST {" << std::endl;
   ++indent_count;
-  os << indent << "expr: ";
+  os << indent << "expr:" << std::endl;
+  ++indent_count;
   expr_->Dump(os);
-  os << indent << "type: ";
-  type_->Dump(os);
   --indent_count;
+  os << indent << "type:" << std::endl;
+  ++indent_count;
+  type_->Dump(os);
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -221,9 +244,10 @@ void UnaryAST::Dump(std::ostream &os) {
   os << indent << "UnaryAST {" << std::endl;
   ++indent_count;
   os << indent << "op: " << operators[static_cast<int>(op_)] << std::endl;
-  os << indent << "opr: ";
+  os << indent << "opr:" << std::endl;
+  ++indent_count;
   opr_->Dump(os);
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
 
@@ -262,11 +286,11 @@ void CharAST::Dump(std::ostream &os) {
 void ArrayAST::Dump(std::ostream &os) {
   os << indent << "ArrayAST {" << std::endl;
   ++indent_count;
-  os << indent << "elems: {";
+  os << indent << "elems: {" << std::endl;
   ++indent_count;
   for (const auto &i : elems_) i->Dump(os);
   --indent_count;
-  os << indent << "}";
+  os << indent << "}" << std::endl;
   --indent_count;
   os << indent << "}" << std::endl;
 }
@@ -275,8 +299,9 @@ void IndexAST::Dump(std::ostream &os) {
   os << indent << "IndexAST {" << std::endl;
   ++indent_count;
   os << indent << "id: " << id_ << std::endl;
-  os << indent << "index: ";
+  os << indent << "index:" << std::endl;
+  ++indent_count;
   index_->Dump(os);
-  --indent_count;
+  indent_count -= 2;
   os << indent << "}" << std::endl;
 }
