@@ -213,6 +213,7 @@ void TypeAST::Dump(std::ostream &os) {
     default: assert(false);
   }
   os << std::endl;
+  os << indent << "ptr: " << ptr_ << std::endl;
   --indent_count;
   os << indent << "}" << std::endl;
 }

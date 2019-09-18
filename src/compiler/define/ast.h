@@ -176,13 +176,14 @@ class LetElemAST : public BaseAST {
 // type declaration
 class TypeAST : public BaseAST {
  public:
-  TypeAST(front::Keyword type) : type_(type) {}
+  TypeAST(front::Keyword type, unsigned int ptr) : type_(type), ptr_(ptr) {}
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   front::Keyword type_;
+  unsigned int ptr_;
 };
 
 // argument definition
