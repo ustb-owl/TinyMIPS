@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <vector>
+#include <cassert>
+
+#include "front/lexer.h"
 
 namespace tinylang::define {
 
@@ -58,6 +61,22 @@ class FuncType : public BaseType {
   TypePtrList args_;
   TypePtr ret_;
 };
+
+// create a new plain type by type keyword
+inline TypePtr MakePlainType(front::Keyword key) {
+  using namespace front;
+  using Type = PlainType::Type;
+  switch (key) {
+    case Keyword::Int32: return std::make_shared<PlainType>(Type::Int32);
+    // TODO
+    default: assert(false); return nullptr;
+  }
+}
+
+// create a new void type
+inline TypePtr MakeVoidType() {
+  return std::make_shared<PlainType>(PlainType::Type::Void);
+}
 
 }  // namespace tinylang::define
 
