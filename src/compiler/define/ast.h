@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <ostream>
 
 #include "front/lexer.h"
 
@@ -14,6 +15,8 @@ namespace tinylang::define {
 class BaseAST {
  public:
   virtual ~BaseAST() = default;
+
+  virtual void Dump(std::ostream &os) = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
   unsigned int line_pos() const { return line_pos_; }
@@ -31,6 +34,8 @@ class AssignAST : public BaseAST {
   AssignAST(const std::string &id, ASTPtr expr)
       : id_(id), expr_(std::move(expr)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string id_;
   ASTPtr expr_;
@@ -41,6 +46,8 @@ class VarDefAST : public BaseAST {
  public:
   VarDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtrList defs_;
 };
@@ -49,6 +56,8 @@ class VarDefAST : public BaseAST {
 class LetDefAST : public BaseAST {
  public:
   LetDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   ASTPtrList defs_;
@@ -62,6 +71,8 @@ class FunDefAST : public BaseAST {
       : id_(id), args_(std::move(args)), type_(std::move(type)),
         body_(std::move(body)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string id_;
   ASTPtrList args_;
@@ -73,6 +84,8 @@ class FunCallAST : public BaseAST {
  public:
   FunCallAST(const std::string &id, ASTPtrList args)
       : id_(id), args_(std::move(args)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   std::string id_;
@@ -86,6 +99,8 @@ class IfAST : public BaseAST {
       : cond_(std::move(cond)), then_(std::move(then)),
         else_then_(std::move(else_then)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtr cond_, then_, else_then_;
 };
@@ -96,6 +111,8 @@ class WhileAST : public BaseAST {
   WhileAST(ASTPtr cond, ASTPtr body)
       : cond_(std::move(cond)), body_(std::move(body)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtr cond_, body_;
 };
@@ -105,6 +122,8 @@ class ControlAST : public BaseAST {
  public:
   ControlAST(front::Keyword type, ASTPtr expr)
       : type_(type), expr_(std::move(expr)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   front::Keyword type_;
@@ -117,6 +136,8 @@ class VarElemAST : public BaseAST {
   VarElemAST(const std::string &id, ASTPtr type, ASTPtr init)
       : id_(id), type_(std::move(type)), init_(std::move(init)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string id_;
   ASTPtr type_, init_;
@@ -126,6 +147,8 @@ class VarElemAST : public BaseAST {
 class TypeAST : public BaseAST {
  public:
   TypeAST(front::Keyword type) : type_(type) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   front::Keyword type_;
@@ -137,6 +160,8 @@ class ArgElemAST : public BaseAST {
   ArgElemAST(const std::string &id, ASTPtr type)
       : id_(id), type_(std::move(type)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string id_;
   ASTPtr type_;
@@ -147,6 +172,8 @@ class BlockAST : public BaseAST {
  public:
   BlockAST(ASTPtrList stmts) : stmts_(std::move(stmts)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtrList stmts_;
 };
@@ -156,6 +183,8 @@ class BinaryAST : public BaseAST {
  public:
   BinaryAST(front::Operator op, ASTPtr lhs, ASTPtr rhs)
       : op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   front::Operator op_;
@@ -168,6 +197,8 @@ class CastAST : public BaseAST {
   CastAST(ASTPtr expr, ASTPtr type)
       : expr_(std::move(expr)), type_(std::move(type)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtr expr_, type_;
 };
@@ -176,6 +207,8 @@ class CastAST : public BaseAST {
 class UnaryAST : public BaseAST {
  public:
   UnaryAST(front::Keyword op, ASTPtr opr) : op_(op), opr_(std::move(opr)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   front::Keyword op_;
@@ -187,6 +220,8 @@ class IdAST : public BaseAST {
  public:
   IdAST(const std::string &id) : id_(id) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string id_;
 };
@@ -195,6 +230,8 @@ class IdAST : public BaseAST {
 class NumAST : public BaseAST {
  public:
   NumAST(unsigned int num) : num_(num) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   unsigned int num_;
@@ -205,6 +242,8 @@ class StringAST : public BaseAST {
  public:
   StringAST(const std::string &str) : str_(str) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   std::string str_;
 };
@@ -213,6 +252,8 @@ class StringAST : public BaseAST {
 class CharAST : public BaseAST {
  public:
   CharAST(char c) : c_(c) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   char c_;
@@ -223,6 +264,8 @@ class ArrayAST : public BaseAST {
  public:
   ArrayAST(ASTPtrList elems) : elems_(std::move(elems)) {}
 
+  void Dump(std::ostream &os) override;
+
  private:
   ASTPtrList elems_;
 };
@@ -232,6 +275,8 @@ class IndexAST : public BaseAST {
  public:
   IndexAST(const std::string &id, ASTPtr index)
       : id_(id), index_(std::move(index)) {}
+
+  void Dump(std::ostream &os) override;
 
  private:
   std::string id_;
