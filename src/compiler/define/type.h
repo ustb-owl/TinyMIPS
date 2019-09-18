@@ -18,18 +18,23 @@ class BaseType {
  public:
   virtual ~BaseType() = default;
 
+  // return if is constant type
   virtual bool IsConst() const = 0;
+  // return if left value which is current type
+  // can accept the right value which is specific type
+  virtual bool CanAccept(const TypePtr &type) const = 0;
+  // return if current type can be casted to specific type
   virtual bool CanCastTo(const TypePtr &type) const = 0;
+  // return the return type of a function call
   virtual TypePtr GetReturnType(const TypePtrList &args) const = 0;
+  // return the dereferenced type of current type
   virtual TypePtr GetDerefedType() const = 0;
 };
 
 class PlainType : public BaseType {
  public:
   enum class Type {
-    Void,
-    Int32, Int8, Int32Ptr, Int8Ptr,
-    UInt32, UInt8, UInt32Ptr, UInt8Ptr,
+    Void, Int32, Int8, UInt32, UInt8,
   };
 
   PlainType(Type type) : type_(type) {}
@@ -68,7 +73,9 @@ inline TypePtr MakePlainType(front::Keyword key) {
   using Type = PlainType::Type;
   switch (key) {
     case Keyword::Int32: return std::make_shared<PlainType>(Type::Int32);
-    // TODO
+    case Keyword::Int8: return std::make_shared<PlainType>(Type::Int8);
+    case Keyword::UInt32: return std::make_shared<PlainType>(Type::UInt32);
+    case Keyword::UInt8: return std::make_shared<PlainType>(Type::UInt8);
     default: assert(false); return nullptr;
   }
 }
