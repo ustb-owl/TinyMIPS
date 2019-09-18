@@ -55,6 +55,18 @@ class ConstType : public BaseType {
   TypePtr type_;
 };
 
+class PointerType : public BaseType {
+ public:
+  PointerType(TypePtr type, unsigned int ptr)
+      : type_(std::move(type)), ptr_(ptr) {}
+
+  //
+
+ private:
+  TypePtr type_;
+  unsigned int ptr_;
+};
+
 class FuncType : public BaseType {
  public:
   FuncType(TypePtrList args, TypePtr ret)
