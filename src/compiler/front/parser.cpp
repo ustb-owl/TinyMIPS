@@ -265,9 +265,12 @@ ASTPtr Parser::ParseVarElem() {
   auto id = lexer_.id_val();
   NextToken();
   // get type
-  if (!CheckChar(':')) return nullptr;
-  auto type = ParseType();
-  if (!type) return nullptr;
+  ASTPtr type;
+  if (IsTokenChar(':')) {
+    NextToken();
+    type = ParseType();
+    if (!type) return nullptr;
+  }
   // get initialization expression
   ASTPtr init;
   if (IsTokenOperator(Operator::Assign)) {
@@ -275,6 +278,8 @@ ASTPtr Parser::ParseVarElem() {
     init = ParseExpression();
     if (!init) return nullptr;
   }
+  // check type & init
+  if (!type && !init) return LogError("initializer required");
   return MakeAST<VarElemAST>(line_pos, id, std::move(type),
                              std::move(init));
 }
@@ -286,9 +291,12 @@ ASTPtr Parser::ParseLetElem() {
   auto id = lexer_.id_val();
   NextToken();
   // get type
-  if (!CheckChar(':')) return nullptr;
-  auto type = ParseType();
-  if (!type) return nullptr;
+  ASTPtr type;
+  if (IsTokenChar(':')) {
+    NextToken();
+    type = ParseType();
+    if (!type) return nullptr;
+  }
   // get initialization expression
   ASTPtr init;
   if (!IsTokenOperator(Operator::Assign)) {
