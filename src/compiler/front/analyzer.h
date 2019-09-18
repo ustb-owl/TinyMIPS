@@ -16,8 +16,8 @@ class Analyzer {
                                 const define::TypePtr &expr);
   define::TypePtr AnalyzeFunDef(unsigned int line_pos,
                                 const std::string &id,
-                                const define::TypePtrList &args,
-                                const define::TypePtr &type);
+                                define::TypePtrList args,
+                                define::TypePtr ret);
   define::TypePtr AnalyzeFunCall(unsigned int line_pos,
                                  const std::string &id,
                                  const define::TypePtrList &args);
@@ -25,17 +25,17 @@ class Analyzer {
                                  const define::TypePtr &expr);
   define::TypePtr AnalyzeVarElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypePtr &type,
+                                 define::TypePtr type,
                                  const define::TypePtr &init);
   define::TypePtr AnalyzeLetElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypePtr &type,
+                                 define::TypePtr type,
                                  const define::TypePtr &init);
   define::TypePtr AnalyzeType(unsigned int line_pos, Keyword type,
                               unsigned int ptr);
   define::TypePtr AnalyzeArgElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypePtr &type);
+                                 define::TypePtr type);
   define::TypePtr AnalyzeBinary(unsigned int line_pos, Operator op,
                                 const define::TypePtr &lhs,
                                 const define::TypePtr &rhs);
