@@ -145,10 +145,24 @@ class ControlAST : public BaseAST {
   ASTPtr expr_;
 };
 
-// variable definition element (used in 'var' and 'let')
+// variable definition element
 class VarElemAST : public BaseAST {
  public:
   VarElemAST(const std::string &id, ASTPtr type, ASTPtr init)
+      : id_(id), type_(std::move(type)), init_(std::move(init)) {}
+
+  void Dump(std::ostream &os) override;
+  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+
+ private:
+  std::string id_;
+  ASTPtr type_, init_;
+};
+
+// constant definition element
+class LetElemAST : public BaseAST {
+ public:
+  LetElemAST(const std::string &id, ASTPtr type, ASTPtr init)
       : id_(id), type_(std::move(type)), init_(std::move(init)) {}
 
   void Dump(std::ostream &os) override;

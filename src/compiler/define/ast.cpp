@@ -172,6 +172,21 @@ void VarElemAST::Dump(std::ostream &os) {
   os << indent << "}" << std::endl;
 }
 
+void LetElemAST::Dump(std::ostream &os) {
+  os << indent << "LetElemAST {" << std::endl;
+  ++indent_count;
+  os << indent << "id: " << id_ << std::endl;
+  os << indent << "type:" << std::endl;
+  ++indent_count;
+  type_->Dump(os);
+  --indent_count;
+  os << indent << "init:" << std::endl;
+  ++indent_count;
+  init_->Dump(os);
+  indent_count -= 2;
+  os << indent << "}" << std::endl;
+}
+
 void TypeAST::Dump(std::ostream &os) {
   os << indent << "TypeAST {" << std::endl;
   ++indent_count;
