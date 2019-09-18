@@ -23,9 +23,9 @@ class Environment {
     symbols_.insert({id, std::move(type)});
   }
   // get symbol info (type info)
-  TypeRef GetInfo(const std::string &id, bool recursive);
+  TypePtr GetInfo(const std::string &id, bool recursive);
   // get symbol info recursively
-  TypeRef GetInfo(const std::string &id) { return GetInfo(id, true); }
+  TypePtr GetInfo(const std::string &id) { return GetInfo(id, true); }
 
   // outer environment
   const EnvPtr &outer() const { return outer_; }

@@ -11,60 +11,60 @@ class Analyzer {
   Analyzer()
       : env_(std::make_shared<define::Environment>()), error_num_(0) {}
 
-  define::TypeRef AnalyzeAssign(unsigned int line_pos,
+  define::TypePtr AnalyzeAssign(unsigned int line_pos,
                                 const std::string &id,
-                                const define::TypeRef &expr);
-  define::TypeRef AnalyzeVarDef(unsigned int line_pos,
-                                const define::TypeRefList &defs);
-  define::TypeRef AnalyzeLetDef(unsigned int line_pos,
-                                const define::TypeRefList &defs);
-  define::TypeRef AnalyzeFunDef(unsigned int line_pos,
+                                const define::TypePtr &expr);
+  define::TypePtr AnalyzeVarDef(unsigned int line_pos,
+                                const define::TypePtrList &defs);
+  define::TypePtr AnalyzeLetDef(unsigned int line_pos,
+                                const define::TypePtrList &defs);
+  define::TypePtr AnalyzeFunDef(unsigned int line_pos,
                                 const std::string &id,
-                                const define::TypeRefList &args,
-                                const define::TypeRef &type,
-                                const define::TypeRef &body);
-  define::TypeRef AnalyzeFunCall(unsigned int line_pos,
+                                const define::TypePtrList &args,
+                                const define::TypePtr &type,
+                                const define::TypePtr &body);
+  define::TypePtr AnalyzeFunCall(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypeRefList &args);
-  define::TypeRef AnalyzeIf(unsigned int line_pos,
-                            const define::TypeRef &cond,
-                            const define::TypeRef &then,
-                            const define::TypeRef &else_then);
-  define::TypeRef AnalyzeWhile(unsigned int line_pos,
-                               const define::TypeRef &cond,
-                               const define::TypeRef &body);
-  define::TypeRef AnalyzeControl(unsigned int line_pos, Keyword type,
-                                 const define::TypeRef &expr);
-  define::TypeRef AnalyzeVarElem(unsigned int line_pos,
+                                 const define::TypePtrList &args);
+  define::TypePtr AnalyzeIf(unsigned int line_pos,
+                            const define::TypePtr &cond,
+                            const define::TypePtr &then,
+                            const define::TypePtr &else_then);
+  define::TypePtr AnalyzeWhile(unsigned int line_pos,
+                               const define::TypePtr &cond,
+                               const define::TypePtr &body);
+  define::TypePtr AnalyzeControl(unsigned int line_pos, Keyword type,
+                                 const define::TypePtr &expr);
+  define::TypePtr AnalyzeVarElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypeRef &type,
-                                 const define::TypeRef &init);
-  define::TypeRef AnalyzeLetElem(unsigned int line_pos,
+                                 const define::TypePtr &type,
+                                 const define::TypePtr &init);
+  define::TypePtr AnalyzeLetElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypeRef &type,
-                                 const define::TypeRef &init);
-  define::TypeRef AnalyzeType(unsigned int line_pos, Keyword type);
-  define::TypeRef AnalyzeArgElem(unsigned int line_pos,
+                                 const define::TypePtr &type,
+                                 const define::TypePtr &init);
+  define::TypePtr AnalyzeType(unsigned int line_pos, Keyword type);
+  define::TypePtr AnalyzeArgElem(unsigned int line_pos,
                                  const std::string &id,
-                                 const define::TypeRef &type);
-  define::TypeRef AnalyzeBlock(unsigned int line_pos,
-                               const define::TypeRefList &stmts);
-  define::TypeRef AnalyzeBinary(unsigned int line_pos, Operator op,
-                                const define::TypeRef &lhs,
-                                const define::TypeRef &rhs);
-  define::TypeRef AnalyzeCast(unsigned int line_pos,
-                              const define::TypeRef &expr,
-                              const define::TypeRef &type);
-  define::TypeRef AnalyzeUnary(unsigned int line_pos, Operator op,
-                               const define::TypeRef &opr);
-  define::TypeRef AnalyzeId(unsigned int line_pos, const std::string &id);
-  define::TypeRef AnalyzeNum();
-  define::TypeRef AnalyzeString();
-  define::TypeRef AnalyzeChar();
-  define::TypeRef AnalyzeArray(unsigned int line_pos,
-                               const define::TypeRefList &elems);
-  define::TypeRef AnalyzeIndex(unsigned int line_pos, const std::string &id,
-                               const define::TypeRef &index);
+                                 const define::TypePtr &type);
+  define::TypePtr AnalyzeBlock(unsigned int line_pos,
+                               const define::TypePtrList &stmts);
+  define::TypePtr AnalyzeBinary(unsigned int line_pos, Operator op,
+                                const define::TypePtr &lhs,
+                                const define::TypePtr &rhs);
+  define::TypePtr AnalyzeCast(unsigned int line_pos,
+                              const define::TypePtr &expr,
+                              const define::TypePtr &type);
+  define::TypePtr AnalyzeUnary(unsigned int line_pos, Operator op,
+                               const define::TypePtr &opr);
+  define::TypePtr AnalyzeId(unsigned int line_pos, const std::string &id);
+  define::TypePtr AnalyzeNum();
+  define::TypePtr AnalyzeString();
+  define::TypePtr AnalyzeChar();
+  define::TypePtr AnalyzeArray(unsigned int line_pos,
+                               const define::TypePtrList &elems);
+  define::TypePtr AnalyzeIndex(unsigned int line_pos, const std::string &id,
+                               const define::TypePtr &index);
 
   // create a new environment
   void NewEnvironment() {
@@ -77,8 +77,8 @@ class Analyzer {
   const define::EnvPtr &env() const { return env_; }
 
  private:
-  define::TypeRef LogError(const char *message, unsigned int line_pos);
-  define::TypeRef LogError(const char *message, const char *id,
+  define::TypePtr LogError(const char *message, unsigned int line_pos);
+  define::TypePtr LogError(const char *message, const char *id,
                            unsigned int line_pos);
 
   unsigned int error_num_;

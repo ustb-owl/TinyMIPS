@@ -19,7 +19,7 @@ class BaseAST {
   virtual ~BaseAST() = default;
 
   virtual void Dump(std::ostream &os) = 0;
-  virtual TypeRef SemaAnalyze(front::Analyzer &ana) = 0;
+  virtual TypePtr SemaAnalyze(front::Analyzer &ana) = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
   void set_env(const EnvPtr &env) { env_ = env; }
@@ -42,7 +42,7 @@ class AssignAST : public BaseAST {
       : id_(id), expr_(std::move(expr)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -55,7 +55,7 @@ class VarDefAST : public BaseAST {
   VarDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtrList defs_;
@@ -67,7 +67,7 @@ class LetDefAST : public BaseAST {
   LetDefAST(ASTPtrList defs) : defs_(std::move(defs)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtrList defs_;
@@ -82,7 +82,7 @@ class FunDefAST : public BaseAST {
         body_(std::move(body)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -97,7 +97,7 @@ class FunCallAST : public BaseAST {
       : id_(id), args_(std::move(args)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -112,7 +112,7 @@ class IfAST : public BaseAST {
         else_then_(std::move(else_then)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtr cond_, then_, else_then_;
@@ -125,7 +125,7 @@ class WhileAST : public BaseAST {
       : cond_(std::move(cond)), body_(std::move(body)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtr cond_, body_;
@@ -138,7 +138,7 @@ class ControlAST : public BaseAST {
       : type_(type), expr_(std::move(expr)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   front::Keyword type_;
@@ -152,7 +152,7 @@ class VarElemAST : public BaseAST {
       : id_(id), type_(std::move(type)), init_(std::move(init)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -166,7 +166,7 @@ class LetElemAST : public BaseAST {
       : id_(id), type_(std::move(type)), init_(std::move(init)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -179,7 +179,7 @@ class TypeAST : public BaseAST {
   TypeAST(front::Keyword type) : type_(type) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   front::Keyword type_;
@@ -192,7 +192,7 @@ class ArgElemAST : public BaseAST {
       : id_(id), type_(std::move(type)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -205,7 +205,7 @@ class BlockAST : public BaseAST {
   BlockAST(ASTPtrList stmts) : stmts_(std::move(stmts)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtrList stmts_;
@@ -218,7 +218,7 @@ class BinaryAST : public BaseAST {
       : op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   front::Operator op_;
@@ -232,7 +232,7 @@ class CastAST : public BaseAST {
       : expr_(std::move(expr)), type_(std::move(type)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtr expr_, type_;
@@ -245,7 +245,7 @@ class UnaryAST : public BaseAST {
       : op_(op), opr_(std::move(opr)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   front::Operator op_;
@@ -258,7 +258,7 @@ class IdAST : public BaseAST {
   IdAST(const std::string &id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
@@ -270,7 +270,7 @@ class NumAST : public BaseAST {
   NumAST(unsigned int num) : num_(num) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   unsigned int num_;
@@ -282,7 +282,7 @@ class StringAST : public BaseAST {
   StringAST(const std::string &str) : str_(str) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string str_;
@@ -294,7 +294,7 @@ class CharAST : public BaseAST {
   CharAST(char c) : c_(c) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   char c_;
@@ -306,7 +306,7 @@ class ArrayAST : public BaseAST {
   ArrayAST(ASTPtrList elems) : elems_(std::move(elems)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   ASTPtrList elems_;
@@ -319,7 +319,7 @@ class IndexAST : public BaseAST {
       : id_(id), index_(std::move(index)) {}
 
   void Dump(std::ostream &os) override;
-  TypeRef SemaAnalyze(front::Analyzer &ana) override;
+  TypePtr SemaAnalyze(front::Analyzer &ana) override;
 
  private:
   std::string id_;
