@@ -230,11 +230,12 @@ class ArrayAST : public BaseAST {
 // indexing
 class IndexAST : public BaseAST {
  public:
-  IndexAST(ASTPtr expr, ASTPtr index)
-      : expr_(std::move(expr)), index_(std::move(index)) {}
+  IndexAST(const std::string &id, ASTPtr index)
+      : id_(id), index_(std::move(index)) {}
 
  private:
-  ASTPtr expr_, index_;
+  std::string id_;
+  ASTPtr index_;
 };
 
 }  // namespace tinylang::define
