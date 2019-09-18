@@ -35,7 +35,7 @@ bin_op    ::= "+"   | "-"   | "*"   | "/"   | "%"   | "&"
             | "<"   | "<="  | ">"   | ">="  | "=="  | "!=";
 unary_op  ::= "+"   | "-"   | "!"   | "~"   | "*"   | "&";
 factor    ::= value | fun_call | index | "(" expr ")";
-index     ::= expr "[" expr "]";
+index     ::= id "[" expr "]";
 
 value     ::= ID_VAL | NUM_VAL | CHAR_VAL | STR_VAL | array;
 array     ::= "{" expr {"," expr} [","] "}";
