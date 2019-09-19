@@ -85,7 +85,8 @@ TypePtr FunCallAST::SemaAnalyze(Analyzer &ana) {
 
 TypePtr IfAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
-  if (!cond_->SemaAnalyze(ana)) return nullptr;
+  auto cond = cond_->SemaAnalyze(ana);
+  if (!cond || cond->IsVoid()) return nullptr;
   if (!then_->SemaAnalyze(ana)) return nullptr;
   if (else_then_ && !else_then_->SemaAnalyze(ana)) return nullptr;
   return MakeVoidType();
@@ -93,7 +94,8 @@ TypePtr IfAST::SemaAnalyze(Analyzer &ana) {
 
 TypePtr WhileAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
-  if (!cond_->SemaAnalyze(ana)) return nullptr;
+  auto cond = cond_->SemaAnalyze(ana);
+  if (!cond || cond->IsVoid()) return nullptr;
   ana.EnterWhile();
   if (!body_->SemaAnalyze(ana)) return nullptr;
   ana.LeaveWhile();
