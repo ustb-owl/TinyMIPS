@@ -8,11 +8,11 @@
 using namespace tinylang::front;
 using namespace tinylang::define;
 
-TypePtr Analyzer::LogError(const char *message, unsigned int line_pos) {
+TypePtr Analyzer::LogError(const char *message) {
   using namespace util;
   // print error message
   std::cerr << style("B") << "analyzer";
-  std::cerr << " (line " << line_pos;
+  std::cerr << " (line " << line_pos_.top();
   std::cerr << "): " << style("Br") << "error";
   std::cerr << ": " << message << std::endl;
   // increase error count
@@ -20,12 +20,11 @@ TypePtr Analyzer::LogError(const char *message, unsigned int line_pos) {
   return nullptr;
 }
 
-TypePtr Analyzer::LogError(const char *message, const std::string &id,
-                           unsigned int line_pos) {
+TypePtr Analyzer::LogError(const char *message, const std::string &id) {
   using namespace util;
   // print error message
   std::cerr << style("B") << "analyzer";
-  std::cerr << " (line " << line_pos;
+  std::cerr << " (line " << line_pos_.top();
   std::cerr << ", id: " << id;
   std::cerr << "): " << style("Br") << "error";
   std::cerr << ": " << message << std::endl;
@@ -34,18 +33,17 @@ TypePtr Analyzer::LogError(const char *message, const std::string &id,
   return nullptr;
 }
 
-TypePtr Analyzer::AnalyzeFunDef(unsigned int line_pos,
-                                const std::string &id, TypePtrList args,
+TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
                                 TypePtr ret) {
   // NOTE: current env is argument env
   const auto &func_env = env_->outer();
   // check if is in root env
   if (!func_env->is_root()) {
-    return LogError("nested function is not allowed", id, line_pos);
+    return LogError("nested function is not allowed", id);
   }
   // check if is existed
   if (func_env->GetInfo(id, false)) {
-    return LogError("identifier has already beed defined", id, line_pos);
+    return LogError("identifier has already beed defined", id);
   }
   // create function symbol
   auto type = std::make_shared<FuncType>(std::move(args), std::move(ret));
@@ -53,41 +51,39 @@ TypePtr Analyzer::AnalyzeFunDef(unsigned int line_pos,
   return MakeVoidType();
 }
 
-TypePtr Analyzer::AnalyzeFunCall(unsigned int line_pos,
-                                 const std::string &id,
+TypePtr Analyzer::AnalyzeFunCall(const std::string &id,
                                  const TypePtrList &args) {
   // get type of id
   auto type = env_->GetInfo(id);
   if (!type) {
-    return LogError("identifier has not been defined", id, line_pos);
+    return LogError("identifier has not been defined", id);
   }
   // check return type
   auto ret = type->GetReturnType(args);
-  if (!ret) return LogError("invalid function call", id, line_pos);
+  if (!ret) return LogError("invalid function call", id);
   return ret;
 }
 
-TypePtr Analyzer::AnalyzeControl(unsigned int line_pos, Keyword type,
-                                 const TypePtr &expr) {
+TypePtr Analyzer::AnalyzeControl(Keyword type, const TypePtr &expr) {
   switch (type) {
     case Keyword::Break: case Keyword::Continue: {
       // check if is in a while loop
       if (!while_count_) {
-        return LogError("using break/continue outside the loop", line_pos);
+        return LogError("using break/continue outside the loop");
       }
       break;
     }
     case Keyword::Return: {
       // check if is in a function
       if (!cur_ret_) {
-        return LogError("using 'return' outside the function", line_pos);
+        return LogError("using 'return' outside the function");
       }
       else {
         auto type = expr;
         if (!type) type = MakeVoidType();
         // check if is compatible
         if (!cur_ret_->CanAccept(type)) {
-          return LogError("type mismatch when returning", line_pos);
+          return LogError("type mismatch when returning");
         }
       }
       break;
@@ -97,17 +93,16 @@ TypePtr Analyzer::AnalyzeControl(unsigned int line_pos, Keyword type,
   return MakeVoidType();
 }
 
-TypePtr Analyzer::AnalyzeVarElem(unsigned int line_pos,
-                                 const std::string &id, TypePtr type,
+TypePtr Analyzer::AnalyzeVarElem(const std::string &id, TypePtr type,
                                  const TypePtr &init) {
   // check if is defined
   if (env_->GetInfo(id, false)) {
-    return LogError("identifier has already beed defined", id, line_pos);
+    return LogError("identifier has already beed defined", id);
   }
   if (type) {
     // check if is compatible
     if (init && !type->CanAccept(init)) {
-      return LogError("type mismatch when initializing", id, line_pos);
+      return LogError("type mismatch when initializing", id);
     }
     // add symbol info
     env_->AddSymbol(id, std::move(type));
@@ -116,8 +111,7 @@ TypePtr Analyzer::AnalyzeVarElem(unsigned int line_pos,
     assert(init != nullptr);
     // check if can be deduced
     if (init->IsVoid() || init->IsFunction()) {
-      return LogError("initializing a vairable with invalid type", id,
-                      line_pos);
+      return LogError("initializing a vairable with invalid type", id);
     }
     // add symbol info
     auto deconst_type = init;
@@ -129,27 +123,25 @@ TypePtr Analyzer::AnalyzeVarElem(unsigned int line_pos,
   return MakeVoidType();
 }
 
-TypePtr Analyzer::AnalyzeLetElem(unsigned int line_pos,
-                                 const std::string &id, TypePtr type,
+TypePtr Analyzer::AnalyzeLetElem(const std::string &id, TypePtr type,
                                  const TypePtr &init) {
   assert(init != nullptr);
   TypePtr const_type;
   // check if is defined
   if (env_->GetInfo(id, false)) {
-    return LogError("identifier has already beed defined", id, line_pos);
+    return LogError("identifier has already beed defined", id);
   }
   if (type) {
     // check if is compatible
     if (!type->CanAccept(init)) {
-      return LogError("type mismatch when initializing", id, line_pos);
+      return LogError("type mismatch when initializing", id);
     }
     const_type = std::move(type);
   }
   else {
     // check if can be deduced
     if (init->IsVoid() || init->IsFunction()) {
-      return LogError("initializing a vairable with 'void' type", id,
-                      line_pos);
+      return LogError("initializing a vairable with 'void' type", id);
     }
     const_type = init;
   }
@@ -161,8 +153,7 @@ TypePtr Analyzer::AnalyzeLetElem(unsigned int line_pos,
   return MakeVoidType();
 }
 
-TypePtr Analyzer::AnalyzeType(unsigned int line_pos, Keyword type,
-                              unsigned int ptr) {
+TypePtr Analyzer::AnalyzeType(Keyword type, unsigned int ptr) {
   auto ret = MakePlainType(type);
   if (ptr) {
     ret = std::make_shared<PointerType>(std::move(ret), ptr);
@@ -170,60 +161,64 @@ TypePtr Analyzer::AnalyzeType(unsigned int line_pos, Keyword type,
   return ret;
 }
 
-TypePtr Analyzer::AnalyzeArgElem(unsigned int line_pos,
-                                 const std::string &id, TypePtr type) {
+TypePtr Analyzer::AnalyzeArgElem(const std::string &id, TypePtr type) {
   if (env_->GetInfo(id, false)) {
-    return LogError("duplicated argument name", id, line_pos);
+    return LogError("duplicated argument name", id);
   }
   env_->AddSymbol(id, std::move(type));
   return MakeVoidType();
 }
 
-TypePtr Analyzer::AnalyzeBinary(unsigned int line_pos, Operator op,
-                                const TypePtr &lhs, const TypePtr &rhs) {
+TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
+                                const TypePtr &rhs) {
   switch (op) {
     // TODO
+    // assign operations
+    case Operator::Assign: {
+      if (!lhs->CanAccept(rhs)) {
+        return LogError("");
+      }
+    }
+    default: assert(false); return nullptr;
   }
 }
 
-TypePtr Analyzer::AnalyzeCast(unsigned int line_pos, const TypePtr &expr,
-                              const TypePtr &type) {
+TypePtr Analyzer::AnalyzeCast(const TypePtr &expr, const TypePtr &type) {
   if (!expr->CanCastTo(type)) {
-    return LogError("invalid type casting", line_pos);
+    return LogError("invalid type casting");
   }
   return type;
 }
 
-TypePtr Analyzer::AnalyzeUnary(unsigned int line_pos, Operator op,
-                               const TypePtr &opr) {
+TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
   // check if is illegal
   switch (op) {
     // integer operations
     case Operator::Add: case Operator::Sub:
     case Operator::Not: {
       if (!opr->IsInteger()) {
-        return LogError("expected integer types", line_pos);
+        return LogError("expected integer types");
       }
       return opr;
     }
     // logic operations
     case Operator::LogicNot: {
       if (!opr->IsInteger() || !opr->IsPointer()) {
-        return LogError("expected integer/pointer types", line_pos);
+        return LogError("expected integer/pointer types");
       }
       return std::make_shared<ConstType>(MakePlainType(Keyword::UInt32));
     }
     // pointer operations
     case Operator::Mul: {
       if (!opr->IsPointer()) {
-        return LogError("expected pointer types", line_pos);
+        return LogError("expected pointer types");
       }
       return opr->GetDerefedType();
     }
     // get address operations
     case Operator::And: {
       if (opr->IsVoid() || opr->IsFunction()) {
-        return LogError("invalid 'address-of' operation", line_pos);
+        return LogError("invalid 'address-of' operation");
       }
       return std::make_shared<PointerType>(opr, 1);
     }
@@ -232,11 +227,11 @@ TypePtr Analyzer::AnalyzeUnary(unsigned int line_pos, Operator op,
   }
 }
 
-TypePtr Analyzer::AnalyzeId(unsigned int line_pos, const std::string &id) {
+TypePtr Analyzer::AnalyzeId(const std::string &id) {
   // get type of id
   auto type = env_->GetInfo(id);
   if (!type) {
-    return LogError("identifier has not been defined", id, line_pos);
+    return LogError("identifier has not been defined", id);
   }
   return type;
 }
@@ -255,20 +250,19 @@ TypePtr Analyzer::AnalyzeChar() {
   return std::make_shared<ConstType>(MakePlainType(Keyword::Int8));
 }
 
-TypePtr Analyzer::AnalyzeArray(unsigned int line_pos,
-                               const TypePtrList &elems) {
+TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
   TypePtr deduced;
   for (const auto &i : elems) {
     // check if is invalid type
     if (i->IsVoid() || i->IsFunction()) {
-      return LogError("invalid type of array element", line_pos);
+      return LogError("invalid type of array element");
     }
     // deduce type of array
     if (!deduced) {
       deduced = i->IsConst() ? i->GetDeconstedType() : i;
     }
     else if (!deduced->CanAccept(i)) {
-      return LogError("type mismatch in array elements", line_pos);
+      return LogError("type mismatch in array elements");
     }
   }
   // create new type
@@ -277,17 +271,17 @@ TypePtr Analyzer::AnalyzeArray(unsigned int line_pos,
   return std::make_shared<ConstType>(std::move(arr_type));
 }
 
-TypePtr Analyzer::AnalyzeIndex(unsigned int line_pos, const std::string &id,
+TypePtr Analyzer::AnalyzeIndex(const std::string &id,
                                const TypePtr &index) {
   // get type of id
   auto type = env_->GetInfo(id);
   if (!type) {
-    return LogError("identifier has not been defined", id, line_pos);
+    return LogError("identifier has not been defined", id);
   }
   // check if is a pointer
-  if (!type->IsPointer()) return LogError("invalid pointer", id, line_pos);
+  if (!type->IsPointer()) return LogError("invalid pointer", id);
   // check index type
-  if (!index->IsInteger()) return LogError("invalid index", id, line_pos);
+  if (!index->IsInteger()) return LogError("invalid index", id);
   // get dereferenced type
   auto deref = type->GetDerefedType();
   assert(deref != nullptr);
