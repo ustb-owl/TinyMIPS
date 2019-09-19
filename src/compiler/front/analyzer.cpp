@@ -8,6 +8,26 @@
 using namespace tinylang::front;
 using namespace tinylang::define;
 
+namespace {
+
+Operator GetDeAssignedOp(Operator op) {
+  switch (op) {
+    case Operator::AssAdd: return Operator::Add;
+    case Operator::AssSub: return Operator::Sub;
+    case Operator::AssMul: return Operator::Mul;
+    case Operator::AssDiv: return Operator::Div;
+    case Operator::AssMod: return Operator::Mod;
+    case Operator::AssAnd: return Operator::And;
+    case Operator::AssOr: return Operator::Or;
+    case Operator::AssXor: return Operator::Xor;
+    case Operator::AssShl: return Operator::Shl;
+    case Operator::AssShr: return Operator::Shr;
+    default: assert(false); return Operator::Assign;
+  }
+}
+
+}  // namespace
+
 TypePtr Analyzer::LogError(const char *message) {
   using namespace util;
   // print error message
@@ -169,13 +189,76 @@ TypePtr Analyzer::AnalyzeArgElem(const std::string &id, TypePtr type) {
 
 TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
                                 const TypePtr &rhs) {
+  // preprocess some types
+  if (lhs->IsVoid() || rhs->IsVoid() || lhs->IsFunction() ||
+      rhs->IsFunction()) {
+    return LogError("invalid operation");
+  }
   switch (op) {
-    // TODO
-    // assign operations
-    case Operator::Assign: {
-      if (!lhs->CanAccept(rhs)) {
-        return LogError("");
+    // integer operations #1
+    case Operator::Add: case Operator::Sub: {
+      TypePtr ret;
+      if (lhs->IsPointer() || rhs->IsPointer()) {
+        ret = lhs->IsPointer() ? lhs : rhs;
       }
+      else if (lhs->GetSize() != rhs->GetSize()) {
+        ret = lhs->GetSize() > rhs->GetSize() ? lhs : rhs;
+      }
+      else if (lhs->IsUnsigned() || rhs->IsUnsigned()) {
+        ret = lhs->IsUnsigned() ? lhs : rhs;
+      }
+      else {
+        ret = lhs;
+      }
+      return ret;
+    }
+    // integer operations #2
+    case Operator::Mul: case Operator::Div: case Operator::Mod:
+    case Operator::And: case Operator::Or: case Operator::Xor:
+    case Operator::Shl: case Operator::Shr: {
+      TypePtr ret;
+      if (lhs->IsPointer() || rhs->IsPointer()) {
+        return LogError("operation cannot be done with pointers");
+      }
+      else if (lhs->GetSize() != rhs->GetSize()) {
+        ret = lhs->GetSize() > rhs->GetSize() ? lhs : rhs;
+      }
+      else if (lhs->IsUnsigned() || rhs->IsUnsigned()) {
+        ret = lhs->IsUnsigned() ? lhs : rhs;
+      }
+      else {
+        ret = lhs;
+      }
+      return ret;
+    }
+    // relational operations
+    case Operator::LogicAnd: case Operator::LogicOr: case Operator::Less:
+    case Operator::LessEqual: case Operator::Great:
+    case Operator::GreatEqual: case Operator::Equal:
+    case Operator::NotEqual: {
+      if (lhs->IsPointer() ^ rhs->IsPointer()) {
+        return LogError("lhs and rhs must be both pointer/non-pointer");
+      }
+      else if (lhs->IsUnsigned() ^ rhs->IsUnsigned()) {
+        return LogError("lhs and rhs must be both signed/unsigned");
+      }
+      return MakePlainType(Keyword::UInt32);
+    }
+    // assign operations
+    case Operator::Assign: case Operator::AssAdd: case Operator::AssSub:
+    case Operator::AssMul: case Operator::AssDiv: case Operator::AssMod:
+    case Operator::AssAnd: case Operator::AssOr: case Operator::AssXor:
+    case Operator::AssShl: case Operator::AssShr: {
+      // check if is compatible
+      if (!lhs->CanAccept(rhs)) {
+        return LogError("type mismatch when assigning");
+      }
+      // check if is compound assign operator
+      if (op != Operator::Assign) {
+        auto de_ass = GetDeAssignedOp(op);
+        if (!AnalyzeBinary(de_ass, lhs, rhs)) return nullptr;
+      }
+      return MakeVoidType();
     }
     default: assert(false); return nullptr;
   }
@@ -187,7 +270,6 @@ TypePtr Analyzer::AnalyzeCast(const TypePtr &expr, const TypePtr &type) {
 }
 
 TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
-  // check if is illegal
   switch (op) {
     // integer operations
     case Operator::Add: case Operator::Sub:
