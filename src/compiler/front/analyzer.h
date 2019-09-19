@@ -14,9 +14,6 @@ class Analyzer {
       : env_(std::make_shared<define::Environment>()),
         error_num_(0), while_count_(0) {}
 
-  define::TypePtr AnalyzeAssign(unsigned int line_pos,
-                                const std::string &id,
-                                const define::TypePtr &expr);
   define::TypePtr AnalyzeFunDef(unsigned int line_pos,
                                 const std::string &id,
                                 define::TypePtrList args,
