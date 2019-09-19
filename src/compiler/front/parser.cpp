@@ -546,6 +546,8 @@ ASTPtr Parser::ParseArray() {
   }
   // check '}'
   if (!CheckChar('}')) return nullptr;
+  // check if array is empty
+  if (elems.empty()) return LogError("array cannot be empty");
   return MakeAST<ArrayAST>(line_pos, std::move(elems));
 }
 
