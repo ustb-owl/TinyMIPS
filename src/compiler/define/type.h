@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstddef>
 #include <cassert>
 
 #include "front/lexer.h"
@@ -22,6 +23,8 @@ class BaseType {
   virtual bool IsVoid() const = 0;
   // return true if is integer type
   virtual bool IsInteger() const = 0;
+  // return true if is unsigned type
+  virtual bool IsUnsigned() const = 0;
   // return true if is constant type
   virtual bool IsConst() const = 0;
   // return true if is pointer type
@@ -33,6 +36,8 @@ class BaseType {
   virtual bool CanAccept(const TypePtr &type) const = 0;
   // return true if current type can be casted to specific type
   virtual bool CanCastTo(const TypePtr &type) const = 0;
+  // return the size of current type
+  virtual std::size_t GetSize() const = 0;
   // return the return type of a function call
   virtual TypePtr GetReturnType(const TypePtrList &args) const = 0;
   // return the dereferenced type of current type
