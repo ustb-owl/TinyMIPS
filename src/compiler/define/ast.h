@@ -35,20 +35,6 @@ class BaseAST {
 using ASTPtr = std::unique_ptr<BaseAST>;
 using ASTPtrList = std::vector<ASTPtr>;
 
-// assign statement
-class AssignAST : public BaseAST {
- public:
-  AssignAST(const std::string &id, ASTPtr expr)
-      : id_(id), expr_(std::move(expr)) {}
-
-  void Dump(std::ostream &os) override;
-  TypePtr SemaAnalyze(front::Analyzer &ana) override;
-
- private:
-  std::string id_;
-  ASTPtr expr_;
-};
-
 // variable definition
 class VarDefAST : public BaseAST {
  public:

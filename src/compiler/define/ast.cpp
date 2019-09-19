@@ -28,17 +28,6 @@ std::ostream &operator<<(std::ostream &os, decltype(indent) func) {
 
 }  // namespace
 
-void AssignAST::Dump(std::ostream &os) {
-  os << indent << "AssignAST {" << std::endl;
-  ++indent_count;
-  os << indent << "id: " << id_ << std::endl;
-  os << indent << "expr:" << std::endl;
-  ++indent_count;
-  expr_->Dump(os);
-  indent_count -= 2;
-  os << indent << "}" << std::endl;
-}
-
 void VarDefAST::Dump(std::ostream &os) {
   os << indent << "VarDefAST {" << std::endl;
   ++indent_count;
@@ -204,12 +193,8 @@ void TypeAST::Dump(std::ostream &os) {
   switch (type_) {
     case front::Keyword::Int32: os << "int32"; break;
     case front::Keyword::Int8: os << "int8"; break;
-    case front::Keyword::Int32Ptr: os << "int32*"; break;
-    case front::Keyword::Int8Ptr: os << "int8*"; break;
     case front::Keyword::UInt32: os << "uint32"; break;
     case front::Keyword::UInt8: os << "uint8"; break;
-    case front::Keyword::UInt32Ptr: os << "uint32*"; break;
-    case front::Keyword::UInt8Ptr: os << "uint8*"; break;
     default: assert(false);
   }
   os << std::endl;

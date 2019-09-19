@@ -3,13 +3,6 @@
 using namespace tinylang::front;
 using namespace tinylang::define;
 
-TypePtr AssignAST::SemaAnalyze(Analyzer &ana) {
-  set_env(ana.env());
-  auto expr = expr_->SemaAnalyze(ana);
-  if (!expr) return nullptr;
-  return ana.AnalyzeAssign(line_pos(), id_, expr);
-}
-
 TypePtr VarDefAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
   TypePtrList defs;
