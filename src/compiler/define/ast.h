@@ -18,7 +18,9 @@ class BaseAST {
  public:
   virtual ~BaseAST() = default;
 
+  // dump the content of AST to output stream
   virtual void Dump(std::ostream &os) = 0;
+  // run sematic analysis on current AST
   virtual TypePtr SemaAnalyze(front::Analyzer &ana) = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
