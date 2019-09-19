@@ -1,6 +1,9 @@
 #ifndef TINYLANG_FRONT_ANALYZER_H_
 #define TINYLANG_FRONT_ANALYZER_H_
 
+#include <string>
+#include <stack>
+
 #include "define/symbol.h"
 #include "front/lexer.h"
 
@@ -9,7 +12,8 @@ namespace tinylang::front {
 class Analyzer {
  public:
   Analyzer()
-      : env_(std::make_shared<define::Environment>()), error_num_(0) {}
+      : env_(std::make_shared<define::Environment>()),
+        error_num_(0), while_count_(0) {}
 
   define::TypePtr AnalyzeAssign(unsigned int line_pos,
                                 const std::string &id,
@@ -59,17 +63,26 @@ class Analyzer {
   }
   // restore current environment to outer environment
   void RestoreEnvironment() { env_ = env_->outer(); }
+  // enter a while loop
+  void EnterWhile() { ++while_count_; }
+  // leave a while loop
+  void LeaveWhile() { --while_count_; }
+  // enter a function
+  void EnterFunction(const define::TypePtr &ret) { func_rets_.push(ret); }
+  // leave a function
+  void LeaveFunction() { func_rets_.pop(); }
 
   unsigned int error_num() const { return error_num_; }
   const define::EnvPtr &env() const { return env_; }
 
  private:
   define::TypePtr LogError(const char *message, unsigned int line_pos);
-  define::TypePtr LogError(const char *message, const char *id,
+  define::TypePtr LogError(const char *message, const std::string &id,
                            unsigned int line_pos);
 
-  unsigned int error_num_;
+  unsigned int error_num_, while_count_;
   define::EnvPtr env_;
+  std::stack<define::TypePtr> func_rets_;
 };
 
 }  // namespace tinylang::front

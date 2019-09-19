@@ -58,12 +58,16 @@ TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
     type = type_->SemaAnalyze(ana);
     if (!type) return nullptr;
   }
+  // register return type of function
+  ana.EnterFunction(type);
+  // analyze function declaration
   auto ret = ana.AnalyzeFunDef(line_pos(), id_,
                                std::move(args), std::move(type));
   // analyze body
   auto body = body_->SemaAnalyze(ana);
   if (!body) return nullptr;
-  // restore env
+  // leave function & restore env
+  ana.LeaveFunction();
   ana.RestoreEnvironment();
   return ret;
 }
@@ -90,7 +94,9 @@ TypePtr IfAST::SemaAnalyze(Analyzer &ana) {
 TypePtr WhileAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
   if (!cond_->SemaAnalyze(ana)) return nullptr;
+  ana.EnterWhile();
   if (!body_->SemaAnalyze(ana)) return nullptr;
+  ana.LeaveWhile();
   return MakeVoidType();
 }
 
