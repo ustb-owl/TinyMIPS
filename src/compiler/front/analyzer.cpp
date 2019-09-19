@@ -68,7 +68,7 @@ TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
   // create return type
   auto const_ret = std::move(ret);
   if (!const_ret->IsConst()) {
-    const_ret = std::make_shared<ConstType>(std::move(ret));
+    const_ret = std::make_shared<ConstType>(std::move(const_ret));
   }
   // create function symbol
   auto type = std::make_shared<FuncType>(std::move(args),
@@ -189,8 +189,8 @@ TypePtr Analyzer::AnalyzeArgElem(const std::string &id, TypePtr type) {
   if (env_->GetInfo(id, false)) {
     return LogError("duplicated argument name", id);
   }
-  env_->AddSymbol(id, std::move(type));
-  return MakeVoidType();
+  env_->AddSymbol(id, type);
+  return type;
 }
 
 TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
