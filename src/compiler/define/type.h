@@ -177,6 +177,21 @@ inline TypePtr MakeVoidType() {
   return std::make_shared<PlainType>(PlainType::Type::Void);
 }
 
+// check if 2 pointers are compatible
+inline bool IsPointerCompatible(const BaseType &p1, const BaseType &p2) {
+  if (p1.IsPointer() && p2.IsPointer()) {
+    return IsPointerCompatible(*p1.GetDerefedType(), *p2.GetDerefedType());
+  }
+  else if (!p1.IsPointer() && !p2.IsPointer()) {
+    return p1.IsInteger() && p2.IsInteger() &&
+           !(p1.IsUnsigned() ^ p2.IsUnsigned()) &&
+           p1.GetSize() == p2.GetSize();
+  }
+  else {
+    return false;
+  }
+}
+
 }  // namespace tinylang::define
 
 #endif  // TINYLANG_DEFINE_TYPE_H_

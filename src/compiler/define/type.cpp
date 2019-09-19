@@ -3,7 +3,8 @@
 using namespace tinylang::define;
 
 bool PlainType::CanAccept(const TypePtr &type) const {
-  if ((type->IsVoid() ^ (type_ == Type::Void)) || type->IsFunction()) {
+  if ((type->IsVoid() ^ (type_ == Type::Void)) || type->IsFunction() ||
+      type->IsPointer()) {
     return false;
   }
   return type->GetSize() <= GetSize();
@@ -31,6 +32,7 @@ TypePtr ConstType::GetReturnType(const TypePtrList &args) const {
 
 bool PointerType::CanAccept(const TypePtr &type) const {
   if (type->IsVoid() || type->IsFunction()) return false;
+  if (type->IsPointer()) return IsPointerCompatible(*this, *type);
   return type->GetSize() <= GetSize();
 }
 
