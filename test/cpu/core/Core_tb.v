@@ -27,6 +27,7 @@ module Core_tb(
   Core core(
     .clk                  (clk),
     .rst                  (rst),
+    .stall                (0),
 
     .rom_en               (rom_en),
     .rom_write_en         (rom_write_en),

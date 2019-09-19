@@ -5,6 +5,7 @@
 module Core(
   input                   clk,
   input                   rst,
+  input                   stall,
   // ROM control
   output                  rom_en,
   output  [`MEM_SEL_BUS]  rom_write_en,
@@ -368,6 +369,7 @@ module Core(
   // pipeline control
   PipelineController pipeline_controller(
     .request_from_id  (id_stall_request),
+    .stall_all        (stall),
     .stall_pc         (stall_pc_conn),
     .stall_if         (stall_if_conn),
     .stall_id         (stall_id_conn),
