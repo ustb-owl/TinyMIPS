@@ -65,8 +65,14 @@ TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
   if (func_env->GetInfo(id, false)) {
     return LogError("identifier has already beed defined", id);
   }
+  // create return type
+  auto const_ret = std::move(ret);
+  if (!const_ret->IsConst()) {
+    const_ret = std::make_shared<ConstType>(std::move(ret));
+  }
   // create function symbol
-  auto type = std::make_shared<FuncType>(std::move(args), std::move(ret));
+  auto type = std::make_shared<FuncType>(std::move(args),
+                                         std::move(const_ret));
   func_env->AddSymbol(id, std::move(type));
   return MakeVoidType();
 }
@@ -199,6 +205,9 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
     case Operator::Add: case Operator::Sub: {
       TypePtr ret;
       if (lhs->IsPointer() || rhs->IsPointer()) {
+        if (lhs->IsPointer() && rhs->IsPointer()) {
+          return LogError("invalid pointer operation");
+        }
         ret = lhs->IsPointer() ? lhs : rhs;
       }
       else if (lhs->GetSize() != rhs->GetSize()) {
