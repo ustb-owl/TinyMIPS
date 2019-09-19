@@ -3,8 +3,9 @@
 using namespace tinylang::define;
 
 bool PlainType::CanAccept(const TypePtr &type) const {
-  if (type_ == Type::Void) return false;
-  if (type->IsVoid() || type->IsFunction()) return false;
+  if ((type->IsVoid() ^ (type_ == Type::Void)) || type->IsFunction()) {
+    return false;
+  }
   return type->GetSize() <= GetSize();
 }
 
