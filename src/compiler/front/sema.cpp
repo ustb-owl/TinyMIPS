@@ -35,9 +35,10 @@ TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
    *        +-- body
    */
 
+  auto guard_pos = ana.SetLinePos(line_pos());
   set_env(ana.env());
   // create argument env
-  ana.NewEnvironment();
+  auto guard_env = ana.NewEnvironment();
   // analyze arguments
   TypePtrList args;
   for (const auto &i : args_) {
@@ -52,20 +53,17 @@ TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
     if (!type) return nullptr;
   }
   // register return type of function
-  ana.EnterFunction(type);
+  auto guard_func = ana.EnterFunction(type);
   // analyze function declaration
-  auto ret = ana.AnalyzeFunDef(line_pos(), id_,
-                               std::move(args), std::move(type));
+  auto ret = ana.AnalyzeFunDef(id_, std::move(args), std::move(type));
   // analyze body
   auto body = body_->SemaAnalyze(ana);
   if (!body) return nullptr;
-  // leave function & restore env
-  ana.LeaveFunction();
-  ana.RestoreEnvironment();
   return ret;
 }
 
 TypePtr FunCallAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
   TypePtrList args;
   for (const auto &i : args_) {
@@ -73,7 +71,7 @@ TypePtr FunCallAST::SemaAnalyze(Analyzer &ana) {
     if (!type) return nullptr;
     args.push_back(type);
   }
-  return ana.AnalyzeFunCall(line_pos(), id_, args);
+  return ana.AnalyzeFunCall(id_, args);
 }
 
 TypePtr IfAST::SemaAnalyze(Analyzer &ana) {
@@ -89,23 +87,24 @@ TypePtr WhileAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
   auto cond = cond_->SemaAnalyze(ana);
   if (!cond || cond->IsVoid()) return nullptr;
-  ana.EnterWhile();
+  auto guard = ana.EnterWhile();
   if (!body_->SemaAnalyze(ana)) return nullptr;
-  ana.LeaveWhile();
   return MakeVoidType();
 }
 
 TypePtr ControlAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
   TypePtr expr;
   if (expr_) {
     expr = expr_->SemaAnalyze(ana);
     if (!expr) return nullptr;
   }
-  return ana.AnalyzeControl(line_pos(), type_, expr);
+  return ana.AnalyzeControl(type_, expr);
 }
 
 TypePtr VarElemAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
   TypePtr type, init;
   if (type_) {
@@ -116,10 +115,11 @@ TypePtr VarElemAST::SemaAnalyze(Analyzer &ana) {
     init = init_->SemaAnalyze(ana);
     if (!init) return nullptr;
   }
-  return ana.AnalyzeVarElem(line_pos(), id_, std::move(type), init);
+  return ana.AnalyzeVarElem(id_, std::move(type), init);
 }
 
 TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
   TypePtr type;
   if (type_) {
@@ -128,81 +128,97 @@ TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
   }
   auto init = init_->SemaAnalyze(ana);
   if (!init) return nullptr;
-  return ana.AnalyzeLetElem(line_pos(), id_, std::move(type), init);
+  return ana.AnalyzeLetElem(id_, std::move(type), init);
 }
 
 TypePtr TypeAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
-  return ana.AnalyzeType(line_pos(), type_, ptr_);
+  return ana.AnalyzeType(type_, ptr_);
 }
 
 TypePtr ArgElemAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
   set_env(ana.env());
   auto type = type_->SemaAnalyze(ana);
   if (!type) return nullptr;
-  return ana.AnalyzeArgElem(line_pos(), id_, std::move(type));
+  return ana.AnalyzeArgElem(id_, std::move(type));
 }
 
 TypePtr BlockAST::SemaAnalyze(Analyzer &ana) {
   set_env(ana.env());
-  ana.NewEnvironment();
+  auto guard = ana.NewEnvironment();
   for (const auto &i : stmts_) {
     if (!i->SemaAnalyze(ana)) return nullptr;
   }
-  ana.RestoreEnvironment();
   return MakeVoidType();
 }
 
 TypePtr BinaryAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
   auto lhs = lhs_->SemaAnalyze(ana);
   if (!lhs) return nullptr;
   auto rhs = rhs_->SemaAnalyze(ana);
   if (!rhs) return nullptr;
-  return ana.AnalyzeBinary(line_pos(), op_, lhs, rhs);
+  return ana.AnalyzeBinary(op_, lhs, rhs);
 }
 
 TypePtr CastAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
   auto expr = expr_->SemaAnalyze(ana);
   if (!expr) return nullptr;
   auto type = type_->SemaAnalyze(ana);
   if (!type) return nullptr;
-  return ana.AnalyzeCast(line_pos(), expr, type);
+  return ana.AnalyzeCast(expr, type);
 }
 
 TypePtr UnaryAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
   auto opr = opr_->SemaAnalyze(ana);
   if (!opr) return nullptr;
-  return ana.AnalyzeUnary(line_pos(), op_, opr);
+  return ana.AnalyzeUnary(op_, opr);
 }
 
 TypePtr IdAST::SemaAnalyze(Analyzer &ana) {
-  return ana.AnalyzeId(line_pos(), id_);
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
+  return ana.AnalyzeId(id_);
 }
 
 TypePtr NumAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
   return ana.AnalyzeNum();
 }
 
 TypePtr StringAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
   return ana.AnalyzeString();
 }
 
 TypePtr CharAST::SemaAnalyze(Analyzer &ana) {
+  set_env(ana.env());
   return ana.AnalyzeChar();
 }
 
 TypePtr ArrayAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
   TypePtrList elems;
   for (const auto &i : elems_) {
     auto type = i->SemaAnalyze(ana);
     if (!type) return nullptr;
     elems.push_back(type);
   }
-  return ana.AnalyzeArray(line_pos(), elems);
+  return ana.AnalyzeArray(elems);
 }
 
 TypePtr IndexAST::SemaAnalyze(Analyzer &ana) {
+  auto guard = ana.SetLinePos(line_pos());
+  set_env(ana.env());
   auto index = index_->SemaAnalyze(ana);
   if (!index) return nullptr;
-  return ana.AnalyzeIndex(line_pos(), id_, index);
+  return ana.AnalyzeIndex(id_, index);
 }
