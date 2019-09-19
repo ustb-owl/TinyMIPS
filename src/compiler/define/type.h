@@ -18,17 +18,21 @@ class BaseType {
  public:
   virtual ~BaseType() = default;
 
-  // return if is constant type
+  // return true if is constant type
   virtual bool IsConst() const = 0;
-  // return if left value which is current type
+  // return true if is void type
+  virtual bool IsVoid() const = 0;
+  // return true if left value which is current type
   // can accept the right value which is specific type
   virtual bool CanAccept(const TypePtr &type) const = 0;
-  // return if current type can be casted to specific type
+  // return true if current type can be casted to specific type
   virtual bool CanCastTo(const TypePtr &type) const = 0;
   // return the return type of a function call
   virtual TypePtr GetReturnType(const TypePtrList &args) const = 0;
   // return the dereferenced type of current type
   virtual TypePtr GetDerefedType() const = 0;
+  // return the deconsted type of current type
+  virtual TypePtr GetDeconstedType() const = 0;
 };
 
 class PlainType : public BaseType {
