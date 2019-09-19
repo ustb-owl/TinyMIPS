@@ -39,8 +39,16 @@ int GetIndex(const char *str, T (&str_array)[N]) {
   return -1;
 }
 
+bool IsOperatorHeadChar(char c) {
+  const char op_head_chars[] = "+-*/%=!<>&|~^";
+  for (const auto &i : op_head_chars) {
+    if (i == c) return true;
+  }
+  return false;
+}
+
 bool IsOperatorChar(char c) {
-  const char op_chars[] = "+-*/%=!<>&|~^";
+  const char op_chars[] = "=&|<>";
   for (const auto &i : op_chars) {
     if (i == c) return true;
   }
@@ -253,7 +261,7 @@ Token Lexer::NextToken() {
   // character
   if (last_char_ == '\'') return HandleChar();
   // operator
-  if (IsOperatorChar(last_char_)) return HandleOperator();
+  if (IsOperatorHeadChar(last_char_)) return HandleOperator();
   // end of line
   if (IsEOL()) return HandleEOL();
   // other characters
