@@ -227,7 +227,7 @@ void ArrayAST::Dump(std::ostream &os) {
     i->Dump(os);
     os << ", ";
   }
-  os << " }";
+  os << '}';
   --in_expr;
 }
 
