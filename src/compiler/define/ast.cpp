@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <cassert>
 
-using namespace tinylang::front;
 using namespace tinylang::define;
 
 namespace {
@@ -66,7 +65,9 @@ void FunCallAST::Dump(std::ostream &os) {
 
 void IfAST::Dump(std::ostream &os) {
   os << indent << "if (";
+  ++in_expr;
   cond_->Dump(os);
+  --in_expr;
   os << ") ";
   then_->Dump(os);
   if (else_then_) {
@@ -77,7 +78,9 @@ void IfAST::Dump(std::ostream &os) {
 
 void WhileAST::Dump(std::ostream &os) {
   os << indent << "while (";
+  ++in_expr;
   cond_->Dump(os);
+  --in_expr;
   os << ") ";
   body_->Dump(os);
 }
@@ -92,7 +95,9 @@ void ControlAST::Dump(std::ostream &os) {
   }
   if (expr_) {
     os << ' ';
+    ++in_expr;
     expr_->Dump(os);
+    --in_expr;
   }
   os << ';' << std::endl;
 }
@@ -158,23 +163,23 @@ void BlockAST::Dump(std::ostream &os) {
 }
 
 void BinaryAST::Dump(std::ostream &os) {
-  ++in_expr;
-  if (static_cast<int>(op_) > static_cast<int>(Operator::Assign)) {
+  if (!in_expr) {
     os << indent;
   }
   else {
     os << '(';
   }
+  ++in_expr;
   lhs_->Dump(os);
   os << ' ' << operators[static_cast<int>(op_)] << ' ';
   rhs_->Dump(os);
-  if (static_cast<int>(op_) > static_cast<int>(Operator::Assign)) {
+  --in_expr;
+  if (!in_expr) {
     os << ';' << std::endl;
   }
   else {
     os << ')';
   }
-  --in_expr;
 }
 
 void CastAST::Dump(std::ostream &os) {
