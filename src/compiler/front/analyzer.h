@@ -2,7 +2,6 @@
 #define TINYLANG_FRONT_ANALYZER_H_
 
 #include <string>
-#include <stack>
 
 #include "define/symbol.h"
 #include "front/lexer.h"
@@ -68,9 +67,9 @@ class Analyzer {
   // leave a while loop
   void LeaveWhile() { --while_count_; }
   // enter a function
-  void EnterFunction(const define::TypePtr &ret) { func_rets_.push(ret); }
+  void EnterFunction(const define::TypePtr &ret) { cur_ret_ = ret; }
   // leave a function
-  void LeaveFunction() { func_rets_.pop(); }
+  void LeaveFunction() { cur_ret_ = nullptr; }
 
   unsigned int error_num() const { return error_num_; }
   const define::EnvPtr &env() const { return env_; }
@@ -82,7 +81,7 @@ class Analyzer {
 
   unsigned int error_num_, while_count_;
   define::EnvPtr env_;
-  std::stack<define::TypePtr> func_rets_;
+  define::TypePtr cur_ret_;
 };
 
 }  // namespace tinylang::front
