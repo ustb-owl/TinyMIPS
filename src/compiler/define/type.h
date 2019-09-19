@@ -18,10 +18,16 @@ class BaseType {
  public:
   virtual ~BaseType() = default;
 
-  // return true if is constant type
-  virtual bool IsConst() const = 0;
   // return true if is void type
   virtual bool IsVoid() const = 0;
+  // return true if is integer type
+  virtual bool IsInteger() const = 0;
+  // return true if is constant type
+  virtual bool IsConst() const = 0;
+  // return true if is pointer type
+  virtual bool IsPointer() const = 0;
+  // return true if is function type
+  virtual bool IsFunction() const = 0;
   // return true if left value which is current type
   // can accept the right value which is specific type
   virtual bool CanAccept(const TypePtr &type) const = 0;
