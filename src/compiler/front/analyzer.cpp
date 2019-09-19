@@ -10,7 +10,7 @@ using namespace tinylang::define;
 
 namespace {
 
-Operator GetDeAssignedOp(Operator op) {
+inline Operator GetDeAssignedOp(Operator op) {
   switch (op) {
     case Operator::AssAdd: return Operator::Add;
     case Operator::AssSub: return Operator::Sub;
@@ -342,8 +342,16 @@ TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
     if (!deduced) {
       deduced = i->IsConst() ? i->GetDeconstedType() : i;
     }
-    else if (!deduced->CanAccept(i)) {
-      return LogError("type mismatch in array elements");
+    else if (i->IsPointer()) {
+      if (!deduced->IsPointer() || !IsPointerCompatible(*deduced, *i)) {
+        return LogError("type mismatch in array elements");
+      }
+    }
+    else if (deduced->GetSize() != i->GetSize()) {
+      deduced = deduced->GetSize() > i->GetSize() ? deduced : i;
+    }
+    else if (deduced->IsUnsigned() || i->IsUnsigned()) {
+      deduced = deduced->IsUnsigned() ? deduced : i;
     }
   }
   // create new type
