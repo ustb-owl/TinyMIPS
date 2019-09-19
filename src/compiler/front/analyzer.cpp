@@ -55,9 +55,7 @@ TypePtr Analyzer::AnalyzeFunCall(const std::string &id,
                                  const TypePtrList &args) {
   // get type of id
   auto type = env_->GetInfo(id);
-  if (!type) {
-    return LogError("identifier has not been defined", id);
-  }
+  if (!type) return LogError("identifier has not been defined", id);
   // check return type
   auto ret = type->GetReturnType(args);
   if (!ret) return LogError("invalid function call", id);
@@ -184,9 +182,7 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
 }
 
 TypePtr Analyzer::AnalyzeCast(const TypePtr &expr, const TypePtr &type) {
-  if (!expr->CanCastTo(type)) {
-    return LogError("invalid type casting");
-  }
+  if (!expr->CanCastTo(type)) return LogError("invalid type casting");
   return type;
 }
 
@@ -196,9 +192,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
     // integer operations
     case Operator::Add: case Operator::Sub:
     case Operator::Not: {
-      if (!opr->IsInteger()) {
-        return LogError("expected integer types");
-      }
+      if (!opr->IsInteger()) return LogError("expected integer types");
       return opr;
     }
     // logic operations
@@ -210,9 +204,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
     }
     // pointer operations
     case Operator::Mul: {
-      if (!opr->IsPointer()) {
-        return LogError("expected pointer types");
-      }
+      if (!opr->IsPointer()) return LogError("expected pointer types");
       return opr->GetDerefedType();
     }
     // get address operations
@@ -230,9 +222,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
 TypePtr Analyzer::AnalyzeId(const std::string &id) {
   // get type of id
   auto type = env_->GetInfo(id);
-  if (!type) {
-    return LogError("identifier has not been defined", id);
-  }
+  if (!type) return LogError("identifier has not been defined", id);
   return type;
 }
 
@@ -275,9 +265,7 @@ TypePtr Analyzer::AnalyzeIndex(const std::string &id,
                                const TypePtr &index) {
   // get type of id
   auto type = env_->GetInfo(id);
-  if (!type) {
-    return LogError("identifier has not been defined", id);
-  }
+  if (!type) return LogError("identifier has not been defined", id);
   // check if is a pointer
   if (!type->IsPointer()) return LogError("invalid pointer", id);
   // check index type
