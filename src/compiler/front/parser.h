@@ -55,11 +55,9 @@ class Parser {
   define::ASTPtr LogError(const char *message);
 
   define::ASTPtr ParseStatement();
-  define::ASTPtr ParseAssign();
   define::ASTPtr ParseVarDef();
   define::ASTPtr ParseLetDef();
   define::ASTPtr ParseFunDef();
-  define::ASTPtr ParseFunCall();
   define::ASTPtr ParseIf();
   define::ASTPtr ParseWhile();
   define::ASTPtr ParseControl();
@@ -74,6 +72,7 @@ class Parser {
   define::ASTPtr ParseCast();
   define::ASTPtr ParseUnary();
   define::ASTPtr ParseFactor();
+  define::ASTPtr ParseFunCall();
   define::ASTPtr ParseIndex();
 
   define::ASTPtr ParseValue();

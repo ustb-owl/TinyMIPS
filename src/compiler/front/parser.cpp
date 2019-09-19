@@ -13,14 +13,14 @@ using namespace tinylang::define;
 namespace {
 
 // table of operator's precedence
-// -1 if it's not a binary operator
+// -1 if it's not a binary/assign operator
 const int op_prec_table[] = {
   90, 90, 100, 100, 100,
   60, 60, 70, 70, 70, 70,
   20, 10, -1,
   50, 30, -1, 40, 80, 80,
-  -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
 };
 
 template <typename T, typename ...Args>
@@ -28,22 +28,6 @@ inline ASTPtr MakeAST(unsigned int line_pos, Args &&...args) {
   auto ast = std::make_unique<T>(std::forward<Args>(args)...);
   ast->set_line_pos(line_pos);
   return ast;
-}
-
-inline Operator GetDeAssignedOp(Operator op) {
-  switch (op) {
-    case Operator::AssAdd: return Operator::Add;
-    case Operator::AssSub: return Operator::Sub;
-    case Operator::AssMul: return Operator::Mul;
-    case Operator::AssDiv: return Operator::Div;
-    case Operator::AssMod: return Operator::Mod;
-    case Operator::AssAnd: return Operator::And;
-    case Operator::AssOr: return Operator::Or;
-    case Operator::AssXor: return Operator::Xor;
-    case Operator::AssShl: return Operator::Shl;
-    case Operator::AssShr: return Operator::Shr;
-    default: assert(false); return Operator::Assign;
-  }
 }
 
 inline int GetOpPrec(Operator op) {
@@ -65,20 +49,7 @@ ASTPtr Parser::LogError(const char *message) {
 }
 
 ASTPtr Parser::ParseStatement() {
-  if (cur_token_ == Token::Id) {
-    // check next token
-    NextToken();
-    if (IsTokenChar('(')) {
-      return ParseFunCall();
-    }
-    else if (IsAssign()) {
-      return ParseAssign();
-    }
-    else {
-      return LogError("invalid statement");
-    }
-  }
-  else if (cur_token_ == Token::Keyword) {
+  if (cur_token_ == Token::Keyword) {
     // switch by keyword
     switch (lexer_.key_val()) {
       case Keyword::Var: return ParseVarDef();
@@ -92,35 +63,8 @@ ASTPtr Parser::ParseStatement() {
     }
   }
   else {
-    return LogError("invalid statement");
+    return ParseExpression();
   }
-}
-
-ASTPtr Parser::ParseAssign() {
-  auto line_pos = lexer_.line_pos();
-  auto id = lexer_.id_val();
-  ASTPtr expr;
-  // check current operator
-  if (IsTokenOperator(Operator::Assign)) {
-    // just assign
-    NextToken();
-    expr = ParseExpression();
-    if (!expr) return nullptr;
-  }
-  else {
-    // create a new id AST
-    auto id_ast = MakeAST<IdAST>(line_pos, id);
-    // get de-assigned operator
-    auto op = GetDeAssignedOp(lexer_.op_val());
-    NextToken();
-    // get expression
-    expr = ParseExpression();
-    if (!expr) return nullptr;
-    // create a new binary AST
-    expr = MakeAST<BinaryAST>(line_pos, op, std::move(id_ast),
-                              std::move(expr));
-  }
-  return MakeAST<AssignAST>(line_pos, id, std::move(expr));
 }
 
 ASTPtr Parser::ParseVarDef() {
@@ -188,27 +132,6 @@ ASTPtr Parser::ParseFunDef() {
   if (!body) return nullptr;
   return MakeAST<FunDefAST>(line_pos, id, std::move(args), std::move(type),
                             std::move(body));
-}
-
-ASTPtr Parser::ParseFunCall() {
-  auto line_pos = lexer_.line_pos();
-  auto id = lexer_.id_val();
-  // eat '('
-  NextToken();
-  // get expression list
-  ASTPtrList args;
-  if (!IsTokenChar(')')) {
-    for (;;) {
-      auto expr = ParseExpression();
-      if (!expr) return nullptr;
-      args.push_back(std::move(expr));
-      // eat ','
-      if (!IsTokenChar(',')) break;
-      NextToken();
-    }
-  }
-  if (!CheckChar(')')) return nullptr;
-  return MakeAST<FunCallAST>(line_pos, id, std::move(args));
 }
 
 ASTPtr Parser::ParseIf() {
@@ -371,6 +294,7 @@ ASTPtr Parser::ParseExpression() {
   while (cur_token_ == Token::Operator) {
     // get operator
     auto op = lexer_.op_val();
+    if (GetOpPrec(op) < 0) break;
     NextToken();
     // handle operator
     while (!ops.empty() && GetOpPrec(ops.top()) >= GetOpPrec(op)) {
@@ -471,6 +395,27 @@ ASTPtr Parser::ParseFactor() {
     // other values
     return ParseValue();
   }
+}
+
+ASTPtr Parser::ParseFunCall() {
+  auto line_pos = lexer_.line_pos();
+  auto id = lexer_.id_val();
+  // eat '('
+  NextToken();
+  // get expression list
+  ASTPtrList args;
+  if (!IsTokenChar(')')) {
+    for (;;) {
+      auto expr = ParseExpression();
+      if (!expr) return nullptr;
+      args.push_back(std::move(expr));
+      // eat ','
+      if (!IsTokenChar(',')) break;
+      NextToken();
+    }
+  }
+  if (!CheckChar(')')) return nullptr;
+  return MakeAST<FunCallAST>(line_pos, id, std::move(args));
 }
 
 ASTPtr Parser::ParseIndex() {
