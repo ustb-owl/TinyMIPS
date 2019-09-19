@@ -54,7 +54,27 @@ class PlainType : public BaseType {
 
   PlainType(Type type) : type_(type) {}
 
-  //
+  bool IsVoid() const override { return type_ == Type::Void; }
+  bool IsInteger() const override { return type_ != Type::Void; }
+  bool IsUnsigned() const override {
+    return type_ == Type::Int32 || type_ == Type::Int8;
+  }
+  bool IsConst() const override { return false; }
+  bool IsPointer() const override { return false; }
+  bool IsFunction() const override { return false; }
+  std::size_t GetSize() const override {
+    switch (type_) {
+      case Type::Int32: case Type::UInt32: return 4;
+      case Type::Int8: case Type::UInt8: return 1;
+      default: return 0;
+    }
+  }
+  TypePtr GetDerefedType() const override { return nullptr; }
+  TypePtr GetDeconstedType() const override { return nullptr; }
+
+  bool CanAccept(const TypePtr &type) const override;
+  bool CanCastTo(const TypePtr &type) const override;
+  TypePtr GetReturnType(const TypePtrList &args) const override;
 
  private:
   Type type_;
@@ -62,9 +82,25 @@ class PlainType : public BaseType {
 
 class ConstType : public BaseType {
  public:
-  ConstType(TypePtr type) : type_(std::move(type)) {}
+  ConstType(TypePtr type) : type_(std::move(type)) {
+    assert(!type_->IsConst());
+  }
 
-  //
+  bool IsVoid() const override { return type_->IsVoid(); }
+  bool IsInteger() const override { return type_->IsInteger(); }
+  bool IsUnsigned() const override { return type_->IsUnsigned(); }
+  bool IsConst() const override { return true; }
+  bool IsPointer() const override { return type_->IsPointer(); }
+  bool IsFunction() const override { return type_->IsFunction(); }
+  std::size_t GetSize() const override { return type_->GetSize(); }
+  TypePtr GetDerefedType() const override {
+    return type_->GetDerefedType();
+  }
+  TypePtr GetDeconstedType() const override { return type_; }
+
+  bool CanAccept(const TypePtr &type) const override;
+  bool CanCastTo(const TypePtr &type) const override;
+  TypePtr GetReturnType(const TypePtrList &args) const override;
 
  private:
   TypePtr type_;
@@ -73,9 +109,26 @@ class ConstType : public BaseType {
 class PointerType : public BaseType {
  public:
   PointerType(TypePtr type, unsigned int ptr)
-      : type_(std::move(type)), ptr_(ptr) {}
+      : type_(std::move(type)), ptr_(ptr) {
+    assert(ptr > 0);
+  }
 
-  //
+  bool IsVoid() const override { return false; }
+  bool IsInteger() const override { return false; }
+  bool IsUnsigned() const override { return true; }
+  bool IsConst() const override { return false; }
+  bool IsPointer() const override { return true; }
+  bool IsFunction() const override { return false; }
+  std::size_t GetSize() const override { return 4; }
+  TypePtr GetDerefedType() const override {
+    return ptr_ == 1 ? type_
+                     : std::make_shared<PointerType>(type_, ptr_ - 1);
+  }
+  TypePtr GetDeconstedType() const override { return nullptr; }
+
+  bool CanAccept(const TypePtr &type) const override;
+  bool CanCastTo(const TypePtr &type) const override;
+  TypePtr GetReturnType(const TypePtrList &args) const override;
 
  private:
   TypePtr type_;
@@ -87,7 +140,19 @@ class FuncType : public BaseType {
   FuncType(TypePtrList args, TypePtr ret)
       : args_(std::move(args)), ret_(std::move(ret)) {}
 
-  //
+  bool IsVoid() const override { return false; }
+  bool IsInteger() const override { return false; }
+  bool IsUnsigned() const override { return false; }
+  bool IsConst() const override { return false; }
+  bool IsPointer() const override { return false; }
+  bool IsFunction() const override { return true; }
+  std::size_t GetSize() const override { return 0; }
+  TypePtr GetDerefedType() const override { return nullptr; }
+  TypePtr GetDeconstedType() const override { return nullptr; }
+
+  bool CanAccept(const TypePtr &type) const override;
+  bool CanCastTo(const TypePtr &type) const override;
+  TypePtr GetReturnType(const TypePtrList &args) const override;
 
  private:
   TypePtrList args_;
