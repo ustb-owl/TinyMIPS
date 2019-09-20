@@ -128,8 +128,11 @@ ASTPtr Parser::ParseFunDef() {
     if (!type) return nullptr;
   }
   // get function body
-  auto body = ParseBlock();
-  if (!body) return nullptr;
+  ASTPtr body;
+  if (IsTokenChar('{')) {
+    body = ParseBlock();
+    if (!body) return nullptr;
+  }
   return MakeAST<FunDefAST>(line_pos, id, std::move(args), std::move(type),
                             std::move(body));
 }
