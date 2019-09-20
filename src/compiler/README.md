@@ -6,11 +6,13 @@ TinyLang is a tiny programming language designed for compiler principle course d
 
 ```ebnf
 program   ::= {stmt};
-stmt      ::= var_def | let_def | fun_def | if | while | control | expr;
+stmt      ::= var_def | let_def | fun_decl  | fun_def
+            | if      | while   | control   | expr;
 
 var_def   ::= "var" var_elem {"," var_elem};
 let_def   ::= "let" let_elem {"," let_elem};
-fun_def   ::= "def" id "(" [arg_def] ")" [":" type] block;
+fun_decl  ::= "def" id "(" [arg_def] ")" [":" type];
+fun_def   ::= fun_decl block;
 if        ::= "if" expr block ["else" (if | block)];
 while     ::= "while" expr block;
 control   ::= "break" | "continue" | ("return" [expr]);
