@@ -4,7 +4,6 @@
 // reference: LLVM version 1.3
 
 #include <memory>
-#include <utility>
 #include <vector>
 #include <ostream>
 #include <forward_list>
@@ -12,6 +11,15 @@
 #include <cassert>
 
 namespace tinylang::define {
+
+// interafce of all SSAs
+class SSAInterface {
+ public:
+  virtual ~SSAInterface() = default;
+
+  // dump the content of SSA value to output stream
+  virtual void Dump(std::ostream &os) = 0;
+};
 
 class Value;
 class User;
@@ -21,10 +29,9 @@ using SSAPtr = std::shared_ptr<Value>;
 using SSAPtrList = std::vector<SSAPtr>;
 
 // a SSA value
-class Value {
+class Value : public SSAInterface {
  public:
   Value() {}
-  virtual ~Value() = default;
 
   // add a use reference to current value
   void AddUse(Use *use) { uses_.push_front(use); }
@@ -32,8 +39,6 @@ class Value {
   void RemoveUse(Use *use) { uses_.remove(use); }
   // replace current value by another value
   void ReplaceBy(const SSAPtr &value);
-  // dump the content of SSA value to output stream
-  virtual void Dump(std::ostream &os) = 0;
 
   const std::forward_list<Use *> &uses() const { return uses_; }
 
@@ -42,7 +47,7 @@ class Value {
   std::forward_list<Use *> uses_;
 };
 
-// a bidirectional reference between SSA user and value
+// a bidirectional reference between SSA users and values
 class Use {
  public:
   explicit Use(const SSAPtr &value, User *user)
