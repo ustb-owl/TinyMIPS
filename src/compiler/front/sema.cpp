@@ -56,9 +56,11 @@ TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
   auto guard_func = ana.EnterFunction(type);
   // analyze function declaration
   auto ret = ana.AnalyzeFunDef(id_, std::move(args), std::move(type));
-  // analyze body
-  auto body = body_->SemaAnalyze(ana);
-  if (!body) return nullptr;
+  // analyze body (if is not declaration)
+  if (body_) {
+    auto body = body_->SemaAnalyze(ana);
+    if (!body) return nullptr;
+  }
   return ret;
 }
 

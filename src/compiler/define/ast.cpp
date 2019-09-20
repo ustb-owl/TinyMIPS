@@ -51,8 +51,14 @@ void FunDefAST::Dump(std::ostream &os) {
     if (i) os << ", ";
     args_[i]->Dump(os);
   }
-  os << ") ";
-  body_->Dump(os);
+  os << ')';
+  if (body_) {
+    os << ' ';
+    body_->Dump(os);
+  }
+  else {
+    os << ';' << std::endl;
+  }
 }
 
 void FunCallAST::Dump(std::ostream &os) {
