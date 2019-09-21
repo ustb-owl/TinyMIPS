@@ -7,9 +7,11 @@
 #include <utility>
 #include <ostream>
 
+#include "define/type.h"
+#include "define/symbol.h"
 #include "front/lexer.h"
 #include "front/analyzer.h"
-#include "define/symbol.h"
+#include "back/irbuilder.h"
 
 namespace tinylang::define {
 
@@ -22,6 +24,8 @@ class BaseAST {
   virtual void Dump(std::ostream &os) = 0;
   // run sematic analysis on current AST
   virtual TypePtr SemaAnalyze(front::Analyzer &ana) = 0;
+  // build IR by current AST
+  virtual back::IRPtr GenerateIR(back::IRBuilder &irb) = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
   void set_env(const EnvPtr &env) { env_ = env; }
@@ -44,6 +48,7 @@ class VarDefAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtrList defs_;
@@ -56,6 +61,7 @@ class LetDefAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtrList defs_;
@@ -71,6 +77,7 @@ class FunDefAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -86,6 +93,7 @@ class FunCallAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -101,6 +109,7 @@ class IfAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtr cond_, then_, else_then_;
@@ -114,6 +123,7 @@ class WhileAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtr cond_, body_;
@@ -127,6 +137,7 @@ class ControlAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   front::Keyword type_;
@@ -141,6 +152,7 @@ class VarElemAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -155,6 +167,7 @@ class LetElemAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -168,6 +181,7 @@ class TypeAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   front::Keyword type_;
@@ -182,6 +196,7 @@ class ArgElemAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -195,6 +210,7 @@ class BlockAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtrList stmts_;
@@ -208,6 +224,7 @@ class BinaryAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   front::Operator op_;
@@ -222,6 +239,7 @@ class CastAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtr expr_, type_;
@@ -235,6 +253,7 @@ class UnaryAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   front::Operator op_;
@@ -248,6 +267,7 @@ class IdAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
@@ -260,6 +280,7 @@ class NumAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   unsigned int num_;
@@ -272,6 +293,7 @@ class StringAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string str_;
@@ -284,6 +306,7 @@ class CharAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   char c_;
@@ -296,6 +319,7 @@ class ArrayAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   ASTPtrList elems_;
@@ -309,6 +333,7 @@ class IndexAST : public BaseAST {
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
+  back::IRPtr GenerateIR(back::IRBuilder &irb) override;
 
  private:
   std::string id_;
