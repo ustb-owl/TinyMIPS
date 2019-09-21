@@ -23,7 +23,8 @@ bool ConstType::CanAccept(const TypePtr &type) const {
 }
 
 bool ConstType::CanCastTo(const TypePtr &type) const {
-  return !type->IsVoid() && type->IsConst() && !type->IsFunction();
+  // allow 'const cast'
+  return type_->CanCastTo(type);
 }
 
 TypePtr ConstType::GetReturnType(const TypePtrList &args) const {

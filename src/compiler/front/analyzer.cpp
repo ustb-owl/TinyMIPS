@@ -300,7 +300,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
     }
     // get address operations
     case Operator::And: {
-      if (opr->IsVoid() || opr->IsFunction()) {
+      if (opr->IsVoid() || opr->IsFunction() || opr->IsConst()) {
         return LogError("invalid 'address-of' operation");
       }
       return std::make_shared<PointerType>(opr, 1);
