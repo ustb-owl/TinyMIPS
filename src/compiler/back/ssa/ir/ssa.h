@@ -1,12 +1,12 @@
-#ifndef TINYLANG_DEFINE_SSA_H_
-#define TINYLANG_DEFINE_SSA_H_
+#ifndef TINYLANG_BACK_SSA_IR_SSA_H_
+#define TINYLANG_BACK_SSA_IR_SSA_H_
 
 #include <list>
 #include <cstddef>
 
-#include "define/usedef.h"
+#include "back/ssa/ir/usedef.h"
 
-namespace tinylang::define {
+namespace tinylang::back::ssa {
 
 // constant number/pointer value
 class NumberSSA : public Value {
@@ -202,6 +202,6 @@ class TriSSA : public User {
   Operator op_;
 };
 
-}  // namespace tinylang::define
+}  // namespace tinylang::back::ssa
 
-#endif  // TINYLANG_DEFINE_SSA_H_
+#endif  // TINYLANG_BACK_SSA_IR_SSA_H_

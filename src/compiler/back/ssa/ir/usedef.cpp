@@ -1,6 +1,6 @@
-#include "define/usedef.h"
+#include "back/ssa/ir/usedef.h"
 
-using namespace tinylang::define;
+using namespace tinylang::back::ssa;
 
 void Value::ReplaceBy(const SSAPtr &value) {
   // TODO: consider optimizing

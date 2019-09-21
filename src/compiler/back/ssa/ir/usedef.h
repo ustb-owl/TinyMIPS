@@ -1,5 +1,5 @@
-#ifndef TINYLANG_DEFINE_USEDEF_H_
-#define TINYLANG_DEFINE_USEDEF_H_
+#ifndef TINYLANG_BACK_SSA_IR_USEDEF_H_
+#define TINYLANG_BACK_SSA_IR_USEDEF_H_
 
 // reference: LLVM version 1.3
 
@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cassert>
 
-namespace tinylang::define {
+namespace tinylang::back::ssa {
 
 // interafce of all SSAs
 class SSAInterface {
@@ -110,6 +110,6 @@ class User : public Value {
   std::vector<Use> operands_;
 };
 
-}  // namespace tinylang::define
+}  // namespace tinylang::back::ssa
 
-#endif  // TINYLANG_DEFINE_USEDEF_H_
+#endif  // TINYLANG_BACK_SSA_IR_USEDEF_H_
