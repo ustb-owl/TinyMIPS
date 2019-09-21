@@ -1,16 +1,19 @@
 #ifndef TINYLANG_BACK_IRBUILDER_H_
 #define TINYLANG_BACK_IRBUILDER_H_
 
-#include "define/ssa.h"
+#include "back/ir.h"
 
 namespace tinylang::back {
 
-class IRBuilder {
+// interface of all IR builders
+class IRBuilderInterface {
  public:
-  virtual ~IRBuilder() = default;
+  virtual ~IRBuilderInterface() = default;
 
   //
 };
+
+using IRBuilder = IRBuilderInterface;
 
 }  // namespace tinylang::back
 
