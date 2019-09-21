@@ -11,7 +11,7 @@ namespace tinylang::back::ssa {
 
 class SSAIR : public IRInterface {
  public:
-  SSAIR(const SSAPtr &value) : value_(value) { assert(value_); }
+  SSAIR(const SSAPtr &value) : value_(value) { assert(value_ != nullptr); }
 
   const std::any value() const override { return value_; }
 
