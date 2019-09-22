@@ -130,10 +130,22 @@ class ReturnTAC : public TACBase {
   TACPtr value_;
 };
 
-// variable reference
-class VariableTAC : public TACBase {
+// variable initialize
+class VarInitTAC : public TACBase {
  public:
-  VariableTAC(std::size_t id) : id_(id) {}
+  VarInitTAC(const TACPtr &value, const TACPtr &var)
+      : value_(value), var_(var) {}
+
+  void Dump(std::ostream &os) override;
+
+ private:
+  TACPtr value_, var_;
+};
+
+// variable reference
+class VarRefTAC : public TACBase {
+ public:
+  VarRefTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
 

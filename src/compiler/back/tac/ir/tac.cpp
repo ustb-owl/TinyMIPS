@@ -34,7 +34,11 @@ void ReturnTAC::Dump(std::ostream &os) {
   //
 }
 
-void VariableTAC::Dump(std::ostream &os) {
+void VarInitTAC::Dump(std::ostream &os) {
+  //
+}
+
+void VarRefTAC::Dump(std::ostream &os) {
   //
 }
 
