@@ -19,8 +19,6 @@ class TACBase {
 
   // dump the content of TAC to output stream
   virtual void Dump(std::ostream &os) = 0;
-
-  //
 };
 
 // binary operations
@@ -37,7 +35,7 @@ class BinaryTAC : public TACBase {
             const TACPtr &dest)
       : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   Operator op_;
@@ -54,7 +52,7 @@ class UnaryTAC : public TACBase {
   UnaryTAC(Operator op, const TACPtr &opr, const TACPtr &dest)
       : op_(op), opr_(opr), dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   Operator op_;
@@ -67,7 +65,7 @@ class LoadTAC : public TACBase {
   LoadTAC(const TACPtr &base, const TACPtr &offset, const TACPtr &dest)
       : base_(base), offset_(offset), dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr base_, offset_, dest_;
@@ -79,7 +77,7 @@ class StoreTAC : public TACBase {
   StoreTAC(const TACPtr &value, const TACPtr &base, const TACPtr &offset)
       : value_(value), base_(base), offset_(offset) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr value_, base_, offset_;
@@ -90,7 +88,7 @@ class JumpTAC : public TACBase {
  public:
   JumpTAC(const TACPtr &dest) : dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr dest_;
@@ -102,7 +100,7 @@ class BranchTAC : public TACBase {
   BranchTAC(const TACPtr &cond, const TACPtr &dest)
       : cond_(cond), dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr cond_, dest_;
@@ -114,7 +112,7 @@ class CallTAC : public TACBase {
   CallTAC(const TACPtr &func, TACPtrList args, const TACPtr &dest)
       : func_(func), args_(std::move(args)), dest_(dest) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr func_, dest_;
@@ -126,7 +124,7 @@ class ReturnTAC : public TACBase {
  public:
   ReturnTAC(const TACPtr &value) : value_(value) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   TACPtr value_;
@@ -137,7 +135,7 @@ class VariableTAC : public TACBase {
  public:
   VariableTAC(std::size_t id) : id_(id) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   std::size_t id_;
@@ -148,7 +146,7 @@ class DataTAC : public TACBase {
  public:
   DataTAC(std::size_t id) : id_(id) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   std::size_t id_;
@@ -159,7 +157,7 @@ class LabelTAC : public TACBase {
  public:
   LabelTAC(std::size_t id) : id_(id) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   std::size_t id_;
@@ -170,7 +168,7 @@ class ArgGetTAC : public TACBase {
  public:
   ArgGetTAC(std::size_t pos) : pos_(pos) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   std::size_t pos_;
@@ -181,7 +179,7 @@ class NumberTAC : public TACBase {
  public:
   NumberTAC(unsigned int num) : num_(num) {}
 
-  //
+  void Dump(std::ostream &os) override;
 
  private:
   unsigned int num_;
