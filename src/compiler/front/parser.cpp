@@ -37,7 +37,7 @@ inline int GetOpPrec(Operator op) {
 }
 
 ASTPtr Parser::LogError(const char *message) {
-  using namespace util;
+  using namespace tinylang::util;
   // print error message
   std::cerr << style("B") << "parser";
   std::cerr << " (line " << lexer_.line_pos();

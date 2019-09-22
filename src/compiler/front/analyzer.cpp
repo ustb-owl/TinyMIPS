@@ -29,7 +29,7 @@ inline Operator GetDeAssignedOp(Operator op) {
 }  // namespace
 
 TypePtr Analyzer::LogError(const char *message) {
-  using namespace util;
+  using namespace tinylang::util;
   // print error message
   std::cerr << style("B") << "analyzer";
   std::cerr << " (line " << line_pos_.top();
@@ -41,7 +41,7 @@ TypePtr Analyzer::LogError(const char *message) {
 }
 
 TypePtr Analyzer::LogError(const char *message, const std::string &id) {
-  using namespace util;
+  using namespace tinylang::util;
   // print error message
   std::cerr << style("B") << "analyzer";
   std::cerr << " (line " << line_pos_.top();

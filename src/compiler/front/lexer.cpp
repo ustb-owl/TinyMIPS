@@ -58,7 +58,7 @@ bool IsOperatorChar(char c) {
 }  // namespace
 
 Token Lexer::PrintError(const char *message) {
-  using namespace util;
+  using namespace tinylang::util;
   // print error message
   std::cerr << style("B") << "lexer";
   std::cerr << " (line " << line_pos_ << "): " << style("RBr") << "error";

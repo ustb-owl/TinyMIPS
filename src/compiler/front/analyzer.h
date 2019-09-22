@@ -45,24 +45,24 @@ class Analyzer {
                                const define::TypePtr &index);
 
   // create a new environment
-  Guard NewEnvironment() {
+  util::Guard NewEnvironment() {
     env_ = std::make_shared<define::Environment>(env_);
-    return Guard([this] { env_ = env_->outer(); });
+    return util::Guard([this] { env_ = env_->outer(); });
   }
   // enter a while loop
-  Guard EnterWhile() {
+  util::Guard EnterWhile() {
     ++while_count_;
-    return Guard([this] { --while_count_; });
+    return util::Guard([this] { --while_count_; });
   }
   // enter a function
-  Guard EnterFunction(const define::TypePtr &ret) {
+  util::Guard EnterFunction(const define::TypePtr &ret) {
     cur_ret_ = ret;
-    return Guard([this] { cur_ret_ = nullptr; });
+    return util::Guard([this] { cur_ret_ = nullptr; });
   }
   // set line position
-  Guard SetLinePos(unsigned int line_pos) {
+  util::Guard SetLinePos(unsigned int line_pos) {
     line_pos_.push(line_pos);
-    return Guard([this] { line_pos_.pop(); });
+    return util::Guard([this] { line_pos_.pop(); });
   }
 
   unsigned int error_num() const { return error_num_; }

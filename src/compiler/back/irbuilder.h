@@ -36,17 +36,17 @@ class IRBuilderInterface {
                               const IRPtr &index) = 0;
 
   // set type of current AST
-  virtual Guard SetType(const define::TypePtr &type) = 0;
+  virtual util::Guard SetType(const define::TypePtr &type) = 0;
   // mark the entry of a function
-  virtual Guard EnterFunction(const std::string &id) = 0;
+  virtual util::Guard EnterFunction(const std::string &id) = 0;
   // mark the entry of a true branch of if statement
-  virtual Guard EnterIfTrueBody() = 0;
+  virtual util::Guard EnterIfTrueBody() = 0;
   // mark the entry of a false branch of if statement
-  virtual Guard EnterIfFalseBody() = 0;
+  virtual util::Guard EnterIfFalseBody() = 0;
   // mark the entry of a condition checking branch of while statement
-  virtual Guard EnterWhileCond() = 0;
+  virtual util::Guard EnterWhileCond() = 0;
   // mark the entry of a body of while statement
-  virtual Guard EnterWhileBody() = 0;
+  virtual util::Guard EnterWhileBody() = 0;
 };
 
 // alias for 'IRBuilderInterface'
