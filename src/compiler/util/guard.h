@@ -4,6 +4,8 @@
 #include <functional>
 #include <utility>
 
+namespace tinylang::util {
+
 class Guard {
  public:
   explicit Guard(std::function<void()> release) : release_(release) {}
@@ -28,5 +30,7 @@ class Guard {
  private:
   std::function<void()> release_;
 };
+
+}  // namespace tinylang::util
 
 #endif  // TINYLANG_UTIL_GUARD_H_

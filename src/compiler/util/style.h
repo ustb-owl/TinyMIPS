@@ -7,7 +7,7 @@
 
 // set output style of 'std::ostream'
 
-namespace util {
+namespace tinylang::util {
 
 enum class Style {
   // font style
@@ -127,17 +127,18 @@ inline void reset(Style) {}
  */
 inline StyleFormat style(const char *fmt) { return {fmt}; }
 
-}  // namespace util
+}  // namespace tinylang::util
 
-inline util::StreamWrapper operator<<(std::ostream &os,
-                                      util::StyleFormat &&sf) {
-  util::StreamWrapper sw(os);
+inline tinylang::util::StreamWrapper operator<<(
+    std::ostream &os, tinylang::util::StyleFormat &&sf) {
+  tinylang::util::StreamWrapper sw(os);
   sw << std::move(sf);
   return sw;
 }
 
-inline util::StreamWrapper operator<<(std::ostream &os, util::Style s) {
-  util::StreamWrapper sw(os);
+inline tinylang::util::StreamWrapper operator<<(std::ostream &os,
+                                                tinylang::util::Style s) {
+  tinylang::util::StreamWrapper sw(os);
   sw << s;
   return sw;
 }
