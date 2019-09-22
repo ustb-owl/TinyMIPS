@@ -64,13 +64,13 @@ class UnaryTAC : public TACBase {
 // load from memory
 class LoadTAC : public TACBase {
  public:
-  LoadTAC(const TACPtr &value, const TACPtr &base, const TACPtr &offset)
-      : value_(value), base_(base), offset_(offset) {}
+  LoadTAC(const TACPtr &base, const TACPtr &offset, const TACPtr &dest)
+      : base_(base), offset_(offset), dest_(dest) {}
 
   //
 
  private:
-  TACPtr value_, base_, offset_;
+  TACPtr base_, offset_, dest_;
 };
 
 // store to memory
@@ -85,18 +85,7 @@ class StoreTAC : public TACBase {
   TACPtr value_, base_, offset_;
 };
 
-// basic block
-class BlockTAC : public TACBase {
- public:
-  BlockTAC(TACPtrList stmts) : stmts_(std::move(stmts)) {}
-
-  //
-
- private:
-  TACPtrList stmts_;
-};
-
-// jump to basic block
+// jump to label
 class JumpTAC : public TACBase {
  public:
   JumpTAC(const TACPtr &dest) : dest_(dest) {}
@@ -107,29 +96,28 @@ class JumpTAC : public TACBase {
   TACPtr dest_;
 };
 
-// branch to basic blocks
+// branch to labels
 class BranchTAC : public TACBase {
  public:
-  BranchTAC(const TACPtr &cond, const TACPtr &true_dest,
-            const TACPtr &false_dest)
-      : cond_(cond), true_dest_(true_dest), false_dest_(false_dest) {}
+  BranchTAC(const TACPtr &cond, const TACPtr &dest)
+      : cond_(cond), dest_(dest) {}
 
   //
 
  private:
-  TACPtr cond_, true_dest_, false_dest_;
+  TACPtr cond_, dest_;
 };
 
 // function call
 class CallTAC : public TACBase {
  public:
-  CallTAC(const TACPtr &func, TACPtrList args)
-      : func_(func), args_(std::move(args)) {}
+  CallTAC(const TACPtr &func, TACPtrList args, const TACPtr &dest)
+      : func_(func), args_(std::move(args)), dest_(dest) {}
 
   //
 
  private:
-  TACPtr func_;
+  TACPtr func_, dest_;
   TACPtrList args_;
 };
 
@@ -159,6 +147,17 @@ class VariableTAC : public TACBase {
 class DataTAC : public TACBase {
  public:
   DataTAC(std::size_t id) : id_(id) {}
+
+  //
+
+ private:
+  std::size_t id_;
+};
+
+// label
+class LabelTAC : public TACBase {
+ public:
+  LabelTAC(std::size_t id) : id_(id) {}
 
   //
 
