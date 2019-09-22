@@ -19,6 +19,12 @@ class Guard {
   // remove copy operator
   Guard &operator=(const Guard &) = delete;
 
+  // release manually
+  void Release() {
+    release_();
+    release_ = nullptr;
+  }
+
  private:
   std::function<void()> release_;
 };
