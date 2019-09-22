@@ -5,7 +5,7 @@
 
 #include "back/ir.h"
 #include "front/lexer.h"
-#include "define/symbol.h"
+#include "define/type.h"
 #include "util/guard.h"
 
 namespace tinylang::back {
@@ -35,8 +35,8 @@ class IRBuilderInterface {
   virtual IRPtr GenerateIndex(const std::string &id,
                               const IRPtr &index) = 0;
 
-  // set environment of current generating process
-  virtual Guard SetEnvironment(const define::EnvPtr &env) = 0;
+  // set type of current AST
+  virtual Guard SetType(const define::TypePtr &type) = 0;
   // mark the entry of a function
   virtual Guard EnterFunction(const std::string &id) = 0;
   // mark the entry of a true branch of if statement
