@@ -8,7 +8,6 @@
 #include <ostream>
 
 #include "define/type.h"
-#include "define/symbol.h"
 #include "front/lexer.h"
 #include "front/analyzer.h"
 #include "back/irbuilder.h"
@@ -28,14 +27,14 @@ class BaseAST {
   virtual back::IRPtr GenerateIR(back::IRBuilder &irb) = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
-  void set_env(const EnvPtr &env) { env_ = env; }
+  const TypePtr &set_type(const TypePtr &type) { return type_ = type; }
 
   unsigned int line_pos() const { return line_pos_; }
-  EnvPtr env() const { return env_; }
+  const TypePtr &type() const { return type_; }
 
  private:
   unsigned int line_pos_;
-  EnvPtr env_;
+  TypePtr type_;
 };
 
 using ASTPtr = std::unique_ptr<BaseAST>;
