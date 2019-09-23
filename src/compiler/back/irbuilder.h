@@ -15,6 +15,7 @@ class IRBuilderInterface {
  public:
   virtual ~IRBuilderInterface() = default;
 
+  virtual IRPtr GenerateFunDecl(const std::string &id) = 0;
   virtual IRPtr GenerateFunCall(const std::string &id, IRPtrList args) = 0;
   virtual IRPtr GenerateIfCond(const IRPtr &cond) = 0;
   virtual IRPtr GenerateWhileCond(const IRPtr &cond) = 0;
