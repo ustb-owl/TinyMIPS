@@ -62,7 +62,7 @@ TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
     return LogError("nested function is not allowed", id);
   }
   // check if is existed
-  if (func_env->GetInfo(id, false)) {
+  if (func_env->GetItem(id, false)) {
     return LogError("identifier has already beed defined", id);
   }
   // create return type
@@ -73,14 +73,14 @@ TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
   // create function symbol
   auto type = std::make_shared<FuncType>(std::move(args),
                                          std::move(const_ret));
-  func_env->AddSymbol(id, std::move(type));
+  func_env->AddItem(id, std::move(type));
   return MakeVoidType();
 }
 
 TypePtr Analyzer::AnalyzeFunCall(const std::string &id,
                                  const TypePtrList &args) {
   // get type of id
-  auto type = env_->GetInfo(id);
+  auto type = env_->GetItem(id);
   if (!type) return LogError("identifier has not been defined", id);
   // check return type
   auto ret = type->GetReturnType(args);
@@ -120,7 +120,7 @@ TypePtr Analyzer::AnalyzeControl(Keyword type, const TypePtr &expr) {
 TypePtr Analyzer::AnalyzeVarElem(const std::string &id, TypePtr type,
                                  const TypePtr &init) {
   // check if is defined
-  if (env_->GetInfo(id, false)) {
+  if (env_->GetItem(id, false)) {
     return LogError("identifier has already beed defined", id);
   }
   if (type) {
@@ -129,7 +129,7 @@ TypePtr Analyzer::AnalyzeVarElem(const std::string &id, TypePtr type,
       return LogError("type mismatch when initializing", id);
     }
     // add symbol info
-    env_->AddSymbol(id, std::move(type));
+    env_->AddItem(id, std::move(type));
   }
   else {
     assert(init != nullptr);
@@ -142,7 +142,7 @@ TypePtr Analyzer::AnalyzeVarElem(const std::string &id, TypePtr type,
     if (deconst_type->IsConst()) {
       deconst_type = deconst_type->GetDeconstedType();
     }
-    env_->AddSymbol(id, std::move(deconst_type));
+    env_->AddItem(id, std::move(deconst_type));
   }
   return MakeVoidType();
 }
@@ -152,7 +152,7 @@ TypePtr Analyzer::AnalyzeLetElem(const std::string &id, TypePtr type,
   assert(init != nullptr);
   TypePtr const_type;
   // check if is defined
-  if (env_->GetInfo(id, false)) {
+  if (env_->GetItem(id, false)) {
     return LogError("identifier has already beed defined", id);
   }
   if (type) {
@@ -173,7 +173,7 @@ TypePtr Analyzer::AnalyzeLetElem(const std::string &id, TypePtr type,
   if (!const_type->IsConst()) {
     const_type = std::make_shared<ConstType>(std::move(const_type));
   }
-  env_->AddSymbol(id, std::move(const_type));
+  env_->AddItem(id, std::move(const_type));
   return MakeVoidType();
 }
 
@@ -186,10 +186,10 @@ TypePtr Analyzer::AnalyzeType(Keyword type, unsigned int ptr) {
 }
 
 TypePtr Analyzer::AnalyzeArgElem(const std::string &id, TypePtr type) {
-  if (env_->GetInfo(id, false)) {
+  if (env_->GetItem(id, false)) {
     return LogError("duplicated argument name", id);
   }
-  env_->AddSymbol(id, type);
+  env_->AddItem(id, type);
   return type;
 }
 
@@ -312,7 +312,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
 
 TypePtr Analyzer::AnalyzeId(const std::string &id) {
   // get type of id
-  auto type = env_->GetInfo(id);
+  auto type = env_->GetItem(id);
   if (!type) return LogError("identifier has not been defined", id);
   return type;
 }
@@ -363,7 +363,7 @@ TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
 TypePtr Analyzer::AnalyzeIndex(const std::string &id,
                                const TypePtr &index) {
   // get type of id
-  auto type = env_->GetInfo(id);
+  auto type = env_->GetItem(id);
   if (!type) return LogError("identifier has not been defined", id);
   // check if is a pointer
   if (!type->IsPointer()) return LogError("invalid pointer", id);

@@ -12,9 +12,7 @@ namespace tinylang::front {
 
 class Analyzer {
  public:
-  Analyzer()
-      : env_(std::make_shared<define::Environment>()),
-        error_num_(0), while_count_(0) {}
+  Analyzer() : env_(MakeEnvironment()), error_num_(0), while_count_(0) {}
 
   define::TypePtr AnalyzeFunDef(const std::string &id,
                                 define::TypePtrList args,
@@ -46,7 +44,7 @@ class Analyzer {
 
   // create a new environment
   util::Guard NewEnvironment() {
-    env_ = std::make_shared<define::Environment>(env_);
+    env_ = MakeEnvironment(env_);
     return util::Guard([this] { env_ = env_->outer(); });
   }
   // enter a while loop
