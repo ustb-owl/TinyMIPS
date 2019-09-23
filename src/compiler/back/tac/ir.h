@@ -19,10 +19,8 @@ class TACIR : public IRInterface {
   TACPtr value_;
 };
 
-// make a new TAC IR
-template <typename T, typename... Args>
-inline IRPtr MakeTAC(Args &&... args) {
-  auto tac = std::make_shared<T>(std::forward(args)...);
+// make a new TAC IR pointer by existing TAC IR
+inline IRPtr MakeTAC(const TACPtr &tac) {
   return std::make_shared<TACIR>(tac);
 }
 
