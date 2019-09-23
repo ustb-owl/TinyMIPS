@@ -32,14 +32,17 @@ class BinaryTAC : public TACBase {
   };
 
   BinaryTAC(Operator op, const TACPtr &lhs, const TACPtr &rhs,
-            const TACPtr &dest)
-      : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest) {}
+            const TACPtr &dest, bool is_unsigned, std::size_t size)
+      : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest),
+        is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
   Operator op_;
   TACPtr lhs_, rhs_, dest_;
+  bool is_unsigned_;
+  std::size_t size_;
 };
 
 // unary operations
@@ -49,38 +52,48 @@ class UnaryTAC : public TACBase {
     Negate, LogicNot, Not, AddressOf,
   };
 
-  UnaryTAC(Operator op, const TACPtr &opr, const TACPtr &dest)
-      : op_(op), opr_(opr), dest_(dest) {}
+  UnaryTAC(Operator op, const TACPtr &opr, const TACPtr &dest,
+           bool is_unsigned, std::size_t size)
+      : op_(op), opr_(opr), dest_(dest),
+        is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
   Operator op_;
   TACPtr opr_, dest_;
+  bool is_unsigned_;
+  std::size_t size_;
 };
 
 // load from memory
 class LoadTAC : public TACBase {
  public:
-  LoadTAC(const TACPtr &base, const TACPtr &offset, const TACPtr &dest)
-      : base_(base), offset_(offset), dest_(dest) {}
+  LoadTAC(const TACPtr &base, const TACPtr &offset, const TACPtr &dest,
+          bool is_unsigned, std::size_t size)
+      : base_(base), offset_(offset), dest_(dest),
+        is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
   TACPtr base_, offset_, dest_;
+  bool is_unsigned_;
+  std::size_t size_;
 };
 
 // store to memory
 class StoreTAC : public TACBase {
  public:
-  StoreTAC(const TACPtr &value, const TACPtr &base, const TACPtr &offset)
-      : value_(value), base_(base), offset_(offset) {}
+  StoreTAC(const TACPtr &value, const TACPtr &base, const TACPtr &offset,
+           std::size_t size)
+      : value_(value), base_(base), offset_(offset), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
   TACPtr value_, base_, offset_;
+  std::size_t size_;
 };
 
 // jump to label
@@ -130,10 +143,10 @@ class ReturnTAC : public TACBase {
   TACPtr value_;
 };
 
-// variable initialize
-class VarInitTAC : public TACBase {
+// variable assign
+class AssignTAC : public TACBase {
  public:
-  VarInitTAC(const TACPtr &value, const TACPtr &var)
+  AssignTAC(const TACPtr &value, const TACPtr &var)
       : value_(value), var_(var) {}
 
   void Dump(std::ostream &os) override;
