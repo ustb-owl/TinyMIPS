@@ -6,36 +6,22 @@
 #include <memory>
 
 #include "define/type.h"
+#include "util/nested.h"
 
 namespace tinylang::define {
 
 // scope environment (symbol table)
-class Environment;
-using EnvPtr = std::shared_ptr<Environment>;
+using EnvPtr = util::NestedMapPtr<std::string, TypePtr>;
 
-class Environment {
- public:
-  Environment() : outer_(nullptr) {}
-  Environment(const EnvPtr &outer) : outer_(outer) {}
+// make a new environment
+inline EnvPtr MakeEnvironment() {
+  return util::MakeNestedMap<std::string, TypePtr>();
+}
 
-  // add a new symbol info to current environment
-  void AddSymbol(const std::string &id, TypePtr type) {
-    symbols_.insert({id, std::move(type)});
-  }
-  // get symbol info (type info)
-  TypePtr GetInfo(const std::string &id, bool recursive);
-  // get symbol info recursively
-  TypePtr GetInfo(const std::string &id) { return GetInfo(id, true); }
-
-  // outer environment
-  const EnvPtr &outer() const { return outer_; }
-  // check if current is root environment
-  bool is_root() const { return outer_ == nullptr; }
-
- private:
-  EnvPtr outer_;
-  std::unordered_map<std::string, TypePtr> symbols_;
-};
+// make a new environment (with outer environment)
+inline EnvPtr MakeEnvironment(const EnvPtr &outer) {
+  return util::MakeNestedMap<std::string, TypePtr>(outer);
+}
 
 }  // namespace tinylang::define
 
