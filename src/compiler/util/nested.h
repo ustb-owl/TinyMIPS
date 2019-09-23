@@ -3,20 +3,9 @@
 
 #include <unordered_map>
 #include <memory>
+#include <type_traits>
 
 namespace tinylang::util {
-
-/*
-
-TODO:
-
-complete this utility
-rewrite Environment
-use this to implement 'vars_' in 'TACBuilder'
-rewrite 'label_stacks_'?
-implement 'NewLabel'... etc
-
-*/
 
 template <typename K, typename V>
 class NestedMap;
@@ -27,8 +16,10 @@ using NestedMapPtr = std::shared_ptr<NestedMap<K, V>>;
 template <typename K, typename V>
 class NestedMap {
  public:
-  NestedMap() : outer_(nullptr) {}
-  NestedMap(const NestedMapPtr<K, V> &outer) : outer_(outer) {}
+  NestedMap() : outer_(nullptr) { PtrChecker<V>{}; }
+  NestedMap(const NestedMapPtr<K, V> &outer) : outer_(outer) {
+    PtrChecker<V>{};
+  }
 
   // add item to current map
   void AddItem(const K &key, const V &value) {
@@ -56,6 +47,14 @@ class NestedMap {
   bool is_root() const { return outer_ == nullptr; }
 
  private:
+  // check if type is suitable
+  template <typename Ptr>
+  struct PtrChecker {
+    static_assert(std::is_pointer<Ptr>::value ||
+                      std::is_assignable<Ptr, nullptr_t>::value,
+                  "type must be a pointer or can accept nullptr_t");
+  };
+
   NestedMapPtr<K, V> outer_;
   std::unordered_map<K, V> map_;
 };
