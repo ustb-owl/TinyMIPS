@@ -18,9 +18,16 @@ IRPtr LetDefAST::GenerateIR(IRBuilder &irb) {
 
 IRPtr FunDefAST::GenerateIR(IRBuilder &irb) {
   auto guard_type = irb.SetType(type());
-  auto guard_func = irb.EnterFunction(id_);
-  for (const auto &i : args_) i->GenerateIR(irb);
-  body_->GenerateIR(irb);
+  if (body_) {
+    // function definition
+    auto guard_func = irb.EnterFunction(id_);
+    for (const auto &i : args_) i->GenerateIR(irb);
+    body_->GenerateIR(irb);
+  }
+  else {
+    // function declaration
+    irb.GenerateFunDecl(id_);
+  }
   return nullptr;
 }
 
@@ -66,7 +73,7 @@ IRPtr ControlAST::GenerateIR(IRBuilder &irb) {
 
 IRPtr VarElemAST::GenerateIR(IRBuilder &irb) {
   auto guard = irb.SetType(type());
-  return irb.GenerateVarElem(id_, init_->GenerateIR(irb));
+  return irb.GenerateVarElem(id_, init_ ? init_->GenerateIR(irb) : nullptr);
 }
 
 IRPtr LetElemAST::GenerateIR(IRBuilder &irb) {
