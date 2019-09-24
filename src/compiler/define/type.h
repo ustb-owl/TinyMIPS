@@ -60,7 +60,7 @@ class PlainType : public BaseType {
   bool IsVoid() const override { return type_ == Type::Void; }
   bool IsInteger() const override { return type_ != Type::Void; }
   bool IsUnsigned() const override {
-    return type_ == Type::Int32 || type_ == Type::Int8;
+    return type_ == Type::UInt32 || type_ == Type::UInt8;
   }
   bool IsConst() const override { return false; }
   bool IsPointer() const override { return false; }

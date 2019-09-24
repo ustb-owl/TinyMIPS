@@ -227,7 +227,10 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
       }
       case Operator::Mul: case Operator::Div: case Operator::Mod:
       case Operator::And: case Operator::Or: case Operator::Xor:
-      case Operator::Shl: case Operator::Shr: {
+      case Operator::Shl: case Operator::Shr: case Operator::Less:
+      case Operator::LessEqual: case Operator::Great:
+      case Operator::GreatEqual: case Operator::Equal:
+      case Operator::NotEqual: {
         if (lhs_type->GetSize() != rhs_type->GetSize()) {
           const auto &sel = lhs_type->GetSize() > rhs_type->GetSize()
                                 ? lhs_type
@@ -239,13 +242,6 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
           is_unsigned = lhs_type->IsUnsigned() || rhs_type->IsUnsigned();
           size = lhs_type->GetSize();
         }
-        break;
-      }
-      case Operator::Less: case Operator::LessEqual: case Operator::Great:
-      case Operator::GreatEqual: case Operator::Equal:
-      case Operator::NotEqual: {
-        is_unsigned = true;
-        size = kTypeSizeWordLength;
         break;
       }
       default: assert(false); return nullptr;
