@@ -470,6 +470,22 @@ Guard TACBuilder::MarkStore(const IRPtr &value) {
 }
 
 void TACBuilder::Dump(std::ostream &os) {
+  // print global data
+  if (!datas_.empty()) {
+    os << "data:" << std::endl;
+    for (std::size_t i = 0; i < datas_.size(); ++i) {
+      const auto &info = datas_[i];
+      os << "  " << i << '(' << (info.elem_size * 8) << "): ";
+      os << std::endl << "    ";
+      for (std::size_t j = 0; j < info.content.size(); ++j) {
+        if (j) os << ", ";
+        info.content[j]->Dump(os);
+        if (j == info.content.size() - 1) os << std::endl;
+      }
+    }
+    os << std::endl;
+  }
+  // print functions
   for (const auto &f : funcs_) {
     const auto &id = f.first;
     const auto &info = f.second;
