@@ -47,8 +47,7 @@ class Parser {
   // check if current token is an assignment operator
   bool IsAssign() const {
     return cur_token_ == Token::Operator &&
-           static_cast<int>(lexer_.op_val()) >=
-               static_cast<int>(Operator::Assign);
+           IsOperatorAssign(lexer_.op_val());
   }
 
   // log error and return null pointer

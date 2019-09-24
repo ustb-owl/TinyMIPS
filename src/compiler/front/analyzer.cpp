@@ -8,26 +8,6 @@
 using namespace tinylang::front;
 using namespace tinylang::define;
 
-namespace {
-
-inline Operator GetDeAssignedOp(Operator op) {
-  switch (op) {
-    case Operator::AssAdd: return Operator::Add;
-    case Operator::AssSub: return Operator::Sub;
-    case Operator::AssMul: return Operator::Mul;
-    case Operator::AssDiv: return Operator::Div;
-    case Operator::AssMod: return Operator::Mod;
-    case Operator::AssAnd: return Operator::And;
-    case Operator::AssOr: return Operator::Or;
-    case Operator::AssXor: return Operator::Xor;
-    case Operator::AssShl: return Operator::Shl;
-    case Operator::AssShr: return Operator::Shr;
-    default: assert(false); return Operator::Assign;
-  }
-}
-
-}  // namespace
-
 TypePtr Analyzer::LogError(const char *message) {
   using namespace tinylang::util;
   // print error message
