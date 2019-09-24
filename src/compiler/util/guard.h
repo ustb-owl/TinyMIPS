@@ -14,7 +14,7 @@ class Guard {
   // remove copy constructor
   Guard(const Guard &) = delete;
   // destructor
-  ~Guard() { release_(); }
+  ~Guard() { if (release_) release_(); }
 
   // remove move operator
   Guard &operator=(Guard &&) noexcept = delete;
@@ -23,8 +23,10 @@ class Guard {
 
   // release manually
   void Release() {
-    release_();
-    release_ = nullptr;
+    if (release_) {
+      release_();
+      release_ = nullptr;
+    }
   }
 
  private:

@@ -105,8 +105,11 @@ void CallTAC::Dump(std::ostream &os) {
 
 void ReturnTAC::Dump(std::ostream &os) {
   os << kIndent;
-  os << "ret ";
-  value_->Dump(os);
+  os << "ret";
+  if (value_) {
+    os << ' ';
+    value_->Dump(os);
+  }
   os << std::endl;
 }
 

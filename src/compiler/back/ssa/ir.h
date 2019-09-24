@@ -27,7 +27,7 @@ inline IRPtr MakeSSA(Args &&... args) {
 }
 
 // cast IR to SSA IR
-inline const SSAPtr &SSACast(const IRPtr &ir) {
+inline const SSAPtr SSACast(const IRPtr &ir) {
   return IRCast<SSAPtr>(ir);
 }
 
