@@ -470,3 +470,21 @@ Guard TACBuilder::MarkStore(const IRPtr &value) {
   store_ = TACCast(value);
   return Guard([this] { store_ = nullptr; });
 }
+
+void TACBuilder::Dump(std::ostream &os) {
+  for (const auto &f : funcs_) {
+    const auto &id = f.first;
+    const auto &info = f.second;
+    // print function label
+    os << id << ", ";
+    info.label->Dump(os);
+    // print IRs
+    if (info.irs.empty()) {
+      os << "  # function declaration" << std::endl;
+    }
+    else {
+      for (const auto &ir : info.irs) ir->Dump(os);
+    }
+    os << std::endl;
+  }
+}

@@ -2,6 +2,7 @@
 #define TINYLANG_BACK_IRBUILDER_H_
 
 #include <string>
+#include <ostream>
 
 #include "back/ir.h"
 #include "front/lexer.h"
@@ -55,6 +56,9 @@ class IRBuilderInterface {
   virtual util::Guard EnterLogicRHS(front::Operator op) = 0;
   // mark next expression is a memory store
   virtual util::Guard MarkStore(const IRPtr &value) = 0;
+
+  // dump IRs in current builder
+  virtual void Dump(std::ostream &os) = 0;
 };
 
 // alias for 'IRBuilderInterface'
