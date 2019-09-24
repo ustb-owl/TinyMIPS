@@ -20,6 +20,8 @@ class TACBuilder : public IRBuilderInterface {
     // create entry function
     NewFuncInfo(kEntryFuncId);
     entry_func_ = cur_func_;
+    // create variable info map
+    NewVarMap();
   }
 
   IRPtr GenerateFunDecl(const std::string &id) override;
@@ -32,6 +34,8 @@ class TACBuilder : public IRBuilderInterface {
   IRPtr GenerateArgElem(const std::string &id) override;
   IRPtr GenerateBinary(front::Operator op, const IRPtr &lhs,
                        const IRPtr &rhs) override;
+  IRPtr GenerateLogicLHS(front::Operator op, const IRPtr &lhs) override;
+  IRPtr GenerateLogicRHS(const IRPtr &rhs) override;
   IRPtr GenerateUnary(front::Operator op, const IRPtr &opr) override;
   IRPtr GenerateId(const std::string &id) override;
   IRPtr GenerateNum(unsigned int num) override;
@@ -40,31 +44,38 @@ class TACBuilder : public IRBuilderInterface {
   IRPtr GenerateArray(IRPtrList elems) override;
   IRPtr GenerateIndex(const std::string &id, const IRPtr &index) override;
 
-  util::Guard SetType(const define::TypePtr &type) override {
-    types_.push(type);
-    return util::Guard([this] { types_.pop(); });
+  util::Guard SetOprType(const define::TypePtr &lhs,
+                         const define::TypePtr &rhs) override {
+    opr_types_.push({lhs, rhs});
+    return util::Guard([this] { opr_types_.pop(); });
   }
   util::Guard EnterFunction(const std::string &id) override;
   util::Guard EnterIfTrueBody() override;
   util::Guard EnterIfFalseBody() override;
   util::Guard EnterWhileCond() override;
   util::Guard EnterWhileBody() override;
+  util::Guard EnterLogicRHS(front::Operator op) override;
+  util::Guard MarkStore(const IRPtr &value) override;
 
  private:
   // id of entry function
   static const char *kEntryFuncId;
-  // label id of true branch of if-statement
-  static const std::size_t kLabelTrue = 0;
-  // label id of false branch of if-statement
-  static const std::size_t kLabelFalse = 1;
-  // label id of end of if-statement
-  static const std::size_t kLabelEndIf = 2;
-  // label id of condition block of while-statement
-  static const std::size_t kLabelCond = 3;
-  // label id of body block of while-statement
-  static const std::size_t kLabelBody = 4;
-  // label id of end of while-statement
-  static const std::size_t kLabelEndWhile = 5;
+
+  // label tags
+  enum class LabelTag {
+    // if-statement
+    LabelTrue, LabelFalse, LabelEndIf,
+    // while-statement
+    LabelCond, LabelBody, LabelEndWhile,
+    // logical expression
+    LabelSecond, LabelEndLogic,
+  };
+
+  // type info
+  struct TypeInfo {
+    define::TypePtr lhs;
+    define::TypePtr rhs;
+  };
 
   // function info
   struct FuncInfo {
@@ -83,6 +94,8 @@ class TACBuilder : public IRBuilderInterface {
   struct DataInfo {
     // content of data
     TACPtrList content;
+    // size of element
+    std::size_t elem_size;
   };
 
   // create a new function info
@@ -104,28 +117,42 @@ class TACBuilder : public IRBuilderInterface {
   // create a new label
   TACPtr NewLabel() { return std::make_shared<LabelTAC>(cur_label_id_++); }
   // create a new unfilled label
-  TACPtr NewUnfilledLabel(std::size_t type);
+  TACPtr NewUnfilledLabel(LabelTag type);
   // get an unfilled label
-  TACPtr GetUnfilledLabel(std::size_t type);
+  const TACPtr &GetUnfilledLabel(LabelTag type);
   // fill label and insert it to current position
-  void FillLabel(std::size_t type);
+  void FillLabel(LabelTag type);
+  // add jump TAC to current function
+  void AddJump(LabelTag type);
+  // new pointer offset calculation
+  TACPtr NewPtrOffset(const TACPtr &offset,
+                      const define::TypePtr &offset_type,
+                      const define::TypePtr &ptr_type);
+  // new pointer offset calculation
+  TACPtr NewPtrOffset(const TACPtr &offset,
+                      const define::TypePtr &offset_type,
+                      std::size_t ptr_size);
 
-  // stack of types
-  std::stack<define::TypePtr> types_;
+  // stack of type of operands
+  std::stack<TypeInfo> opr_types_;
   // hash map of function info
   std::unordered_map<std::string, FuncInfo> funcs_;
   // current function & entry function
   FuncInfo *cur_func_, *entry_func_;
   // unfilled labels in current scope
-  std::stack<std::unordered_map<std::size_t, TACPtr>> unfilled_;
+  std::stack<std::unordered_map<LabelTag, TACPtr>> unfilled_;
   // current label id
   std::size_t cur_label_id_;
   // table of variables
   util::NestedMapPtr<std::string, TACPtr> vars_;
   // current variable id
   std::size_t cur_var_id_;
+  // stack of return value in logical expression
+  std::stack<TACPtr> logics_;
   // data list
   std::vector<DataInfo> datas_;
+  // store value (for memory accessing)
+  TACPtr store_;
 };
 
 }  // namespace tinylang::back::tac
