@@ -16,9 +16,9 @@ using NestedMapPtr = std::shared_ptr<NestedMap<K, V>>;
 template <typename K, typename V>
 class NestedMap {
  public:
-  NestedMap() : outer_(nullptr) { PtrChecker<V>{}; }
+  NestedMap() : outer_(nullptr) { static_cast<void>(PtrChecker<V>{}); }
   NestedMap(const NestedMapPtr<K, V> &outer) : outer_(outer) {
-    PtrChecker<V>{};
+    static_cast<void>(PtrChecker<V>{});
   }
 
   // add item to current map
@@ -32,7 +32,7 @@ class NestedMap {
       return it->second;
     }
     else if (outer_ && recursive) {
-      return outer_->GetInfo(key);
+      return outer_->GetItem(key);
     }
     else {
       return nullptr;
@@ -51,7 +51,7 @@ class NestedMap {
   template <typename Ptr>
   struct PtrChecker {
     static_assert(std::is_pointer<Ptr>::value ||
-                      std::is_assignable<Ptr, nullptr_t>::value,
+                      std::is_assignable<Ptr, std::nullptr_t>::value,
                   "type must be a pointer or can accept nullptr_t");
   };
 

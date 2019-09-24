@@ -261,6 +261,7 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
 
 IRPtr TACBuilder::GenerateLogicLHS(Operator op, const IRPtr &lhs) {
   unfilled_.push({});
+  auto lhs_tac = TACCast(lhs);
   // create return value variable
   auto ret = NewTempVar();
   logics_.push(ret);
@@ -273,7 +274,7 @@ IRPtr TACBuilder::GenerateLogicLHS(Operator op, const IRPtr &lhs) {
     auto init = std::make_shared<NumberTAC>(0);
     AddInst(std::make_shared<AssignTAC>(std::move(init), ret));
     // generate branch & jump
-    AddInst(std::make_shared<BranchTAC>(TACCast(lhs), std::move(second)));
+    AddInst(std::make_shared<BranchTAC>(lhs_tac, std::move(second)));
     AddJump(LabelTag::LabelEndLogic);
   }
   else {  // LogicOr
@@ -283,8 +284,9 @@ IRPtr TACBuilder::GenerateLogicLHS(Operator op, const IRPtr &lhs) {
     auto init = std::make_shared<NumberTAC>(1);
     AddInst(std::make_shared<AssignTAC>(std::move(init), ret));
     // generate branch
-    AddInst(std::make_shared<BranchTAC>(TACCast(lhs), std::move(label)));
+    AddInst(std::make_shared<BranchTAC>(lhs_tac, std::move(label)));
   }
+  return nullptr;
 }
 
 IRPtr TACBuilder::GenerateLogicRHS(const IRPtr &rhs) {
