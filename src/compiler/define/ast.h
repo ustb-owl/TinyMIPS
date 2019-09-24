@@ -25,6 +25,8 @@ class BaseAST {
   virtual TypePtr SemaAnalyze(front::Analyzer &ana) = 0;
   // build IR by current AST
   virtual back::IRPtr GenerateIR(back::IRBuilder &irb) = 0;
+  // return true if current AST is a memory access operation
+  virtual bool IsMemAccess() const = 0;
 
   void set_line_pos(unsigned int line_pos) { line_pos_ = line_pos; }
   const TypePtr &set_type(const TypePtr &type) { return type_ = type; }
@@ -48,6 +50,7 @@ class VarDefAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtrList defs_;
@@ -61,6 +64,7 @@ class LetDefAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtrList defs_;
@@ -77,6 +81,7 @@ class FunDefAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -93,6 +98,7 @@ class FunCallAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -109,6 +115,7 @@ class IfAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtr cond_, then_, else_then_;
@@ -123,6 +130,7 @@ class WhileAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtr cond_, body_;
@@ -137,6 +145,7 @@ class ControlAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   front::Keyword type_;
@@ -152,6 +161,7 @@ class VarElemAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -167,6 +177,7 @@ class LetElemAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -181,6 +192,7 @@ class TypeAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   front::Keyword type_;
@@ -196,6 +208,7 @@ class ArgElemAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -210,6 +223,7 @@ class BlockAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtrList stmts_;
@@ -224,6 +238,7 @@ class BinaryAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   front::Operator op_;
@@ -239,6 +254,7 @@ class CastAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtr expr_, type_;
@@ -253,6 +269,7 @@ class UnaryAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return op_ == front::Operator::Mul; }
 
  private:
   front::Operator op_;
@@ -267,6 +284,7 @@ class IdAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string id_;
@@ -280,6 +298,7 @@ class NumAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   unsigned int num_;
@@ -293,6 +312,7 @@ class StringAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   std::string str_;
@@ -306,6 +326,7 @@ class CharAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   char c_;
@@ -319,6 +340,7 @@ class ArrayAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return false; }
 
  private:
   ASTPtrList elems_;
@@ -333,6 +355,7 @@ class IndexAST : public BaseAST {
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
   back::IRPtr GenerateIR(back::IRBuilder &irb) override;
+  bool IsMemAccess() const override { return true; }
 
  private:
   std::string id_;
