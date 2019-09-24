@@ -10,6 +10,9 @@
 
 namespace tinylang::define {
 
+// size of machine word length
+constexpr std::size_t kTypeSizeWordLength = 4;
+
 // definition of base class of all types
 class BaseType;
 using TypePtr = std::shared_ptr<BaseType>;
@@ -119,7 +122,7 @@ class PointerType : public BaseType {
   bool IsConst() const override { return false; }
   bool IsPointer() const override { return true; }
   bool IsFunction() const override { return false; }
-  std::size_t GetSize() const override { return 4; }
+  std::size_t GetSize() const override { return kTypeSizeWordLength; }
   TypePtr GetDerefedType() const override {
     return ptr_ == 1 ? type_
                      : std::make_shared<PointerType>(type_, ptr_ - 1);
