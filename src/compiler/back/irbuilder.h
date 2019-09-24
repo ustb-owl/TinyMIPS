@@ -27,6 +27,8 @@ class IRBuilderInterface {
   virtual IRPtr GenerateArgElem(const std::string &id) = 0;
   virtual IRPtr GenerateBinary(front::Operator op, const IRPtr &lhs,
                                const IRPtr &rhs) = 0;
+  virtual IRPtr GenerateLogicLHS(front::Operator op, const IRPtr &lhs) = 0;
+  virtual IRPtr GenerateLogicRHS(const IRPtr &rhs) = 0;
   virtual IRPtr GenerateUnary(front::Operator op, const IRPtr &opr) = 0;
   virtual IRPtr GenerateId(const std::string &id) = 0;
   virtual IRPtr GenerateNum(unsigned int num) = 0;
@@ -36,8 +38,9 @@ class IRBuilderInterface {
   virtual IRPtr GenerateIndex(const std::string &id,
                               const IRPtr &index) = 0;
 
-  // set type of current AST
-  virtual util::Guard SetType(const define::TypePtr &type) = 0;
+  // set type of current operand
+  virtual util::Guard SetOprType(const define::TypePtr &lhs,
+                                 const define::TypePtr &rhs) = 0;
   // mark the entry of a function
   virtual util::Guard EnterFunction(const std::string &id) = 0;
   // mark the entry of a true branch of if statement
@@ -48,6 +51,10 @@ class IRBuilderInterface {
   virtual util::Guard EnterWhileCond() = 0;
   // mark the entry of a body of while statement
   virtual util::Guard EnterWhileBody() = 0;
+  // mark the entry of second part of logical expression
+  virtual util::Guard EnterLogicRHS(front::Operator op) = 0;
+  // mark next expression is a memory store
+  virtual util::Guard MarkStore(const IRPtr &value) = 0;
 };
 
 // alias for 'IRBuilderInterface'
