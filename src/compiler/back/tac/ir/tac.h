@@ -69,15 +69,14 @@ class UnaryTAC : public TACBase {
 // load from memory
 class LoadTAC : public TACBase {
  public:
-  LoadTAC(const TACPtr &base, const TACPtr &offset, const TACPtr &dest,
-          bool is_unsigned, std::size_t size)
-      : base_(base), offset_(offset), dest_(dest),
-        is_unsigned_(is_unsigned), size_(size) {}
+  LoadTAC(const TACPtr &addr, const TACPtr &dest, bool is_unsigned,
+          std::size_t size)
+      : addr_(addr), dest_(dest), is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
-  TACPtr base_, offset_, dest_;
+  TACPtr addr_, dest_;
   bool is_unsigned_;
   std::size_t size_;
 };
@@ -85,14 +84,13 @@ class LoadTAC : public TACBase {
 // store to memory
 class StoreTAC : public TACBase {
  public:
-  StoreTAC(const TACPtr &value, const TACPtr &base, const TACPtr &offset,
-           std::size_t size)
-      : value_(value), base_(base), offset_(offset), size_(size) {}
+  StoreTAC(const TACPtr &value, const TACPtr &addr, std::size_t size)
+      : value_(value), addr_(addr), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
  private:
-  TACPtr value_, base_, offset_;
+  TACPtr value_, addr_;
   std::size_t size_;
 };
 
