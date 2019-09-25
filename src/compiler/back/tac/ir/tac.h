@@ -4,13 +4,28 @@
 #include <memory>
 #include <vector>
 #include <ostream>
+#include <optional>
 #include <cstddef>
 
 namespace tinylang::back::tac {
 
+// forward declaration
 class TACBase;
 using TACPtr = std::shared_ptr<TACBase>;
 using TACPtrList = std::vector<TACPtr>;
+
+// binary operators
+enum class BinaryOp {
+  Add, Sub, Mul, Div, Mod,
+  Equal, NotEqual, Less, LessEqual, Great, GreatEqual,
+  LogicAnd, LogicOr,
+  And, Or, Xor, Shl, Shr,
+};
+
+// unary operators
+enum class UnaryOp {
+  Negate, LogicNot, Not, AddressOf,
+};
 
 // base class for all tree-address code
 class TACBase {
@@ -19,27 +34,41 @@ class TACBase {
 
   // dump the content of TAC to output stream
   virtual void Dump(std::ostream &os) = 0;
+
+  // return true if current TAC is constant
+  virtual bool IsConst() const = 0;
+  // return value in current TAC
+  virtual std::optional<unsigned int> GetValue() const = 0;
+  // return operand1 of current TAC
+  virtual TACPtr GetOperand1() const = 0;
+  // return operand2 of current TAC
+  virtual TACPtr GetOperand2() const = 0;
+  // return dest of current TAC
+  virtual TACPtr GetDest() const = 0;
+  // return binary operator of current TAC
+  virtual std::optional<BinaryOp> GetBinaryOp() const = 0;
+  // return unary operator of current TAC
+  virtual std::optional<UnaryOp> GetUnaryOp() const = 0;
+  // return true if current TAC is unsigned
+  virtual bool IsUnsigned() const = 0;
+  // return size of current TAC
+  virtual std::size_t GetSize() const = 0;
 };
 
 // binary operations
 class BinaryTAC : public TACBase {
  public:
-  enum class Operator {
-    Add, Sub, Mul, Div, Mod,
-    Equal, NotEqual, Less, LessEqual, Great, GreatEqual,
-    LogicAnd, LogicOr,
-    And, Or, Xor, Shl, Shr,
-  };
-
-  BinaryTAC(Operator op, const TACPtr &lhs, const TACPtr &rhs,
+  BinaryTAC(BinaryOp op, const TACPtr &lhs, const TACPtr &rhs,
             const TACPtr &dest, bool is_unsigned, std::size_t size)
       : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest),
         is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
-  Operator op_;
+  BinaryOp op_;
   TACPtr lhs_, rhs_, dest_;
   bool is_unsigned_;
   std::size_t size_;
@@ -48,19 +77,17 @@ class BinaryTAC : public TACBase {
 // unary operations
 class UnaryTAC : public TACBase {
  public:
-  enum class Operator {
-    Negate, LogicNot, Not, AddressOf,
-  };
-
-  UnaryTAC(Operator op, const TACPtr &opr, const TACPtr &dest,
+  UnaryTAC(UnaryOp op, const TACPtr &opr, const TACPtr &dest,
            bool is_unsigned, std::size_t size)
       : op_(op), opr_(opr), dest_(dest),
         is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
-  Operator op_;
+  UnaryOp op_;
   TACPtr opr_, dest_;
   bool is_unsigned_;
   std::size_t size_;
@@ -74,6 +101,8 @@ class LoadTAC : public TACBase {
       : addr_(addr), dest_(dest), is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   TACPtr addr_, dest_;
@@ -89,6 +118,8 @@ class StoreTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   TACPtr value_, addr_;
   std::size_t size_;
@@ -100,6 +131,8 @@ class JumpTAC : public TACBase {
   JumpTAC(const TACPtr &dest) : dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   TACPtr dest_;
@@ -113,6 +146,8 @@ class BranchTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   TACPtr cond_, dest_;
 };
@@ -124,6 +159,8 @@ class CallTAC : public TACBase {
       : func_(func), args_(std::move(args)), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   TACPtr func_, dest_;
@@ -137,6 +174,8 @@ class ReturnTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   TACPtr value_;
 };
@@ -149,6 +188,8 @@ class AssignTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   TACPtr value_, var_;
 };
@@ -159,6 +200,8 @@ class VarRefTAC : public TACBase {
   VarRefTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   std::size_t id_;
@@ -171,6 +214,8 @@ class DataTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   std::size_t id_;
 };
@@ -181,6 +226,8 @@ class LabelTAC : public TACBase {
   LabelTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   std::size_t id_;
@@ -193,6 +240,8 @@ class ArgGetTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
 
+  // TODO
+
  private:
   std::size_t pos_;
 };
@@ -203,6 +252,8 @@ class NumberTAC : public TACBase {
   NumberTAC(unsigned int num) : num_(num) {}
 
   void Dump(std::ostream &os) override;
+
+  // TODO
 
  private:
   unsigned int num_;
