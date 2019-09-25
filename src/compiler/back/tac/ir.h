@@ -25,7 +25,7 @@ inline IRPtr MakeTAC(const TACPtr &tac) {
 }
 
 // cast IR to TAC IR
-inline const TACPtr TACCast(const IRPtr &ir) {
+inline TACPtr TACCast(const IRPtr &ir) {
   return IRCast<TACPtr>(ir);
 }
 

@@ -21,7 +21,7 @@ using IRPtrList = std::vector<IRPtr>;
 
 // cast IR pointer to specific type
 template <typename T>
-inline const T IRCast(const IRPtr &ir) {
+inline T IRCast(const IRPtr &ir) {
   auto ret = ir->value();
   auto value = std::any_cast<T>(&ret);
   assert(value != nullptr);
