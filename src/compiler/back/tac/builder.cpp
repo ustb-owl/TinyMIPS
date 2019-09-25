@@ -469,6 +469,10 @@ Guard TACBuilder::MarkStore(const IRPtr &value) {
   return Guard([this] { store_ = nullptr; });
 }
 
+void TACBuilder::EndGeneration() {
+  AddInst(std::make_shared<ReturnTAC>(nullptr));
+}
+
 void TACBuilder::Dump(std::ostream &os) {
   // print global data
   if (!datas_.empty()) {
