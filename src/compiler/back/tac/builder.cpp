@@ -10,37 +10,37 @@ using namespace tinylang::util;
 
 namespace {
 
-inline BinaryTAC::Operator BinaryOperatorCast(Operator op) {
+inline BinaryOp BinaryOperatorCast(Operator op) {
   switch (op) {
-    case Operator::Add: return BinaryTAC::Operator::Add;
-    case Operator::Sub: return BinaryTAC::Operator::Sub;
-    case Operator::Mul: return BinaryTAC::Operator::Mul;
-    case Operator::Div: return BinaryTAC::Operator::Div;
-    case Operator::Mod: return BinaryTAC::Operator::Mod;
-    case Operator::Equal: return BinaryTAC::Operator::Equal;
-    case Operator::NotEqual: return BinaryTAC::Operator::NotEqual;
-    case Operator::Less: return BinaryTAC::Operator::Less;
-    case Operator::LessEqual: return BinaryTAC::Operator::LessEqual;
-    case Operator::Great: return BinaryTAC::Operator::Great;
-    case Operator::GreatEqual: return BinaryTAC::Operator::GreatEqual;
-    case Operator::LogicAnd: return BinaryTAC::Operator::LogicAnd;
-    case Operator::LogicOr: return BinaryTAC::Operator::LogicOr;
-    case Operator::And: return BinaryTAC::Operator::And;
-    case Operator::Or: return BinaryTAC::Operator::Or;
-    case Operator::Xor: return BinaryTAC::Operator::Xor;
-    case Operator::Shl: return BinaryTAC::Operator::Shl;
-    case Operator::Shr: return BinaryTAC::Operator::Shr;
-    default: assert(false); return BinaryTAC::Operator::Add;
+    case Operator::Add: return BinaryOp::Add;
+    case Operator::Sub: return BinaryOp::Sub;
+    case Operator::Mul: return BinaryOp::Mul;
+    case Operator::Div: return BinaryOp::Div;
+    case Operator::Mod: return BinaryOp::Mod;
+    case Operator::Equal: return BinaryOp::Equal;
+    case Operator::NotEqual: return BinaryOp::NotEqual;
+    case Operator::Less: return BinaryOp::Less;
+    case Operator::LessEqual: return BinaryOp::LessEqual;
+    case Operator::Great: return BinaryOp::Great;
+    case Operator::GreatEqual: return BinaryOp::GreatEqual;
+    case Operator::LogicAnd: return BinaryOp::LogicAnd;
+    case Operator::LogicOr: return BinaryOp::LogicOr;
+    case Operator::And: return BinaryOp::And;
+    case Operator::Or: return BinaryOp::Or;
+    case Operator::Xor: return BinaryOp::Xor;
+    case Operator::Shl: return BinaryOp::Shl;
+    case Operator::Shr: return BinaryOp::Shr;
+    default: assert(false); return BinaryOp::Add;
   }
 }
 
-inline UnaryTAC::Operator UnaryOperatorCast(Operator op) {
+inline UnaryOp UnaryOperatorCast(Operator op) {
   switch (op) {
-    case Operator::Sub: return UnaryTAC::Operator::Negate;
-    case Operator::LogicNot: return UnaryTAC::Operator::LogicNot;
-    case Operator::Not: return UnaryTAC::Operator::Not;
-    case Operator::And: return UnaryTAC::Operator::AddressOf;
-    default: assert(false); return UnaryTAC::Operator::Negate;
+    case Operator::Sub: return UnaryOp::Negate;
+    case Operator::LogicNot: return UnaryOp::LogicNot;
+    case Operator::Not: return UnaryOp::Not;
+    case Operator::And: return UnaryOp::AddressOf;
+    default: assert(false); return UnaryOp::Negate;
   }
 }
 
@@ -89,7 +89,7 @@ TACPtr TACBuilder::NewPtrOffset(const TACPtr &offset,
                                 std::size_t size) {
   auto var = NewTempVar();
   AddInst(std::make_shared<BinaryTAC>(
-      BinaryTAC::Operator::Mul, offset, std::make_shared<NumberTAC>(size),
+      BinaryOp::Mul, offset, std::make_shared<NumberTAC>(size),
       var, offset_type->IsUnsigned(), kTypeSizeWordLength));
   return var;
 }
@@ -384,7 +384,7 @@ IRPtr TACBuilder::GenerateIndex(const std::string &id, const IRPtr &index) {
   auto offset = NewPtrOffset(TACCast(index), opr_types_.top().rhs, size);
   // generate address
   auto addr = NewTempVar();
-  AddInst(std::make_shared<BinaryTAC>(BinaryTAC::Operator::Add, base,
+  AddInst(std::make_shared<BinaryTAC>(BinaryOp::Add, base,
                                       offset, addr, true,
                                       kTypeSizeWordLength));
   if (store_) {
