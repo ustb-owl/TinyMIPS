@@ -21,6 +21,10 @@ void Optimizer::ShowInfo(std::ostream &os) {
   os << "current optimization level: " << opt_level_ << std::endl;
   // show registed info
   os << "registed function passes:" << std::endl;
+  if (passes_.empty()) {
+    os << "  <none>" << std::endl;
+    return;
+  }
   for (const auto &i : passes_) {
     os << "  " << std::setw(16) << std::left << i->name();
     os << "min_opt_level = " << i->min_opt_level() << std::endl;
