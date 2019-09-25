@@ -68,7 +68,7 @@ class Optimizer {
 
 // helper class for registering a pass
 template <typename T>
-class RegisterPass : class PassInfo {
+class RegisterPass : public PassInfo {
  public:
   RegisterPass(std::string_view name, unsigned int min_opt_level)
       : PassInfo(name, std::make_unique<T>(), min_opt_level) {
