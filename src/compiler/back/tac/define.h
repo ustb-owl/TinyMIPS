@@ -1,6 +1,7 @@
 #ifndef TINYLANG_BACK_TAC_DEFINE_H_
 #define TINYLANG_BACK_TAC_DEFINE_H_
 
+#include <list>
 #include <unordered_map>
 #include <string>
 #include <cstddef>
@@ -19,7 +20,7 @@ struct FuncInfo {
   TACPtrList vars;
   // list of instructions in function
   // empty if is just a declaration
-  TACPtrList irs;
+  std::list<TACPtr> irs;
 };
 
 // function info map
