@@ -9,7 +9,9 @@
 #include <cstddef>
 
 #include "back/irbuilder.h"
+#include "back/tac/define.h"
 #include "back/tac/ir.h"
+#include "back/tac/optimizer.h"
 #include "util/nested.h"
 
 namespace tinylang::back::tac {
@@ -60,6 +62,9 @@ class TACBuilder : public IRBuilderInterface {
   void EndGeneration() override;
   void Dump(std::ostream &os) override;
 
+  // run TAC optimization
+  void RunOptimization(Optimizer &opt);
+
  private:
   // id of entry function
   static const char *kEntryFuncId;
@@ -78,27 +83,6 @@ class TACBuilder : public IRBuilderInterface {
   struct TypeInfo {
     define::TypePtr lhs;
     define::TypePtr rhs;
-  };
-
-  // function info
-  struct FuncInfo {
-    // label of current function
-    TACPtr label;
-    // list of arguments of function
-    TACPtrList args;
-    // list of variables in function
-    TACPtrList vars;
-    // list of instructions in function
-    // empty if is just a declaration
-    TACPtrList irs;
-  };
-
-  // data info
-  struct DataInfo {
-    // content of data
-    TACPtrList content;
-    // size of element
-    std::size_t elem_size;
   };
 
   // create a new function info
@@ -139,7 +123,7 @@ class TACBuilder : public IRBuilderInterface {
   // stack of type of operands
   std::stack<TypeInfo> opr_types_;
   // hash map of function info
-  std::unordered_map<std::string, FuncInfo> funcs_;
+  FuncInfoMap funcs_;
   // current function & entry function
   FuncInfo *cur_func_, *entry_func_;
   // unfilled labels in current scope

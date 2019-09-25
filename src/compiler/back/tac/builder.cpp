@@ -506,3 +506,8 @@ void TACBuilder::Dump(std::ostream &os) {
     os << std::endl;
   }
 }
+
+void TACBuilder::RunOptimization(Optimizer &opt) {
+  opt.set_funcs(&funcs_);
+  opt.Run();
+}
