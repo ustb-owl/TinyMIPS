@@ -290,7 +290,7 @@ IRPtr TACBuilder::GenerateLogicRHS(const IRPtr &rhs) {
   auto ret = logics_.top();
   logics_.pop();
   // generate assign
-  AddInst(std::make_shared<AssignTAC>(ret, TACCast(rhs)));
+  AddInst(std::make_shared<AssignTAC>(TACCast(rhs), ret));
   return MakeTAC(ret);
 }
 
@@ -457,7 +457,7 @@ Guard TACBuilder::EnterWhileBody() {
 }
 
 Guard TACBuilder::EnterLogicRHS(Operator op) {
-  if (op == Operator::LogicAnd) NewUnfilledLabel(LabelTag::LabelSecond);
+  if (op == Operator::LogicAnd) FillLabel(LabelTag::LabelSecond);
   return Guard([this] {
     FillLabel(LabelTag::LabelEndLogic);
     unfilled_.pop();

@@ -313,7 +313,7 @@ ASTPtr Parser::ParseExpression() {
     }
     ops.push(op);
     // get next expression
-    expr = ParseExpression();
+    expr = ParseCast();
     if (!expr) return nullptr;
     oprs.push(std::move(expr));
   }
@@ -371,7 +371,10 @@ ASTPtr Parser::ParseUnary() {
 }
 
 ASTPtr Parser::ParseFactor() {
-  if (cur_token_ == Token::Id) {
+  if (cur_token_ == Token::Operator) {
+    return ParseUnary();
+  }
+  else if (cur_token_ == Token::Id) {
     // look ahead
     NextToken();
     if (cur_token_ == Token::Id) {
