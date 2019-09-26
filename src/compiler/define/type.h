@@ -22,6 +22,8 @@ class BaseType {
  public:
   virtual ~BaseType() = default;
 
+  // return true if is right value
+  virtual bool IsRightValue() const = 0;
   // return true if is void type
   virtual bool IsVoid() const = 0;
   // return true if is integer type
@@ -47,6 +49,8 @@ class BaseType {
   virtual TypePtr GetDerefedType() const = 0;
   // return the deconsted type of current type
   virtual TypePtr GetDeconstedType() const = 0;
+  // return a new type with specific value type (left/right)
+  virtual TypePtr GetRightValue(bool is_right) = 0;
 };
 
 class PlainType : public BaseType {
@@ -55,8 +59,9 @@ class PlainType : public BaseType {
     Void, Int32, Int8, UInt32, UInt8,
   };
 
-  PlainType(Type type) : type_(type) {}
+  PlainType(Type type, bool is_right) : type_(type), is_right_(is_right) {}
 
+  bool IsRightValue() const override { return is_right_; }
   bool IsVoid() const override { return type_ == Type::Void; }
   bool IsInteger() const override { return type_ != Type::Void; }
   bool IsUnsigned() const override {
@@ -74,6 +79,9 @@ class PlainType : public BaseType {
   }
   TypePtr GetDerefedType() const override { return nullptr; }
   TypePtr GetDeconstedType() const override { return nullptr; }
+  TypePtr GetRightValue(bool is_right) override {
+    return std::make_shared<PlainType>(type_, is_right);
+  }
 
   bool CanAccept(const TypePtr &type) const override;
   bool CanCastTo(const TypePtr &type) const override;
@@ -81,6 +89,7 @@ class PlainType : public BaseType {
 
  private:
   Type type_;
+  bool is_right_;
 };
 
 class ConstType : public BaseType {
@@ -89,6 +98,7 @@ class ConstType : public BaseType {
     assert(!type_->IsConst());
   }
 
+  bool IsRightValue() const override { return type_->IsRightValue(); }
   bool IsVoid() const override { return type_->IsVoid(); }
   bool IsInteger() const override { return type_->IsInteger(); }
   bool IsUnsigned() const override { return type_->IsUnsigned(); }
@@ -100,6 +110,9 @@ class ConstType : public BaseType {
     return type_->GetDerefedType();
   }
   TypePtr GetDeconstedType() const override { return type_; }
+  TypePtr GetRightValue(bool is_right) override {
+    return std::make_shared<ConstType>(type_->GetRightValue(is_right));
+  }
 
   bool CanAccept(const TypePtr &type) const override;
   bool CanCastTo(const TypePtr &type) const override;
@@ -115,7 +128,9 @@ class PointerType : public BaseType {
       : type_(std::move(type)), ptr_(ptr) {
     assert(ptr > 0);
   }
-
+  
+  // TODO: ???
+  bool IsRightValue() const override { return type_->IsRightValue(); }
   bool IsVoid() const override { return false; }
   bool IsInteger() const override { return false; }
   bool IsUnsigned() const override { return true; }
@@ -128,6 +143,10 @@ class PointerType : public BaseType {
                      : std::make_shared<PointerType>(type_, ptr_ - 1);
   }
   TypePtr GetDeconstedType() const override { return nullptr; }
+  TypePtr GetRightValue(bool is_right) override {
+    return std::make_shared<PointerType>(type_->GetRightValue(is_right),
+                                         ptr_);
+  }
 
   bool CanAccept(const TypePtr &type) const override;
   bool CanCastTo(const TypePtr &type) const override;
@@ -143,6 +162,7 @@ class FuncType : public BaseType {
   FuncType(TypePtrList args, TypePtr ret)
       : args_(std::move(args)), ret_(std::move(ret)) {}
 
+  bool IsRightValue() const override { return true; }
   bool IsVoid() const override { return false; }
   bool IsInteger() const override { return false; }
   bool IsUnsigned() const override { return false; }
@@ -152,6 +172,7 @@ class FuncType : public BaseType {
   std::size_t GetSize() const override { return 0; }
   TypePtr GetDerefedType() const override { return nullptr; }
   TypePtr GetDeconstedType() const override { return nullptr; }
+  TypePtr GetRightValue(bool is_right) override { return nullptr; }
 
   bool CanAccept(const TypePtr &type) const override;
   bool CanCastTo(const TypePtr &type) const override;
@@ -163,21 +184,32 @@ class FuncType : public BaseType {
 };
 
 // create a new plain type by type keyword
-inline TypePtr MakePlainType(front::Keyword key) {
+inline TypePtr MakePlainType(front::Keyword key, bool is_right) {
   using namespace front;
   using Type = PlainType::Type;
   switch (key) {
-    case Keyword::Int32: return std::make_shared<PlainType>(Type::Int32);
-    case Keyword::Int8: return std::make_shared<PlainType>(Type::Int8);
-    case Keyword::UInt32: return std::make_shared<PlainType>(Type::UInt32);
-    case Keyword::UInt8: return std::make_shared<PlainType>(Type::UInt8);
-    default: assert(false); return nullptr;
+    case Keyword::Int32: {
+      return std::make_shared<PlainType>(Type::Int32, is_right);
+    }
+    case Keyword::Int8: {
+      return std::make_shared<PlainType>(Type::Int8, is_right);
+    }
+    case Keyword::UInt32: {
+      return std::make_shared<PlainType>(Type::UInt32, is_right);
+    }
+    case Keyword::UInt8: {
+      return std::make_shared<PlainType>(Type::UInt8, is_right);
+    }
+    default: {
+      assert(false);
+      return nullptr;
+    }
   }
 }
 
 // create a new void type
 inline TypePtr MakeVoidType() {
-  return std::make_shared<PlainType>(PlainType::Type::Void);
+  return std::make_shared<PlainType>(PlainType::Type::Void, true);
 }
 
 // check if 2 pointers are compatible
