@@ -1,6 +1,7 @@
 #include "back/tac/builder.h"
 
 #include <cassert>
+#include <cstdint>
 
 using namespace tinylang::front;
 using namespace tinylang::define;
@@ -356,7 +357,10 @@ IRPtr TACBuilder::GenerateNum(unsigned int num) {
 IRPtr TACBuilder::GenerateString(const std::string &str) {
   // create string
   TACPtrList elems;
-  for (const auto &c : str) elems.push_back(std::make_shared<NumberTAC>(c));
+  for (const auto &c : str) {
+    std::int8_t signed_c = c;
+    elems.push_back(std::make_shared<NumberTAC>(signed_c));
+  }
   elems.push_back(std::make_shared<NumberTAC>(0));
   // add data info
   datas_.push_back({std::move(elems), 1});
@@ -364,7 +368,8 @@ IRPtr TACBuilder::GenerateString(const std::string &str) {
 }
 
 IRPtr TACBuilder::GenerateChar(char c) {
-  return MakeTAC(std::make_shared<NumberTAC>(c));
+  std::int8_t signed_c = c;
+  return MakeTAC(std::make_shared<NumberTAC>(signed_c));
 }
 
 IRPtr TACBuilder::GenerateArray(IRPtrList elems) {
