@@ -9,10 +9,20 @@ std::list<PassInfo *> Optimizer::passes_;
 
 void Optimizer::Run() {
   if (!funcs_) return;
+  // traversal all functions
   for (auto &&f : *funcs_) {
-    for (const auto &p : passes_) {
-      if (opt_level_ >= p->min_opt_level()) p->pass()->Run(f.second);
-    }
+    bool changed;
+    do {
+      changed = false;
+      // run all passes on current function
+      for (const auto &p : passes_) {
+        if (opt_level_ >= p->min_opt_level()) {
+          auto ret = p->pass()->Run(f.second);
+          if (!changed && ret) changed = true;
+        }
+      }
+      // do until nothing changed
+    } while (changed);
   }
 }
 
