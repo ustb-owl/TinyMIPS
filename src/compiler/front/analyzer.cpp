@@ -46,13 +46,13 @@ TypePtr Analyzer::AnalyzeFunDef(const std::string &id, TypePtrList args,
     return LogError("identifier has already beed defined", id);
   }
   // create return type
-  auto const_ret = std::move(ret);
-  if (!const_ret->IsConst()) {
-    const_ret = std::make_shared<ConstType>(std::move(const_ret));
+  auto right_ret = std::move(ret);
+  if (!right_ret->IsRightValue()) {
+    right_ret = right_ret->GetRightValue(true);
   }
   // create function symbol
   auto type = std::make_shared<FuncType>(std::move(args),
-                                         std::move(const_ret));
+                                         std::move(right_ret));
   func_env->AddItem(id, std::move(type));
   return MakeVoidType();
 }
@@ -86,6 +86,7 @@ TypePtr Analyzer::AnalyzeControl(Keyword type, const TypePtr &expr) {
         auto type = expr;
         if (!type) type = MakeVoidType();
         // check if is compatible
+        assert(cur_ret_->IsVoid() || !cur_ret_->IsRightValue());
         if (!cur_ret_->CanAccept(type)) {
           return LogError("type mismatch when returning");
         }
@@ -118,11 +119,11 @@ TypePtr Analyzer::AnalyzeVarElem(const std::string &id, TypePtr type,
       return LogError("initializing a vairable with invalid type", id);
     }
     // add symbol info
-    auto deconst_type = init;
-    if (deconst_type->IsConst()) {
-      deconst_type = deconst_type->GetDeconstedType();
+    auto left_type = init;
+    if (left_type->IsRightValue()) {
+      left_type = left_type->GetRightValue(false);
     }
-    env_->AddItem(id, std::move(deconst_type));
+    env_->AddItem(id, std::move(left_type));
   }
   return MakeVoidType();
 }
@@ -148,6 +149,9 @@ TypePtr Analyzer::AnalyzeLetElem(const std::string &id, TypePtr type,
       return LogError("initializing a vairable with 'void' type", id);
     }
     const_type = init;
+    if (const_type->IsRightValue()) {
+      const_type = const_type->GetRightValue(false);
+    }
   }
   // add symbol info
   if (!const_type->IsConst()) {
@@ -158,7 +162,7 @@ TypePtr Analyzer::AnalyzeLetElem(const std::string &id, TypePtr type,
 }
 
 TypePtr Analyzer::AnalyzeType(Keyword type, unsigned int ptr) {
-  auto ret = MakePlainType(type);
+  auto ret = MakePlainType(type, false);
   if (ptr) {
     ret = std::make_shared<PointerType>(std::move(ret), ptr);
   }
@@ -169,7 +173,8 @@ TypePtr Analyzer::AnalyzeArgElem(const std::string &id, TypePtr type) {
   if (env_->GetItem(id, false)) {
     return LogError("duplicated argument name", id);
   }
-  env_->AddItem(id, type);
+  assert(!type->IsRightValue());
+  env_->AddItem(id, std::move(type));
   return type;
 }
 
@@ -199,7 +204,7 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
       else {
         ret = lhs;
       }
-      return ret;
+      return ret->IsRightValue() ? ret : ret->GetRightValue(true);
     }
     // integer operations #2
     case Operator::Mul: case Operator::Div: case Operator::Mod:
@@ -218,7 +223,7 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
       else {
         ret = lhs;
       }
-      return ret;
+      return ret->IsRightValue() ? ret : ret->GetRightValue(true);
     }
     // relational operations
     case Operator::LogicAnd: case Operator::LogicOr: case Operator::Less:
@@ -231,7 +236,7 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
       else if (lhs->IsUnsigned() ^ rhs->IsUnsigned()) {
         return LogError("lhs and rhs must be both signed/unsigned");
       }
-      return MakePlainType(Keyword::UInt32);
+      return MakePlainType(Keyword::UInt32, true);
     }
     // assign operations
     case Operator::Assign: case Operator::AssAdd: case Operator::AssSub:
@@ -255,7 +260,8 @@ TypePtr Analyzer::AnalyzeBinary(Operator op, const TypePtr &lhs,
 
 TypePtr Analyzer::AnalyzeCast(const TypePtr &expr, const TypePtr &type) {
   if (!expr->CanCastTo(type)) return LogError("invalid type casting");
-  return type;
+  assert(!type->IsRightValue());
+  return expr->IsRightValue() ? type->GetRightValue(true) : type;
 }
 
 TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
@@ -264,26 +270,30 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
     case Operator::Add: case Operator::Sub:
     case Operator::Not: {
       if (!opr->IsInteger()) return LogError("expected integer types");
-      return opr;
+      return opr->IsRightValue() ? opr : opr->GetRightValue(true);
     }
     // logic operations
     case Operator::LogicNot: {
       if (!opr->IsInteger() || !opr->IsPointer()) {
         return LogError("expected integer/pointer types");
       }
-      return std::make_shared<ConstType>(MakePlainType(Keyword::UInt32));
+      return std::make_shared<ConstType>(
+          MakePlainType(Keyword::UInt32, true));
     }
     // pointer operations
     case Operator::Mul: {
       if (!opr->IsPointer()) return LogError("expected pointer types");
-      return opr->GetDerefedType();
+      auto deref = opr->GetDerefedType();
+      // dereference operation will make a left value
+      return deref->IsRightValue() ? deref->GetRightValue(false) : deref;
     }
     // get address operations
     case Operator::And: {
-      if (opr->IsVoid() || opr->IsFunction() || opr->IsConst()) {
+      if (opr->IsVoid() || opr->IsFunction() || opr->IsRightValue()) {
         return LogError("invalid 'address-of' operation");
       }
-      return std::make_shared<PointerType>(opr, 1);
+      auto right = opr->IsRightValue() ? opr : opr->GetRightValue(true);
+      return std::make_shared<PointerType>(std::move(right), 1);
     }
     // other
     default: assert(false); return nullptr;
@@ -298,17 +308,17 @@ TypePtr Analyzer::AnalyzeId(const std::string &id) {
 }
 
 TypePtr Analyzer::AnalyzeNum() {
-  return std::make_shared<ConstType>(MakePlainType(Keyword::Int32));
+  return MakePlainType(Keyword::Int32, true);
 }
 
 TypePtr Analyzer::AnalyzeString() {
-  auto char_type = MakePlainType(Keyword::Int8);
+  auto char_type = MakePlainType(Keyword::Int8, true);
   auto str_type = std::make_shared<PointerType>(std::move(char_type), 1);
   return std::make_shared<ConstType>(std::move(str_type));
 }
 
 TypePtr Analyzer::AnalyzeChar() {
-  return std::make_shared<ConstType>(MakePlainType(Keyword::Int8));
+  return MakePlainType(Keyword::Int8, true);
 }
 
 TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
@@ -320,7 +330,7 @@ TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
     }
     // deduce type of array
     if (!deduced) {
-      deduced = i->IsConst() ? i->GetDeconstedType() : i;
+      deduced = i;
     }
     else if (i->IsPointer()) {
       if (!deduced->IsPointer() || !IsPointerCompatible(*deduced, *i)) {
@@ -334,8 +344,11 @@ TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
       deduced = deduced->IsUnsigned() ? deduced : i;
     }
   }
-  // create new type
+  // remove const specifier and make right value
   assert(deduced != nullptr);
+  if (deduced->IsConst()) deduced = deduced->GetDeconstedType();
+  if (!deduced->IsRightValue()) deduced = deduced->GetRightValue(true);
+  // create new type
   auto arr_type = std::make_shared<PointerType>(std::move(deduced), 1);
   return std::make_shared<ConstType>(std::move(arr_type));
 }
@@ -352,5 +365,6 @@ TypePtr Analyzer::AnalyzeIndex(const std::string &id,
   // get dereferenced type
   auto deref = type->GetDerefedType();
   assert(deref != nullptr);
-  return deref;
+  // indexing operation will make a left value
+  return deref->IsRightValue() ? deref->GetRightValue(false) : deref;
 }
