@@ -54,7 +54,7 @@ inline unsigned int DoCalc(UnaryOp op, unsigned int opr) {
 }
 
 // constant folding on TAC IR
-class ConstFoldPass : public PassInterface {
+class ConstFoldPass : public PassBase {
  public:
   ConstFoldPass() {}
 
@@ -70,37 +70,46 @@ class ConstFoldPass : public PassInterface {
     return changed;
   }
 
+  void RunOn(BinaryTAC &tac) override {
+    // get lhs & rhs
+    tac.lhs()->RunPass(*this);
+    auto lhs = last_num_;
+    tac.rhs()->RunPass(*this);
+    auto rhs = last_num_;
+    // do calculation
+    auto ans = DoCalc(tac.op(), lhs, rhs);
+    // create new TAC
+    auto val = std::make_shared<NumberTAC>(ans);
+    last_tac_ = std::make_shared<AssignTAC>(std::move(val), tac.dest());
+  }
+
+  void RunOn(UnaryTAC &tac) override {
+    // get operand
+    tac.opr()->RunPass(*this);
+    auto opr = last_num_;
+    // do calculation
+    auto ans = DoCalc(tac.op(), opr);
+    // create new TAC
+    auto val = std::make_shared<NumberTAC>(ans);
+    last_tac_ = std::make_shared<AssignTAC>(std::move(val), tac.dest());
+  }
+
+  void RunOn(NumberTAC &tac) override {
+    last_num_ = tac.num();
+  }
+
  private:
   TACPtr DoFolding(const TACPtr &tac) {
     if (tac->IsConst()) {
-      auto bin = tac->GetBinaryOp();
-      auto una = tac->GetUnaryOp();
-      if (bin) {
-        // get lhs & rhs
-        auto lhs = tac->GetOperand1()->GetValue();
-        auto rhs = tac->GetOperand2()->GetValue();
-        assert(lhs && rhs);
-        // do calculation
-        auto ans = DoCalc(*bin, *lhs, *rhs);
-        // create new TAC
-        auto dest = tac->GetDest();
-        auto val = std::make_shared<NumberTAC>(ans);
-        return std::make_shared<AssignTAC>(std::move(val), std::move(dest));
-      }
-      else if (una) {
-        // get operand
-        auto opr = tac->GetOperand1()->GetValue();
-        assert(opr);
-        // do calculation
-        auto ans = DoCalc(*una, *opr);
-        // create new TAC
-        auto dest = tac->GetDest();
-        auto val = std::make_shared<NumberTAC>(ans);
-        return std::make_shared<AssignTAC>(std::move(val), std::move(dest));
-      }
+      last_tac_ = nullptr;
+      tac->RunPass(*this);
+      return last_tac_;
     }
     return nullptr;
   }
+
+  TACPtr last_tac_;
+  unsigned int last_num_;
 };
 
 }  // namespace
