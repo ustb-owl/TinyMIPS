@@ -403,8 +403,8 @@ IRPtr TACBuilder::GenerateString(const std::string &str) {
   // create string
   TACPtrList elems;
   for (const auto &c : str) {
-    std::int8_t signed_c = c;
-    elems.push_back(std::make_shared<NumberTAC>(signed_c));
+    std::uint8_t unsigned_c = c;
+    elems.push_back(std::make_shared<NumberTAC>(unsigned_c));
   }
   elems.push_back(std::make_shared<NumberTAC>(0));
   // add data info
@@ -413,8 +413,8 @@ IRPtr TACBuilder::GenerateString(const std::string &str) {
 }
 
 IRPtr TACBuilder::GenerateChar(char c) {
-  std::int8_t signed_c = c;
-  return MakeTAC(std::make_shared<NumberTAC>(signed_c));
+  std::uint8_t unsigned_c = c;
+  return MakeTAC(std::make_shared<NumberTAC>(unsigned_c));
 }
 
 IRPtr TACBuilder::GenerateArray(IRPtrList elems) {
