@@ -1,5 +1,7 @@
 #include "back/tac/ir/tac.h"
 
+#include "back/tac/optimizer.h"
+
 using namespace tinylang::back::tac;
 
 namespace {
@@ -146,58 +148,17 @@ void NumberTAC::Dump(std::ostream &os) {
   os << num_;
 }
 
-void BinaryTAC::RunPass(PassBase &pass) {
-  pass.OptimizeBinary(op_);
-}
-
-void UnaryTAC::RunPass(PassBase &pass) {
-  pass.OptimizeUnary(op_);
-}
-
-void LoadTAC::RunPass(PassBase &pass) {
-  pass.OptimizeLoad(is_unsigned_, size_);
-}
-
-void StoreTAC::RunPass(PassBase &pass) {
-  pass.OptimizeStore(size_);
-}
-
-void JumpTAC::RunPass(PassBase &pass) {
-  pass.OptimizeJump();
-}
-
-void BranchTAC::RunPass(PassBase &pass) {
-  pass.OptimizeBranch();
-}
-
-void CallTAC::RunPass(PassBase &pass) {
-  pass.OptimizeCall();
-}
-
-void ReturnTAC::RunPass(PassBase &pass) {
-  pass.OptimizeReturn();
-}
-
-void AssignTAC::RunPass(PassBase &pass) {
-  pass.OptimizeAssign();
-}
-
-void VarRefTAC::RunPass(PassBase &pass) {
-  pass.OptimizeVarRef(id_);
-}
-
-void DataTAC::RunPass(PassBase &pass) {
-  pass.OptimizeDataRef(id_);
-}
-
-void LabelTAC::RunPass(PassBase &pass) {
-  pass.OptimizeLabel(id_);
-}
-
-void ArgGetTAC::RunPass(PassBase &pass) {
-  pass.OptimizeArgGet(pos_);
-}
-
-void NumberTAC::RunPass(PassBase &pass) {
-  pass.OptimizeNumber(num_);
-}
+void BinaryTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void UnaryTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void LoadTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void StoreTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void JumpTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void BranchTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void CallTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void ReturnTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void AssignTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void VarRefTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void DataTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void LabelTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void ArgGetTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void NumberTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }

@@ -6,15 +6,30 @@
 #include <ostream>
 #include <cstddef>
 
-#include "back/tac/ir/op.h"
-#include "back/tac/optimizer.h"
-
 namespace tinylang::back::tac {
 
 // forward declaration
 class TACBase;
 using TACPtr = std::shared_ptr<TACBase>;
 using TACPtrList = std::vector<TACPtr>;
+
+// forward declaration of pass
+class PassBase;
+
+// binary operators
+enum class BinaryOp {
+  Add, Sub, Mul, UMul, Div, UDiv, Mod, UMod,
+  Equal, NotEqual,
+  Less, ULess, LessEq, ULessEq, Great, UGreat, GreatEq, UGreatEq,
+  LogicAnd, LogicOr,
+  And, Or, Xor, Shl, AShr, LShr,
+};
+
+// unary operators
+enum class UnaryOp {
+  Negate, LogicNot, Not, AddressOf,
+  SExt, ZExt, Trunc,
+};
 
 // base class for all tree-address code
 class TACBase {
@@ -25,15 +40,8 @@ class TACBase {
   virtual void Dump(std::ostream &os) = 0;
   // run optimization on current TAC
   virtual void RunPass(PassBase &pass) = 0;
-
   // return true if current TAC is constant
   virtual bool IsConst() const = 0;
-  // return operand1 of current TAC
-  virtual TACPtr GetOperand1() const = 0;
-  // return operand2 of current TAC
-  virtual TACPtr GetOperand2() const = 0;
-  // return dest of current TAC
-  virtual TACPtr GetDest() const = 0;
 };
 
 // binary operations
@@ -45,13 +53,14 @@ class BinaryTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override {
     return lhs_->IsConst() && rhs_->IsConst();
   }
-  TACPtr GetOperand1() const override { return lhs_; }
-  TACPtr GetOperand2() const override { return rhs_; }
-  TACPtr GetDest() const override { return dest_; }
+
+  BinaryOp op() const { return op_; }
+  const TACPtr &lhs() const { return lhs_; }
+  const TACPtr &rhs() const { return rhs_; }
+  const TACPtr &dest() const { return dest_; }
 
  private:
   BinaryOp op_;
@@ -66,11 +75,11 @@ class UnaryTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return opr_->IsConst(); }
-  TACPtr GetOperand1() const override { return opr_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return dest_; }
+
+  UnaryOp op() const { return op_; }
+  const TACPtr &opr() const { return opr_; }
+  const TACPtr &dest() const { return dest_; }
 
  private:
   UnaryOp op_;
@@ -86,11 +95,12 @@ class LoadTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return addr_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return dest_; }
+
+  const TACPtr &addr() const { return addr_; }
+  const TACPtr &dest() const { return dest_; }
+  bool is_unsigned() const { return is_unsigned_; }
+  std::size_t size() const { return size_; }
 
  private:
   TACPtr addr_, dest_;
@@ -106,11 +116,11 @@ class StoreTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return value_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return addr_; }
+
+  const TACPtr &value() const { return value_; }
+  const TACPtr &addr() const { return addr_; }
+  std::size_t size() const { return size_; }
 
  private:
   TACPtr value_, addr_;
@@ -124,11 +134,9 @@ class JumpTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return dest_; }
+
+  const TACPtr &dest() const { return dest_; }
 
  private:
   TACPtr dest_;
@@ -142,11 +150,10 @@ class BranchTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return cond_->IsConst(); }
-  TACPtr GetOperand1() const override { return cond_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return dest_; }
+
+  const TACPtr &cond() const { return cond_; }
+  const TACPtr &dest() const { return dest_; }
 
  private:
   TACPtr cond_, dest_;
@@ -160,11 +167,11 @@ class CallTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return func_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return dest_; }
+
+  const TACPtr &func() const { return func_; }
+  const TACPtr &dest() const { return dest_; }
+  const TACPtrList &args() const { return args_; }
 
  private:
   TACPtr func_, dest_;
@@ -178,11 +185,9 @@ class ReturnTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return value_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  const TACPtr &value() const { return value_; }
 
  private:
   TACPtr value_;
@@ -196,11 +201,10 @@ class AssignTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return value_->IsConst(); }
-  TACPtr GetOperand1() const override { return value_; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return var_; }
+
+  const TACPtr &value() const { return value_; }
+  const TACPtr &var() const { return var_; }
 
  private:
   TACPtr value_, var_;
@@ -213,11 +217,9 @@ class VarRefTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  std::size_t id() const { return id_; }
 
  private:
   std::size_t id_;
@@ -230,11 +232,9 @@ class DataTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return true; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  std::size_t id() const { return id_; }
 
  private:
   std::size_t id_;
@@ -247,11 +247,9 @@ class LabelTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  std::size_t id() const { return id_; }
 
  private:
   std::size_t id_;
@@ -264,11 +262,9 @@ class ArgGetTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return false; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  std::size_t pos() const { return pos_; }
 
  private:
   std::size_t pos_;
@@ -281,11 +277,9 @@ class NumberTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
-
   bool IsConst() const override { return true; }
-  TACPtr GetOperand1() const override { return nullptr; }
-  TACPtr GetOperand2() const override { return nullptr; }
-  TACPtr GetDest() const override { return nullptr; }
+
+  unsigned int num() const { return num_; }
 
  private:
   unsigned int num_;
