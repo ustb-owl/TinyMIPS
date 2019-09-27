@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 #include <cstddef>
 #include <cassert>
 
@@ -43,6 +44,8 @@ class BaseType {
   virtual bool CanCastTo(const TypePtr &type) const = 0;
   // return the size of current type
   virtual std::size_t GetSize() const = 0;
+  // return the type of arguments of a function call
+  virtual std::optional<TypePtrList> GetArgsType() const = 0;
   // return the return type of a function call
   virtual TypePtr GetReturnType(const TypePtrList &args) const = 0;
   // return the dereferenced type of current type
@@ -77,6 +80,7 @@ class PlainType : public BaseType {
       default: return 0;
     }
   }
+  std::optional<TypePtrList> GetArgsType() const override { return {}; }
   TypePtr GetDerefedType() const override { return nullptr; }
   TypePtr GetDeconstedType() const override { return nullptr; }
   TypePtr GetRightValue(bool is_right) override {
@@ -106,6 +110,7 @@ class ConstType : public BaseType {
   bool IsPointer() const override { return type_->IsPointer(); }
   bool IsFunction() const override { return type_->IsFunction(); }
   std::size_t GetSize() const override { return type_->GetSize(); }
+  std::optional<TypePtrList> GetArgsType() const override { return {}; }
   TypePtr GetDerefedType() const override {
     return type_->GetDerefedType();
   }
@@ -129,7 +134,6 @@ class PointerType : public BaseType {
     assert(ptr > 0);
   }
   
-  // TODO: ???
   bool IsRightValue() const override { return type_->IsRightValue(); }
   bool IsVoid() const override { return false; }
   bool IsInteger() const override { return false; }
@@ -138,6 +142,7 @@ class PointerType : public BaseType {
   bool IsPointer() const override { return true; }
   bool IsFunction() const override { return false; }
   std::size_t GetSize() const override { return kTypeSizeWordLength; }
+  std::optional<TypePtrList> GetArgsType() const override { return {}; }
   TypePtr GetDerefedType() const override {
     return ptr_ == 1 ? type_
                      : std::make_shared<PointerType>(type_, ptr_ - 1);
@@ -170,6 +175,7 @@ class FuncType : public BaseType {
   bool IsPointer() const override { return false; }
   bool IsFunction() const override { return true; }
   std::size_t GetSize() const override { return 0; }
+  std::optional<TypePtrList> GetArgsType() const override { return args_; }
   TypePtr GetDerefedType() const override { return nullptr; }
   TypePtr GetDeconstedType() const override { return nullptr; }
   TypePtr GetRightValue(bool is_right) override { return nullptr; }
