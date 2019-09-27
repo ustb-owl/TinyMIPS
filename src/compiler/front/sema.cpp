@@ -58,7 +58,9 @@ TypePtr FunDefAST::SemaAnalyze(Analyzer &ana) {
     auto body = body_->SemaAnalyze(ana);
     if (!body) return nullptr;
   }
-  return set_type(ret);
+  // set type of function AST to function's type
+  set_type(ana.env()->outer()->GetItem(id_));
+  return ret;
 }
 
 TypePtr FunCallAST::SemaAnalyze(Analyzer &ana) {
@@ -109,7 +111,10 @@ TypePtr VarElemAST::SemaAnalyze(Analyzer &ana) {
     init = init_->SemaAnalyze(ana);
     if (!init) return nullptr;
   }
-  return set_type(ana.AnalyzeVarElem(id_, std::move(type), init));
+  auto ret = ana.AnalyzeVarElem(id_, std::move(type), init);
+  // set type of var element AST to variable's type
+  set_type(ana.env()->GetItem(id_));
+  return ret;
 }
 
 TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
@@ -121,7 +126,10 @@ TypePtr LetElemAST::SemaAnalyze(Analyzer &ana) {
   }
   auto init = init_->SemaAnalyze(ana);
   if (!init) return nullptr;
-  return set_type(ana.AnalyzeLetElem(id_, std::move(type), init));
+  auto ret = ana.AnalyzeLetElem(id_, std::move(type), init);
+  // set type of let element AST to variable's type
+  set_type(ana.env()->GetItem(id_));
+  return ret;
 }
 
 TypePtr TypeAST::SemaAnalyze(Analyzer &ana) {
