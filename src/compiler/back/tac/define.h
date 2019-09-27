@@ -6,6 +6,7 @@
 #include <string>
 #include <cstddef>
 
+#include "define/type.h"
 #include "back/tac/ir/tac.h"
 
 namespace tinylang::back::tac {
@@ -14,6 +15,8 @@ namespace tinylang::back::tac {
 struct FuncInfo {
   // label of current function
   TACPtr label;
+  // type of current function, 'nullptr' if is entry function
+  define::TypePtr type;
   // list of arguments of function
   TACPtrList args;
   // list of variables in function
