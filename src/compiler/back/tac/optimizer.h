@@ -6,21 +6,39 @@
 #include <string_view>
 #include <list>
 #include <ostream>
+#include <cstddef>
 
 #include "back/tac/define.h"
+#include "back/tac/ir/op.h"
 
 namespace tinylang::back::tac {
 
 // interface of function pass
-class PassInterface {
+class PassBase {
  public:
-  virtual ~PassInterface() = default;
+  virtual ~PassBase() = default;
 
   // run on function, return true if function is modified
   virtual bool Run(FuncInfo &func) = 0;
+
+  // visitor methods for running on TAC IRs
+  virtual void OptimizeBinary(BinaryOp op) {}
+  virtual void OptimizeUnary(UnaryOp op) {}
+  virtual void OptimizeLoad(bool is_unsigned, std::size_t size) {}
+  virtual void OptimizeStore(std::size_t size) {}
+  virtual void OptimizeJump() {}
+  virtual void OptimizeBranch() {}
+  virtual void OptimizeCall() {}
+  virtual void OptimizeReturn() {}
+  virtual void OptimizeAssign() {}
+  virtual void OptimizeVarRef(std::size_t id) {}
+  virtual void OptimizeDataRef(std::size_t id) {}
+  virtual void OptimizeLabel(std::size_t id) {}
+  virtual void OptimizeArgGet(std::size_t pos) {}
+  virtual void OptimizeNumber(unsigned int num) {}
 };
 
-using PassPtr = std::unique_ptr<PassInterface>;
+using PassPtr = std::unique_ptr<PassBase>;
 
 // pass info
 class PassInfo {
@@ -28,6 +46,7 @@ class PassInfo {
   PassInfo(std::string_view name, PassPtr pass, unsigned int min_opt_level)
       : name_(name), pass_(std::move(pass)),
         min_opt_level_(min_opt_level) {}
+  virtual ~PassInfo() = default;
 
   const std::string_view name() const { return name_; }
   const PassPtr &pass() const { return pass_; }
