@@ -294,12 +294,12 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
       case Operator::LessEqual: case Operator::Great:
       case Operator::GreatEqual: case Operator::Equal:
       case Operator::NotEqual: {
+        lhs_tac = NewDataCast(lhs_tac, lhs_type, kTypeSizeWordLength);
+        rhs_tac = NewDataCast(rhs_tac, rhs_type, kTypeSizeWordLength);
         if (lhs_type->GetSize() > rhs_type->GetSize()) {
-          rhs_tac = NewDataCast(rhs_tac, rhs_type, lhs_type);
           is_unsigned = lhs_type->IsUnsigned();
         }
         else if (lhs_type->GetSize() < rhs_type->GetSize()) {
-          lhs_tac = NewDataCast(lhs_tac, lhs_type, rhs_type);
           is_unsigned = rhs_type->IsUnsigned();
         }
         else {
