@@ -145,3 +145,59 @@ void ArgGetTAC::Dump(std::ostream &os) {
 void NumberTAC::Dump(std::ostream &os) {
   os << num_;
 }
+
+void BinaryTAC::Optimize(PassBase &pass) {
+  pass.OptimizeBinary(op_);
+}
+
+void UnaryTAC::Optimize(PassBase &pass) {
+  pass.OptimizeUnary(op_);
+}
+
+void LoadTAC::Optimize(PassBase &pass) {
+  pass.OptimizeLoad(is_unsigned_, size_);
+}
+
+void StoreTAC::Optimize(PassBase &pass) {
+  pass.OptimizeStore(size_);
+}
+
+void JumpTAC::Optimize(PassBase &pass) {
+  pass.OptimizeJump();
+}
+
+void BranchTAC::Optimize(PassBase &pass) {
+  pass.OptimizeBranch();
+}
+
+void CallTAC::Optimize(PassBase &pass) {
+  pass.OptimizeCall();
+}
+
+void ReturnTAC::Optimize(PassBase &pass) {
+  pass.OptimizeReturn();
+}
+
+void AssignTAC::Optimize(PassBase &pass) {
+  pass.OptimizeAssign();
+}
+
+void VarRefTAC::Optimize(PassBase &pass) {
+  pass.OptimizeVarRef(id_);
+}
+
+void DataTAC::Optimize(PassBase &pass) {
+  pass.OptimizeDataRef(id_);
+}
+
+void LabelTAC::Optimize(PassBase &pass) {
+  pass.OptimizeLabel(id_);
+}
+
+void ArgGetTAC::Optimize(PassBase &pass) {
+  pass.OptimizeArgGet(pos_);
+}
+
+void NumberTAC::Optimize(PassBase &pass) {
+  pass.OptimizeNumber(num_);
+}

@@ -4,8 +4,10 @@
 #include <memory>
 #include <vector>
 #include <ostream>
-#include <optional>
 #include <cstddef>
+
+#include "back/tac/ir/op.h"
+#include "back/tac/optimizer.h"
 
 namespace tinylang::back::tac {
 
@@ -14,21 +16,6 @@ class TACBase;
 using TACPtr = std::shared_ptr<TACBase>;
 using TACPtrList = std::vector<TACPtr>;
 
-// binary operators
-enum class BinaryOp {
-  Add, Sub, Mul, UMul, Div, UDiv, Mod, UMod,
-  Equal, NotEqual,
-  Less, ULess, LessEq, ULessEq, Great, UGreat, GreatEq, UGreatEq,
-  LogicAnd, LogicOr,
-  And, Or, Xor, Shl, AShr, LShr,
-};
-
-// unary operators
-enum class UnaryOp {
-  Negate, LogicNot, Not, AddressOf,
-  SExt, ZExt, Trunc,
-};
-
 // base class for all tree-address code
 class TACBase {
  public:
@@ -36,23 +23,17 @@ class TACBase {
 
   // dump the content of TAC to output stream
   virtual void Dump(std::ostream &os) = 0;
+  // run optimization on current TAC
+  virtual void Optimize(PassBase &pass) = 0;
 
   // return true if current TAC is constant
   virtual bool IsConst() const = 0;
-  // return constant value in current TAC
-  virtual std::optional<unsigned int> GetValue() const = 0;
-  // return true if current TAC is data ref
-  virtual bool IsDataRef() const = 0;
   // return operand1 of current TAC
   virtual TACPtr GetOperand1() const = 0;
   // return operand2 of current TAC
   virtual TACPtr GetOperand2() const = 0;
   // return dest of current TAC
   virtual TACPtr GetDest() const = 0;
-  // return binary operator of current TAC
-  virtual std::optional<BinaryOp> GetBinaryOp() const = 0;
-  // return unary operator of current TAC
-  virtual std::optional<UnaryOp> GetUnaryOp() const = 0;
 };
 
 // binary operations
@@ -63,17 +44,14 @@ class BinaryTAC : public TACBase {
       : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override {
     return lhs_->IsConst() && rhs_->IsConst();
   }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return lhs_; }
   TACPtr GetOperand2() const override { return rhs_; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return op_; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   BinaryOp op_;
@@ -87,15 +65,12 @@ class UnaryTAC : public TACBase {
       : op_(op), opr_(opr), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return opr_->IsConst(); }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return opr_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return op_; }
 
  private:
   UnaryOp op_;
@@ -110,15 +85,12 @@ class LoadTAC : public TACBase {
       : addr_(addr), dest_(dest), is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return addr_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr addr_, dest_;
@@ -133,15 +105,12 @@ class StoreTAC : public TACBase {
       : value_(value), addr_(addr), size_(size) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return value_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return addr_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr value_, addr_;
@@ -154,15 +123,12 @@ class JumpTAC : public TACBase {
   JumpTAC(const TACPtr &dest) : dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr dest_;
@@ -175,15 +141,12 @@ class BranchTAC : public TACBase {
       : cond_(cond), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return cond_->IsConst(); }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return cond_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr cond_, dest_;
@@ -196,15 +159,12 @@ class CallTAC : public TACBase {
       : func_(func), args_(std::move(args)), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return func_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return dest_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr func_, dest_;
@@ -217,15 +177,12 @@ class ReturnTAC : public TACBase {
   ReturnTAC(const TACPtr &value) : value_(value) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return value_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr value_;
@@ -238,15 +195,12 @@ class AssignTAC : public TACBase {
       : value_(value), var_(var) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return value_->IsConst(); }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return value_; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return var_; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   TACPtr value_, var_;
@@ -258,15 +212,12 @@ class VarRefTAC : public TACBase {
   VarRefTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   std::size_t id_;
@@ -278,15 +229,12 @@ class DataTAC : public TACBase {
   DataTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
-  bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return true; }
+  bool IsConst() const override { return true; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   std::size_t id_;
@@ -298,15 +246,12 @@ class LabelTAC : public TACBase {
   LabelTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   std::size_t id_;
@@ -318,15 +263,12 @@ class ArgGetTAC : public TACBase {
   ArgGetTAC(std::size_t pos) : pos_(pos) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
-  std::optional<unsigned int> GetValue() const override { return {}; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   std::size_t pos_;
@@ -338,15 +280,12 @@ class NumberTAC : public TACBase {
   NumberTAC(unsigned int num) : num_(num) {}
 
   void Dump(std::ostream &os) override;
+  void Optimize(PassBase &pass) override;
 
   bool IsConst() const override { return true; }
-  std::optional<unsigned int> GetValue() const override { return num_; }
-  bool IsDataRef() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
   TACPtr GetOperand2() const override { return nullptr; }
   TACPtr GetDest() const override { return nullptr; }
-  std::optional<BinaryOp> GetBinaryOp() const override { return {}; }
-  std::optional<UnaryOp> GetUnaryOp() const override { return {}; }
 
  private:
   unsigned int num_;
