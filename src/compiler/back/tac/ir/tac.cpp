@@ -7,14 +7,16 @@ namespace {
 const char *kIndent = "  ";
 
 const char *bin_ops[] = {
-  "add", "sub", "mul", "div", "mod",
-  "eql", "neq", "lt", "le", "gt", "ge",
+  "add", "sub", "mul", "umul", "div", "udiv", "mod", "umod",
+  "eql", "neq",
+  "lt", "ult", "le", "ule", "gt", "ugt", "ge", "uge",
   "land", "lor",
   "and", "or", "xor", "shl", "shr",
 };
 
 const char *una_ops[] = {
   "neg", "lnot", "not", "addr",
+  "sext", "zext", "trunc",
 };
 
 bool in_expr = false;
@@ -30,7 +32,6 @@ void BinaryTAC::Dump(std::ostream &os) {
   os << kIndent;
   dest_->Dump(os);
   os << " = " << bin_ops[static_cast<int>(op_)];
-  PrintTypeInfo(os, is_unsigned_, size_);
   os << ' ';
   lhs_->Dump(os);
   os << ", ";
@@ -42,7 +43,6 @@ void UnaryTAC::Dump(std::ostream &os) {
   os << kIndent;
   dest_->Dump(os);
   os << " = " << una_ops[static_cast<int>(op_)];
-  PrintTypeInfo(os, is_unsigned_, size_);
   os << ' ';
   opr_->Dump(os);
   os << std::endl;
