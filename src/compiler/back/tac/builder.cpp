@@ -430,7 +430,7 @@ IRPtr TACBuilder::GenerateArray(IRPtrList elems) {
   std::unordered_map<std::size_t, TACPtr> inits;
   for (std::size_t i = 0; i < elems.size(); ++i) {
     auto tac = TACCast(elems[i]);
-    if (tac->IsConst() || tac->IsDataRef()) {
+    if (tac->IsConst()) {
       arr.push_back(std::move(tac));
     }
     else {
