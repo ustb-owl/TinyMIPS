@@ -15,6 +15,8 @@ IRPtr LetDefAST::GenerateIR(IRBuilder &irb) {
 }
 
 IRPtr FunDefAST::GenerateIR(IRBuilder &irb) {
+  // NOTE: lhs type is type of current function
+  auto guard_opr = irb.SetOprType(type(), nullptr);
   if (body_) {
     // function definition
     auto guard_func = irb.EnterFunction(id_);
@@ -30,7 +32,15 @@ IRPtr FunDefAST::GenerateIR(IRBuilder &irb) {
 
 IRPtr FunCallAST::GenerateIR(IRBuilder &irb) {
   IRPtrList args;
-  for (const auto &i : args_) args.push_back(i->GenerateIR(irb));
+  TypePtrList types;
+  for (const auto &i : args_) {
+    args.push_back(i->GenerateIR(irb));
+    types.push_back(i->type());
+  }
+  // create a pseudo function type to represent 'types'
+  auto pseudo_func = std::make_shared<FuncType>(std::move(types), nullptr);
+  // NOTE: lhs type is type of arguments
+  auto guard_opr = irb.SetOprType(pseudo_func, nullptr);
   return irb.GenerateFunCall(id_, std::move(args));
 }
 
@@ -60,15 +70,20 @@ IRPtr WhileAST::GenerateIR(IRBuilder &irb) {
 }
 
 IRPtr ControlAST::GenerateIR(IRBuilder &irb) {
+  auto guard = irb.SetOprType(expr_ ? expr_->type() : nullptr, nullptr);
   return irb.GenerateControl(type_,
                              expr_ ? expr_->GenerateIR(irb) : nullptr);
 }
 
 IRPtr VarElemAST::GenerateIR(IRBuilder &irb) {
+  // NOTE: lhs type is variable's type, rhs type is initializer's type
+  auto guard = irb.SetOprType(type(), init_ ? init_->type() : nullptr);
   return irb.GenerateVarElem(id_, init_ ? init_->GenerateIR(irb) : nullptr);
 }
 
 IRPtr LetElemAST::GenerateIR(IRBuilder &irb) {
+  // NOTE: lhs type is variable's type, rhs type is initializer's type
+  auto guard = irb.SetOprType(type(), init_->type());
   return irb.GenerateLetElem(id_, init_->GenerateIR(irb));
 }
 
@@ -137,10 +152,17 @@ IRPtr CharAST::GenerateIR(IRBuilder &irb) {
 }
 
 IRPtr ArrayAST::GenerateIR(IRBuilder &irb) {
-  // NOTE: operand type is type of current array (pointer type)
-  auto guard = irb.SetOprType(type(), nullptr);
   IRPtrList elems;
-  for (const auto &i : elems_) elems.push_back(i->GenerateIR(irb));
+  TypePtrList types;
+  for (const auto &i : elems_) {
+    elems.push_back(i->GenerateIR(irb));
+    types.push_back(i->type());
+  }
+  // NOTE: lhs type is array's derefed type, rhs type is elements' type
+  // TODO: a little tricky
+  auto pseudo_func = std::make_shared<FuncType>(std::move(types), nullptr);
+  auto guard = irb.SetOprType(type()->GetDerefedType(),
+                              std::move(pseudo_func));
   return irb.GenerateArray(std::move(elems));
 }
 
