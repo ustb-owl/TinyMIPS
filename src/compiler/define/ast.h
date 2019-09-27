@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <ostream>
+#include <cstdint>
 
 #include "define/type.h"
 #include "front/lexer.h"
@@ -321,7 +322,7 @@ class StringAST : public BaseAST {
 // character value
 class CharAST : public BaseAST {
  public:
-  CharAST(char c) : c_(c) {}
+  CharAST(std::uint8_t c) : c_(c) {}
 
   void Dump(std::ostream &os) override;
   TypePtr SemaAnalyze(front::Analyzer &ana) override;
@@ -329,7 +330,7 @@ class CharAST : public BaseAST {
   bool IsMemAccess() const override { return false; }
 
  private:
-  char c_;
+  std::uint8_t c_;
 };
 
 // array value

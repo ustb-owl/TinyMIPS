@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <string>
+#include <cstdint>
 
 namespace tinylang::front {
 
@@ -16,7 +17,7 @@ enum class Token {
 enum class Keyword {
   // var, let, def, as
   Var, Let, Def, As,
-  // i32, i8, ui32, ui8
+  // i32, i8, u32, u8
   Int32, Int8, UInt32, UInt8,
   // if, else, while
   If, Else, While,
@@ -69,7 +70,7 @@ class Lexer {
   // operators
   Operator op_val() const { return op_val_; }
   // character literals
-  char char_val() const { return char_val_; }
+  std::uint8_t char_val() const { return char_val_; }
   // other characters
   char other_val() const { return other_val_; }
 
@@ -101,7 +102,8 @@ class Lexer {
   unsigned int num_val_;
   Keyword key_val_;
   Operator op_val_;
-  char char_val_, other_val_;
+  std::uint8_t char_val_;
+  char other_val_;
 };
 
 // check if operator is assign ('=', '+=', '-=', ...)

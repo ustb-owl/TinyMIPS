@@ -312,13 +312,13 @@ TypePtr Analyzer::AnalyzeNum() {
 }
 
 TypePtr Analyzer::AnalyzeString() {
-  auto char_type = MakePlainType(Keyword::Int8, true);
+  auto char_type = MakePlainType(Keyword::UInt8, true);
   auto str_type = std::make_shared<PointerType>(std::move(char_type), 1);
   return std::make_shared<ConstType>(std::move(str_type));
 }
 
 TypePtr Analyzer::AnalyzeChar() {
-  return MakePlainType(Keyword::Int8, true);
+  return MakePlainType(Keyword::UInt8, true);
 }
 
 TypePtr Analyzer::AnalyzeArray(const TypePtrList &elems) {
