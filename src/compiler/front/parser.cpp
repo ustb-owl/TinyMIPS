@@ -375,10 +375,13 @@ ASTPtr Parser::ParseFactor() {
     return ParseUnary();
   }
   else if (cur_token_ == Token::Id) {
+    auto line_pos = lexer_.line_pos();
+    auto id = lexer_.id_val();
     // look ahead
     NextToken();
     if (cur_token_ == Token::Id) {
-      return LogError("invalid factor expression");
+      // just an identifier
+      return MakeAST<IdAST>(line_pos, id);
     }
     else if (IsTokenChar('(')) {
       return ParseFunCall();
