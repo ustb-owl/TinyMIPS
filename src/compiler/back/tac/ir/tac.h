@@ -24,7 +24,7 @@ class TACBase {
   // dump the content of TAC to output stream
   virtual void Dump(std::ostream &os) = 0;
   // run optimization on current TAC
-  virtual void Optimize(PassBase &pass) = 0;
+  virtual void RunPass(PassBase &pass) = 0;
 
   // return true if current TAC is constant
   virtual bool IsConst() const = 0;
@@ -44,7 +44,7 @@ class BinaryTAC : public TACBase {
       : op_(op), lhs_(lhs), rhs_(rhs), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override {
     return lhs_->IsConst() && rhs_->IsConst();
@@ -65,7 +65,7 @@ class UnaryTAC : public TACBase {
       : op_(op), opr_(opr), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return opr_->IsConst(); }
   TACPtr GetOperand1() const override { return opr_; }
@@ -85,7 +85,7 @@ class LoadTAC : public TACBase {
       : addr_(addr), dest_(dest), is_unsigned_(is_unsigned), size_(size) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return addr_; }
@@ -105,7 +105,7 @@ class StoreTAC : public TACBase {
       : value_(value), addr_(addr), size_(size) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return value_; }
@@ -123,7 +123,7 @@ class JumpTAC : public TACBase {
   JumpTAC(const TACPtr &dest) : dest_(dest) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
@@ -141,7 +141,7 @@ class BranchTAC : public TACBase {
       : cond_(cond), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return cond_->IsConst(); }
   TACPtr GetOperand1() const override { return cond_; }
@@ -159,7 +159,7 @@ class CallTAC : public TACBase {
       : func_(func), args_(std::move(args)), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return func_; }
@@ -177,7 +177,7 @@ class ReturnTAC : public TACBase {
   ReturnTAC(const TACPtr &value) : value_(value) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return value_; }
@@ -195,7 +195,7 @@ class AssignTAC : public TACBase {
       : value_(value), var_(var) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return value_->IsConst(); }
   TACPtr GetOperand1() const override { return value_; }
@@ -212,7 +212,7 @@ class VarRefTAC : public TACBase {
   VarRefTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
@@ -229,7 +229,7 @@ class DataTAC : public TACBase {
   DataTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return true; }
   TACPtr GetOperand1() const override { return nullptr; }
@@ -246,7 +246,7 @@ class LabelTAC : public TACBase {
   LabelTAC(std::size_t id) : id_(id) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
@@ -263,7 +263,7 @@ class ArgGetTAC : public TACBase {
   ArgGetTAC(std::size_t pos) : pos_(pos) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return false; }
   TACPtr GetOperand1() const override { return nullptr; }
@@ -280,7 +280,7 @@ class NumberTAC : public TACBase {
   NumberTAC(unsigned int num) : num_(num) {}
 
   void Dump(std::ostream &os) override;
-  void Optimize(PassBase &pass) override;
+  void RunPass(PassBase &pass) override;
 
   bool IsConst() const override { return true; }
   TACPtr GetOperand1() const override { return nullptr; }
