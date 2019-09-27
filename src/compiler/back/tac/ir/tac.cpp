@@ -11,7 +11,7 @@ const char *bin_ops[] = {
   "eql", "neq",
   "lt", "ult", "le", "ule", "gt", "ugt", "ge", "uge",
   "land", "lor",
-  "and", "or", "xor", "shl", "shr",
+  "and", "or", "xor", "shl", "ashr", "lshr",
 };
 
 const char *una_ops[] = {

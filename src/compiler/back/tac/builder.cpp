@@ -44,7 +44,9 @@ inline BinaryOp BinaryOperatorCast(Operator op, bool is_unsigned) {
     case Operator::Or: return BinaryOp::Or;
     case Operator::Xor: return BinaryOp::Xor;
     case Operator::Shl: return BinaryOp::Shl;
-    case Operator::Shr: return BinaryOp::Shr;
+    case Operator::Shr: {
+      return is_unsigned ? BinaryOp::LShr : BinaryOp::AShr;
+    }
     default: assert(false); return BinaryOp::Add;
   }
 }
@@ -290,9 +292,8 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
       }
       case Operator::Mul: case Operator::Div: case Operator::Mod:
       case Operator::And: case Operator::Or: case Operator::Xor:
-      case Operator::Shl: case Operator::Shr: case Operator::Less:
-      case Operator::LessEqual: case Operator::Great:
-      case Operator::GreatEqual: case Operator::Equal:
+      case Operator::Shl: case Operator::Less: case Operator::LessEqual:
+      case Operator::Great: case Operator::GreatEqual: case Operator::Equal:
       case Operator::NotEqual: {
         lhs_tac = NewDataCast(lhs_tac, lhs_type, kTypeSizeWordLength);
         rhs_tac = NewDataCast(rhs_tac, rhs_type, kTypeSizeWordLength);
@@ -305,6 +306,12 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
         else {
           is_unsigned = lhs_type->IsUnsigned() || rhs_type->IsUnsigned();
         }
+        break;
+      }
+      case Operator::Shr: {
+        lhs_tac = NewDataCast(lhs_tac, lhs_type, kTypeSizeWordLength);
+        rhs_tac = NewDataCast(rhs_tac, rhs_type, kTypeSizeWordLength);
+        is_unsigned = lhs_type->IsUnsigned();
         break;
       }
       default: assert(false); return nullptr;

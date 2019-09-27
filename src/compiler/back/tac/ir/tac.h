@@ -20,7 +20,7 @@ enum class BinaryOp {
   Equal, NotEqual,
   Less, ULess, LessEq, ULessEq, Great, UGreat, GreatEq, UGreatEq,
   LogicAnd, LogicOr,
-  And, Or, Xor, Shl, Shr,
+  And, Or, Xor, Shl, AShr, LShr,
 };
 
 // unary operators
