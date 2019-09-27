@@ -11,19 +11,33 @@ using namespace tinylang::util;
 
 namespace {
 
-inline BinaryOp BinaryOperatorCast(Operator op) {
+inline BinaryOp BinaryOperatorCast(Operator op, bool is_unsigned) {
   switch (op) {
     case Operator::Add: return BinaryOp::Add;
     case Operator::Sub: return BinaryOp::Sub;
-    case Operator::Mul: return BinaryOp::Mul;
-    case Operator::Div: return BinaryOp::Div;
-    case Operator::Mod: return BinaryOp::Mod;
+    case Operator::Mul: {
+      return is_unsigned ? BinaryOp::UMul : BinaryOp::Mul;
+    }
+    case Operator::Div: {
+      return is_unsigned ? BinaryOp::UDiv : BinaryOp::Div;
+    }
+    case Operator::Mod: {
+      return is_unsigned ? BinaryOp::UMod : BinaryOp::Mod;
+    }
     case Operator::Equal: return BinaryOp::Equal;
     case Operator::NotEqual: return BinaryOp::NotEqual;
-    case Operator::Less: return BinaryOp::Less;
-    case Operator::LessEqual: return BinaryOp::LessEqual;
-    case Operator::Great: return BinaryOp::Great;
-    case Operator::GreatEqual: return BinaryOp::GreatEqual;
+    case Operator::Less: {
+      return is_unsigned ? BinaryOp::ULess : BinaryOp::Less;
+    }
+    case Operator::LessEqual: {
+      return is_unsigned ? BinaryOp::ULessEq : BinaryOp::LessEq;
+    }
+    case Operator::Great: {
+      return is_unsigned ? BinaryOp::UGreat : BinaryOp::Great;
+    }
+    case Operator::GreatEqual: {
+      return is_unsigned ? BinaryOp::UGreatEq : BinaryOp::GreatEq;
+    }
     case Operator::LogicAnd: return BinaryOp::LogicAnd;
     case Operator::LogicOr: return BinaryOp::LogicOr;
     case Operator::And: return BinaryOp::And;
@@ -52,7 +66,8 @@ const char *TACBuilder::kEntryFuncId = "_start";
 
 void TACBuilder::NewFuncInfo(const std::string &id) {
   // insert function info
-  auto result = funcs_.insert({id, {NewLabel(), {}, {}}});
+  const auto &type = opr_types_.top().lhs;
+  auto result = funcs_.insert({id, {NewLabel(), type, {}, {}}});
   assert(result.second);
   // update current function info
   cur_func_ = &result.first->second;
@@ -89,23 +104,55 @@ TACPtr TACBuilder::NewPtrOffset(const TACPtr &offset,
                                 const TypePtr &offset_type,
                                 std::size_t size) {
   auto var = NewTempVar();
+  auto tac = NewDataCast(offset, offset_type, kTypeSizeWordLength);
   AddInst(std::make_shared<BinaryTAC>(
-      BinaryOp::Mul, offset, std::make_shared<NumberTAC>(size),
-      var, offset_type->IsUnsigned(), kTypeSizeWordLength));
+      BinaryOp::Mul, tac, std::make_shared<NumberTAC>(size), var));
   return var;
+}
+
+TACPtr TACBuilder::NewDataCast(const TACPtr &data, const TypePtr &src,
+                               const TypePtr &dest) {
+  return NewDataCast(data, src, dest->GetSize());
+}
+
+TACPtr TACBuilder::NewDataCast(const TACPtr &data, const TypePtr &src,
+                               std::size_t dest) {
+  auto s_size = src->GetSize();
+  if (s_size == dest) {
+    return data;
+  }
+  else if (s_size > dest) {
+    auto var = NewTempVar();
+    AddInst(std::make_shared<UnaryTAC>(UnaryOp::Trunc, data, var));
+    return var;
+  }
+  else {
+    auto var = NewTempVar();
+    auto op = src->IsUnsigned() ? UnaryOp::ZExt : UnaryOp::SExt;
+    AddInst(std::make_shared<UnaryTAC>(op, data, var));
+    return var;
+  }
 }
 
 IRPtr TACBuilder::GenerateFunDecl(const std::string &id) {
   // insert function info
-  auto result = funcs_.insert({id, {NewLabel(), {}, {}}});
+  const auto &type = opr_types_.top().lhs;
+  auto result = funcs_.insert({id, {NewLabel(), type, {}, {}}});
   assert(result.second);
   return nullptr;
 }
 
 IRPtr TACBuilder::GenerateFunCall(const std::string &id, IRPtrList args) {
+  // get type of arguments
+  auto args_type = funcs_[id].type->GetArgsType();
+  auto types = opr_types_.top().lhs->GetArgsType();
+  assert(args_type && types);
   // get argument list
   TACPtrList tac_args;
-  for (const auto &i : args) tac_args.push_back(TACCast(i));
+  for (std::size_t i = 0; i < args.size(); ++i) {
+    auto tac = NewDataCast(TACCast(args[i]), (*types)[i], (*args_type)[i]);
+    tac_args.push_back(std::move(tac));
+  }
   // create function call
   auto dest = NewTempVar();
   AddInst(std::make_shared<CallTAC>(funcs_[id].label, std::move(tac_args),
@@ -144,7 +191,14 @@ IRPtr TACBuilder::GenerateControl(Keyword type, const IRPtr &expr) {
       break;
     }
     case Keyword::Return: {
-      AddInst(std::make_shared<ReturnTAC>(TACCast(expr)));
+      TACPtr ret_val;
+      if (expr) {
+        auto func_arg = cur_func_->type->GetArgsType();
+        auto func_ret = cur_func_->type->GetReturnType(*func_arg);
+        const auto &expr_type = opr_types_.top().lhs;
+        ret_val = NewDataCast(TACCast(expr), expr_type, func_ret);
+      }
+      AddInst(std::make_shared<ReturnTAC>(std::move(ret_val)));
       break;
     }
     default: assert(false); break;
@@ -159,7 +213,11 @@ IRPtr TACBuilder::GenerateVarElem(const std::string &id,
   vars_->AddItem(id, var);
   cur_func_->vars.push_back(var);
   // generate initializer
-  if (init) AddInst(std::make_shared<AssignTAC>(TACCast(init), var));
+  if (init) {
+    const auto &cur = opr_types_.top();
+    auto tac = NewDataCast(TACCast(init), cur.rhs, cur.lhs);
+    AddInst(std::make_shared<AssignTAC>(std::move(tac), var));
+  }
   return nullptr;
 }
 
@@ -171,7 +229,9 @@ IRPtr TACBuilder::GenerateLetElem(const std::string &id,
   cur_func_->vars.push_back(var);
   // generate initializer
   assert(init != nullptr);
-  AddInst(std::make_shared<AssignTAC>(TACCast(init), var));
+  const auto &cur = opr_types_.top();
+  auto tac = NewDataCast(TACCast(init), cur.rhs, cur.lhs);
+  AddInst(std::make_shared<AssignTAC>(std::move(tac), var));
   return nullptr;
 }
 
@@ -193,28 +253,30 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
   const auto &rhs_type = opr_types_.top().rhs;
   if (op == Operator::Assign) {
     // generate assign
-    AddInst(std::make_shared<AssignTAC>(TACCast(rhs), TACCast(lhs)));
+    auto tac = NewDataCast(TACCast(rhs), rhs_type, lhs_type);
+    AddInst(std::make_shared<AssignTAC>(std::move(tac), TACCast(lhs)));
     return nullptr;
   }
   else if (IsOperatorAssign(op)) {
     // generate assign with binary operation
     auto var = TACCast(GenerateBinary(GetDeAssignedOp(op), lhs, rhs));
+    if (lhs_type->GetSize() < rhs_type->GetSize()) {
+      // case: i8 += i32 -> i8 = i8 + i32 -> i8 = trunc i32
+      var = NewDataCast(var, rhs_type, lhs_type);
+    }
     AddInst(std::make_shared<AssignTAC>(std::move(var), TACCast(lhs)));
     return nullptr;
   }
   else {
-    // create lhs, rhs and dest
+    // create lhs, rhs TAC
     auto lhs_tac = TACCast(lhs), rhs_tac = TACCast(rhs);
-    auto var = NewTempVar();
-    // get unsigned flag and result size
+    // get unsigned flag
     bool is_unsigned;
-    std::size_t size;
     switch (op) {
       case Operator::Add: case Operator::Sub: {
         // check if pointer operation
         if (lhs_type->IsPointer() || rhs_type->IsPointer()) {
           is_unsigned = true;
-          size = kTypeSizeWordLength;
           // make new operand (times derefed type's size)
           if (lhs_type->IsPointer()) {
             rhs_tac = NewPtrOffset(rhs_tac, rhs_type, lhs_type);
@@ -232,26 +294,26 @@ IRPtr TACBuilder::GenerateBinary(Operator op, const IRPtr &lhs,
       case Operator::LessEqual: case Operator::Great:
       case Operator::GreatEqual: case Operator::Equal:
       case Operator::NotEqual: {
-        if (lhs_type->GetSize() != rhs_type->GetSize()) {
-          const auto &sel = lhs_type->GetSize() > rhs_type->GetSize()
-                                ? lhs_type
-                                : rhs_type;
-          is_unsigned = sel->IsUnsigned();
-          size = sel->GetSize();
+        if (lhs_type->GetSize() > rhs_type->GetSize()) {
+          rhs_tac = NewDataCast(rhs_tac, rhs_type, lhs_type);
+          is_unsigned = lhs_type->IsUnsigned();
+        }
+        else if (lhs_type->GetSize() < rhs_type->GetSize()) {
+          lhs_tac = NewDataCast(lhs_tac, lhs_type, rhs_type);
+          is_unsigned = rhs_type->IsUnsigned();
         }
         else {
           is_unsigned = lhs_type->IsUnsigned() || rhs_type->IsUnsigned();
-          size = lhs_type->GetSize();
         }
         break;
       }
       default: assert(false); return nullptr;
     }
     // generate binary operation
-    auto bin_op = BinaryOperatorCast(op);
+    auto var = NewTempVar();
+    auto bin_op = BinaryOperatorCast(op, is_unsigned);
     AddInst(std::make_shared<BinaryTAC>(bin_op, std::move(lhs_tac),
-                                        std::move(rhs_tac), var,
-                                        is_unsigned, size));
+                                        std::move(rhs_tac), var));
     return MakeTAC(var);
   }
 }
@@ -322,27 +384,10 @@ IRPtr TACBuilder::GenerateUnary(Operator op, const IRPtr &opr) {
     }
     default:;
   }
-  // create variable
-  auto var = NewTempVar();
-  // get unsigned flag and result size
-  bool is_unsigned;
-  std::size_t size;
-  switch (op) {
-    case Operator::Sub: case Operator::Not: {
-      is_unsigned = type->IsUnsigned();
-      size = type->GetSize();
-      break;
-    }
-    case Operator::LogicNot: case Operator::And: {
-      is_unsigned = true;
-      size = kTypeSizeWordLength;
-      break;
-    }
-    default: assert(false); return nullptr;
-  }
   // generate unary operation
+  auto var = NewTempVar();
   auto una_op = UnaryOperatorCast(op);
-  AddInst(std::make_shared<UnaryTAC>(una_op, tac, var, is_unsigned, size));
+  AddInst(std::make_shared<UnaryTAC>(una_op, tac, var));
   return MakeTAC(var);
 }
 
@@ -375,11 +420,44 @@ IRPtr TACBuilder::GenerateChar(char c) {
 IRPtr TACBuilder::GenerateArray(IRPtrList elems) {
   // create array
   TACPtrList arr;
-  for (const auto &i : elems) arr.push_back(TACCast(i));
+  std::unordered_map<std::size_t, TACPtr> inits;
+  for (std::size_t i = 0; i < elems.size(); ++i) {
+    auto tac = TACCast(elems[i]);
+    if (tac->IsConst() || tac->IsDataRef()) {
+      arr.push_back(std::move(tac));
+    }
+    else {
+      arr.push_back(std::make_shared<NumberTAC>(0));
+      inits.insert({i, std::move(tac)});
+    }
+  }
   // add data info
-  auto size = opr_types_.top().lhs->GetDerefedType()->GetSize();
-  datas_.push_back({std::move(arr), size});
-  return MakeTAC(std::make_shared<DataTAC>(datas_.size() - 1));
+  auto size = opr_types_.top().lhs->GetSize();
+  datas_.push_back({arr, size});
+  auto data = std::make_shared<DataTAC>(datas_.size() - 1);
+  // array initialize
+  if (!inits.empty()) {
+    // create base address variable
+    auto base = NewTempVar();
+    AddInst(std::make_shared<AssignTAC>(data, base));
+    // create initializers
+    std::size_t i = 0;
+    for (const auto &it : inits) {
+      // create address variable
+      auto offset = std::make_shared<NumberTAC>(it.first * size);
+      auto addr = NewTempVar();
+      AddInst(std::make_shared<BinaryTAC>(BinaryOp::Add, base,
+                                          std::move(offset), addr));
+      // create initialization data
+      const auto &types = opr_types_.top().rhs->GetArgsType();
+      assert(types);
+      auto tac = NewDataCast(it.second, (*types)[i++], size);
+      // create store
+      AddInst(std::make_shared<StoreTAC>(std::move(tac), std::move(addr),
+                                         size));
+    }
+  }
+  return MakeTAC(data);
 }
 
 IRPtr TACBuilder::GenerateIndex(const std::string &id, const IRPtr &index) {
@@ -389,9 +467,7 @@ IRPtr TACBuilder::GenerateIndex(const std::string &id, const IRPtr &index) {
   auto offset = NewPtrOffset(TACCast(index), opr_types_.top().rhs, size);
   // generate address
   auto addr = NewTempVar();
-  AddInst(std::make_shared<BinaryTAC>(BinaryOp::Add, base,
-                                      offset, addr, true,
-                                      kTypeSizeWordLength));
+  AddInst(std::make_shared<BinaryTAC>(BinaryOp::Add, base, offset, addr));
   if (store_) {
     // handle store
     AddInst(std::make_shared<StoreTAC>(store_, addr, size));

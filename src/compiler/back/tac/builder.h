@@ -20,6 +20,7 @@ class TACBuilder : public IRBuilderInterface {
  public:
   TACBuilder() : cur_label_id_(0), cur_var_id_(0) {
     // create entry function
+    auto guard = SetOprType(nullptr, nullptr);
     NewFuncInfo(kEntryFuncId);
     entry_func_ = cur_func_;
     // create variable info map
@@ -79,8 +80,8 @@ class TACBuilder : public IRBuilderInterface {
     LabelSecond, LabelEndLogic,
   };
 
-  // type info
-  struct TypeInfo {
+  // type info of operands
+  struct OprTypeInfo {
     define::TypePtr lhs;
     define::TypePtr rhs;
   };
@@ -115,13 +116,19 @@ class TACBuilder : public IRBuilderInterface {
   TACPtr NewPtrOffset(const TACPtr &offset,
                       const define::TypePtr &offset_type,
                       const define::TypePtr &ptr_type);
-  // new pointer offset calculation
+  // new pointer offset calculation (with specific size)
   TACPtr NewPtrOffset(const TACPtr &offset,
                       const define::TypePtr &offset_type,
                       std::size_t ptr_size);
+  // new data casting
+  TACPtr NewDataCast(const TACPtr &data, const define::TypePtr &src,
+                     const define::TypePtr &dest);
+  // new data casting (with specific size)
+  TACPtr NewDataCast(const TACPtr &data, const define::TypePtr &src,
+                     std::size_t dest);
 
   // stack of type of operands
-  std::stack<TypeInfo> opr_types_;
+  std::stack<OprTypeInfo> opr_types_;
   // hash map of function info
   FuncInfoMap funcs_;
   // current function & entry function
