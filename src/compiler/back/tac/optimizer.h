@@ -9,7 +9,7 @@
 #include <cstddef>
 
 #include "back/tac/define.h"
-#include "back/tac/ir/op.h"
+#include "back/tac/ir/tac.h"
 
 namespace tinylang::back::tac {
 
@@ -22,20 +22,20 @@ class PassBase {
   virtual bool Run(FuncInfo &func) = 0;
 
   // visitor methods for running on TAC IRs
-  virtual void OptimizeBinary(BinaryOp op) {}
-  virtual void OptimizeUnary(UnaryOp op) {}
-  virtual void OptimizeLoad(bool is_unsigned, std::size_t size) {}
-  virtual void OptimizeStore(std::size_t size) {}
-  virtual void OptimizeJump() {}
-  virtual void OptimizeBranch() {}
-  virtual void OptimizeCall() {}
-  virtual void OptimizeReturn() {}
-  virtual void OptimizeAssign() {}
-  virtual void OptimizeVarRef(std::size_t id) {}
-  virtual void OptimizeDataRef(std::size_t id) {}
-  virtual void OptimizeLabel(std::size_t id) {}
-  virtual void OptimizeArgGet(std::size_t pos) {}
-  virtual void OptimizeNumber(unsigned int num) {}
+  virtual void RunOn(BinaryTAC &tac) {}
+  virtual void RunOn(UnaryTAC &tac) {}
+  virtual void RunOn(LoadTAC &tac) {}
+  virtual void RunOn(StoreTAC &tac) {}
+  virtual void RunOn(JumpTAC &tac) {}
+  virtual void RunOn(BranchTAC &tac) {}
+  virtual void RunOn(CallTAC &tac) {}
+  virtual void RunOn(ReturnTAC &tac) {}
+  virtual void RunOn(AssignTAC &tac) {}
+  virtual void RunOn(VarRefTAC &tac) {}
+  virtual void RunOn(DataTAC &tac) {}
+  virtual void RunOn(LabelTAC &tac) {}
+  virtual void RunOn(ArgGetTAC &tac) {}
+  virtual void RunOn(NumberTAC &tac) {}
 };
 
 using PassPtr = std::unique_ptr<PassBase>;
