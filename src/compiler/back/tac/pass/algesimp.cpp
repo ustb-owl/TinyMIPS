@@ -1,5 +1,3 @@
-#include <cassert>
-
 #include "back/tac/optimizer.h"
 #include "define/type.h"
 
