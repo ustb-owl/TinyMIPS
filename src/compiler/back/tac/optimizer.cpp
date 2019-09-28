@@ -55,7 +55,7 @@ void Optimizer::ShowInfo(std::ostream &os) {
   if (!count) {
     os << "  <none>" << std::endl;
   }
-  else if (count % 5 != 4) {
+  else if ((count - 1) % 5 != 4) {
     os << std::endl;
   }
 }
