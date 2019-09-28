@@ -57,6 +57,10 @@ class BinaryTAC : public TACBase {
     return lhs_->IsConst() && rhs_->IsConst();
   }
 
+  void set_lhs(const TACPtr &lhs) { lhs_ = lhs; }
+  void set_rhs(const TACPtr &rhs) { rhs_ = rhs; }
+  void set_dest(const TACPtr &dest) { dest_ = dest; }
+
   BinaryOp op() const { return op_; }
   const TACPtr &lhs() const { return lhs_; }
   const TACPtr &rhs() const { return rhs_; }
@@ -76,6 +80,9 @@ class UnaryTAC : public TACBase {
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return opr_->IsConst(); }
+
+  void set_opr(const TACPtr &opr) { opr_ = opr; }
+  void set_dest(const TACPtr &dest) { dest_ = dest; }
 
   UnaryOp op() const { return op_; }
   const TACPtr &opr() const { return opr_; }
@@ -97,6 +104,9 @@ class LoadTAC : public TACBase {
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return false; }
 
+  void set_addr(const TACPtr &addr) { addr_ = addr; }
+  void set_dest(const TACPtr &dest) { dest_ = dest; }
+
   const TACPtr &addr() const { return addr_; }
   const TACPtr &dest() const { return dest_; }
   bool is_unsigned() const { return is_unsigned_; }
@@ -117,6 +127,9 @@ class StoreTAC : public TACBase {
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return false; }
+
+  void set_value(const TACPtr &value) { value_ = value; }
+  void set_addr(const TACPtr &addr) { addr_ = addr; }
 
   const TACPtr &value() const { return value_; }
   const TACPtr &addr() const { return addr_; }
@@ -152,6 +165,8 @@ class BranchTAC : public TACBase {
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return cond_->IsConst(); }
 
+  void set_cond(const TACPtr &cond) { cond_ = cond; }
+
   const TACPtr &cond() const { return cond_; }
   const TACPtr &dest() const { return dest_; }
 
@@ -168,6 +183,8 @@ class CallTAC : public TACBase {
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return false; }
+
+  void set_dest(const TACPtr &dest) { dest_ = dest; }
 
   const TACPtr &func() const { return func_; }
   const TACPtr &dest() const { return dest_; }
@@ -187,6 +204,8 @@ class ReturnTAC : public TACBase {
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return false; }
 
+  void set_value(const TACPtr &value) { value_ = value; }
+
   const TACPtr &value() const { return value_; }
 
  private:
@@ -202,6 +221,8 @@ class AssignTAC : public TACBase {
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
   bool IsConst() const override { return value_->IsConst(); }
+
+  void set_value(const TACPtr &value) { value_ = value; }
 
   const TACPtr &value() const { return value_; }
   const TACPtr &var() const { return var_; }
