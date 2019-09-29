@@ -36,6 +36,17 @@ class PassBase {
   virtual void RunOn(LabelTAC &tac) {}
   virtual void RunOn(ArgGetTAC &tac) {}
   virtual void RunOn(NumberTAC &tac) {}
+
+  void set_cur_var_id(std::size_t *cur_var_id) { cur_var_id_ = cur_var_id; }
+
+ protected:
+  // create a new temporary variable
+  TACPtr NewTempVar() {
+    return std::make_shared<VarRefTAC>((*cur_var_id_)++);
+  }
+
+ private:
+  std::size_t *cur_var_id_;
 };
 
 using PassPtr = std::unique_ptr<PassBase>;
@@ -71,18 +82,21 @@ class Optimizer {
   // show info of optimization
   void ShowInfo(std::ostream &os);
 
-  // set optimization level (0-1)
+  // set optimization level (0-2)
   void set_opt_level(unsigned int opt_level) { opt_level_ = opt_level; }
   // set function info map
   void set_funcs(FuncInfoMap *funcs) { funcs_ = funcs; }
+  // set pointer of current variable ID
+  void set_cur_var_id(std::size_t *cur_var_id) { cur_var_id_ = cur_var_id; }
 
   // get optimization level
   unsigned int opt_level() const { return opt_level_; }
 
  private:
   static std::list<PassInfo *> passes_;
-  FuncInfoMap *funcs_;
   unsigned int opt_level_;
+  FuncInfoMap *funcs_;
+  std::size_t *cur_var_id_;
 };
 
 // helper class for registering a pass

@@ -17,6 +17,7 @@ void Optimizer::Run() {
       // run all passes on current function
       for (const auto &p : passes_) {
         if (opt_level_ >= p->min_opt_level()) {
+          p->pass()->set_cur_var_id(cur_var_id_);
           auto ret = p->pass()->Run(f.second);
           if (!changed && ret) changed = true;
         }
