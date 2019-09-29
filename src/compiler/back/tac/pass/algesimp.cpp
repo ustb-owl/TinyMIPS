@@ -168,8 +168,7 @@ class AlgebraicSimplificationPass : public PassBase {
         SimplifyLHS(op, rhs, dest);
         break;
       }
-      // 0 / x = 0
-      // 0 % x = 0
+      // 0 / x = 0, 0 % x = 0
       // 0 << x = 0, (signed/unsigned) 0 >> x = 0
       case BinaryOp::Div: case BinaryOp::UDiv:
       case BinaryOp::Mod: case BinaryOp::UMod:
