@@ -35,7 +35,7 @@ class DeadCodeEliminationPass : public PassBase {
     insts_.clear();
     // find and mark all eligible TACs
     for (auto &&i : func.irs) i->RunPass(*this);
-    // check & remove
+    // check & remove IRs
     bool changed = false;
     for (auto it = func.irs.begin(); it != func.irs.end();) {
       // find in info map
@@ -49,6 +49,18 @@ class DeadCodeEliminationPass : public PassBase {
           if (!changed) changed = true;
           continue;
         }
+      }
+      ++it;
+    }
+    // check & remove local variables
+    for (auto it = func.vars.begin(); it != func.vars.end();) {
+      // find in vars
+      auto var_it = vars_.find(*it);
+      if (var_it != vars_.end() && !var_it->second) {
+        // remove
+        it = func.vars.erase(it);
+        if (!changed) changed = true;
+        continue;
       }
       ++it;
     }
