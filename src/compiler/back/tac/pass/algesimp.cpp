@@ -148,7 +148,7 @@ class AlgebraicSimplificationPass : public PassBase {
         if (!last_num_) {
           MakeAssign(lhs, dest);
         }
-        else if (last_num_ >= kTypeSizeWordLength) {
+        else if (last_num_ >= kTypeSizeWordLength * 8) {
           MakeAssignZero(dest);
         }
         break;
