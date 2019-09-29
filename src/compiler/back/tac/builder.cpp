@@ -597,5 +597,6 @@ void TACBuilder::Dump(std::ostream &os) {
 
 void TACBuilder::RunOptimization(Optimizer &opt) {
   opt.set_funcs(&funcs_);
+  opt.set_cur_var_id(&cur_var_id_);
   opt.Run();
 }
