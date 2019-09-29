@@ -87,7 +87,7 @@ class Optimizer {
   // set function info map
   void set_funcs(FuncInfoMap *funcs) { funcs_ = funcs; }
   // set pointer of current variable ID
-  void set_cur_var_id(std::size_t *cur_var_id) { cur_var_id_ = cur_var_id; }
+  void set_cur_var_id(std::size_t *cur_var_id);
 
   // get optimization level
   unsigned int opt_level() const { return opt_level_; }
@@ -96,7 +96,6 @@ class Optimizer {
   static std::list<PassInfo *> passes_;
   unsigned int opt_level_;
   FuncInfoMap *funcs_;
-  std::size_t *cur_var_id_;
 };
 
 // helper class for registering a pass

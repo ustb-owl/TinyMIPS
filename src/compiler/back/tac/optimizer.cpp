@@ -17,7 +17,6 @@ void Optimizer::Run() {
       // run all passes on current function
       for (const auto &p : passes_) {
         if (opt_level_ >= p->min_opt_level()) {
-          p->pass()->set_cur_var_id(cur_var_id_);
           auto ret = p->pass()->Run(f.second);
           if (!changed && ret) changed = true;
         }
@@ -58,5 +57,12 @@ void Optimizer::ShowInfo(std::ostream &os) {
   }
   else if ((count - 1) % 5 != 4) {
     os << std::endl;
+  }
+}
+
+void Optimizer::set_cur_var_id(std::size_t *cur_var_id) {
+  // initialize all passes
+  for (const auto &p : passes_) {
+    p->pass()->set_cur_var_id(cur_var_id);
   }
 }
