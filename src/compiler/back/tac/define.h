@@ -20,7 +20,7 @@ struct FuncInfo {
   // list of arguments of function
   TACPtrList args;
   // list of variables in function
-  TACPtrList vars;
+  std::list<TACPtr> vars;
   // list of instructions in function
   // empty if is just a declaration
   std::list<TACPtr> irs;
