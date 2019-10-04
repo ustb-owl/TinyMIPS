@@ -2,6 +2,7 @@
 #define TINYLANG_BACK_TAC_DEFINE_H_
 
 #include <list>
+#include <unordered_set>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@ struct FuncInfo {
   // list of arguments of function
   TACPtrList args;
   // list of variables in function
-  std::list<TACPtr> vars;
+  std::unordered_set<TACPtr> vars;
   // list of instructions in function
   // empty if is just a declaration
   std::list<TACPtr> irs;

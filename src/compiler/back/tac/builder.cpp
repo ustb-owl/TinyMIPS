@@ -213,7 +213,7 @@ IRPtr TACBuilder::GenerateVarElem(const std::string &id,
   auto var = NewTempVar();
   // add variable info
   vars_->AddItem(id, var);
-  cur_func_->vars.push_back(var);
+  cur_func_->vars.insert(var);
   // generate initializer
   if (init) {
     const auto &cur = opr_types_.top();
@@ -228,7 +228,7 @@ IRPtr TACBuilder::GenerateLetElem(const std::string &id,
   auto var = NewTempVar();
   // add variable info
   vars_->AddItem(id, var);
-  cur_func_->vars.push_back(var);
+  cur_func_->vars.insert(var);
   // generate initializer
   assert(init != nullptr);
   const auto &cur = opr_types_.top();
