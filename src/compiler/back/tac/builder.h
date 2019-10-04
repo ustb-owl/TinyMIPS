@@ -144,7 +144,7 @@ class TACBuilder : public IRBuilderInterface {
   // stack of return value in logical expression
   std::stack<TACPtr> logics_;
   // data list
-  std::vector<DataInfo> datas_;
+  DataInfoList datas_;
   // store value (for memory accessing)
   TACPtr store_;
 };

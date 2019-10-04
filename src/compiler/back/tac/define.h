@@ -4,6 +4,7 @@
 #include <list>
 #include <unordered_map>
 #include <string>
+#include <vector>
 #include <cstddef>
 
 #include "define/type.h"
@@ -36,6 +37,9 @@ struct DataInfo {
   // size of element
   std::size_t elem_size;
 };
+
+// data info list
+using DataInfoList = std::vector<DataInfo>;
 
 }  // namespace tinylang::back::tac
 
