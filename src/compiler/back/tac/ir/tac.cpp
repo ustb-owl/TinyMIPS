@@ -1,6 +1,7 @@
 #include "back/tac/ir/tac.h"
 
 #include "back/tac/optimizer.h"
+#include "back/tac/codegen.h"
 
 using namespace tinylang::back::tac;
 
@@ -162,3 +163,18 @@ void DataTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void LabelTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void ArgGetTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void NumberTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+
+void BinaryTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void UnaryTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void LoadTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void StoreTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void JumpTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void BranchTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void CallTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void ReturnTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void AssignTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void VarRefTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void DataTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void LabelTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void ArgGetTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void NumberTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }

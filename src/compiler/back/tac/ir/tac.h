@@ -13,8 +13,9 @@ class TACBase;
 using TACPtr = std::shared_ptr<TACBase>;
 using TACPtrList = std::vector<TACPtr>;
 
-// forward declaration of pass
+// forward declaration of pass & code generator
 class PassBase;
+class CodeGenerator;
 
 // binary operators
 enum class BinaryOp {
@@ -40,6 +41,9 @@ class TACBase {
   virtual void Dump(std::ostream &os) = 0;
   // run optimization on current TAC
   virtual void RunPass(PassBase &pass) = 0;
+  // run code generation on current TAC
+  virtual void GenerateCode(CodeGenerator &gen) = 0;
+
   // return true if current TAC is constant
   virtual bool IsConst() const = 0;
 };
@@ -53,6 +57,8 @@ class BinaryTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override {
     return lhs_->IsConst() && rhs_->IsConst();
   }
@@ -79,6 +85,8 @@ class UnaryTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return opr_->IsConst(); }
 
   void set_opr(const TACPtr &opr) { opr_ = opr; }
@@ -102,6 +110,8 @@ class LoadTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   void set_addr(const TACPtr &addr) { addr_ = addr; }
@@ -126,6 +136,8 @@ class StoreTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   void set_value(const TACPtr &value) { value_ = value; }
@@ -147,6 +159,8 @@ class JumpTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   const TACPtr &dest() const { return dest_; }
@@ -163,6 +177,8 @@ class BranchTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return cond_->IsConst(); }
 
   void set_cond(const TACPtr &cond) { cond_ = cond; }
@@ -182,6 +198,8 @@ class CallTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   void set_dest(const TACPtr &dest) { dest_ = dest; }
@@ -202,6 +220,8 @@ class ReturnTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   void set_value(const TACPtr &value) { value_ = value; }
@@ -220,6 +240,8 @@ class AssignTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return value_->IsConst(); }
 
   void set_value(const TACPtr &value) { value_ = value; }
@@ -238,6 +260,8 @@ class VarRefTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   std::size_t id() const { return id_; }
@@ -253,6 +277,8 @@ class DataTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return true; }
 
   std::size_t id() const { return id_; }
@@ -268,6 +294,8 @@ class LabelTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   std::size_t id() const { return id_; }
@@ -283,6 +311,8 @@ class ArgGetTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return false; }
 
   std::size_t pos() const { return pos_; }
@@ -298,6 +328,8 @@ class NumberTAC : public TACBase {
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
   bool IsConst() const override { return true; }
 
   unsigned int num() const { return num_; }
