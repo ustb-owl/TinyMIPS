@@ -23,8 +23,8 @@ const int op_prec_table[] = {
   0, 0, 0, 0, 0,
 };
 
-template <typename T, typename ...Args>
-inline ASTPtr MakeAST(unsigned int line_pos, Args &&...args) {
+template <typename T, typename... Args>
+inline ASTPtr MakeAST(unsigned int line_pos, Args &&... args) {
   auto ast = std::make_unique<T>(std::forward<Args>(args)...);
   ast->set_line_pos(line_pos);
   return ast;
