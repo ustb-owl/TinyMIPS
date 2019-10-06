@@ -12,8 +12,7 @@ namespace tinylang::back::tac {
 
 class CodeGenerator {
  public:
-  CodeGenerator(FuncInfo &entry, FuncInfoMap &funcs, DataInfoList &datas)
-      : entry_(entry), funcs_(funcs), datas_(datas) {}
+  CodeGenerator() : entry_(nullptr), funcs_(nullptr), datas_(nullptr) {}
 
   // visitor methods
   void GenerateOn(BinaryTAC &tac);
@@ -31,10 +30,17 @@ class CodeGenerator {
   void GenerateOn(ArgGetTAC &tac);
   void GenerateOn(NumberTAC &tac);
 
-  // run generate process
+  // run code generation
   void Generate();
   // dump generated assembly code
   void Dump(std::ostream &os);
+
+  // set entry function's info
+  void set_entry(FuncInfo *entry) { entry_ = entry; }
+  // set function info map
+  void set_funcs(FuncInfoMap *funcs) { funcs_ = funcs; }
+  // set data info list
+  void set_datas(DataInfoList *datas) { datas_ = datas; }
 
  private:
   // generate all global variables
@@ -47,20 +53,20 @@ class CodeGenerator {
   // put global variable name to stream
   void PutGlobalVarName();
   // put data name to stream
-  void PutDataName();
+  void PutDataName(std::size_t id);
   // put label name to stream
-  void PutLabelName();
+  void PutLabelName(std::size_t id);
 
   // function info of entry function
-  FuncInfo &entry_;
+  FuncInfo *entry_;
   // function info map in TAC builder
-  FuncInfoMap &funcs_;
+  FuncInfoMap *funcs_;
   // data info in TAC builder
-  DataInfoList &datas_;
+  DataInfoList *datas_;
   // string stream of generated code
   std::ostringstream code_;
-  // last id
-  std::size_t last_var_id_, last_data_id_, last_label_id_;
+  // last variable id
+  std::size_t last_var_id_;
 };
 
 }  // namespace tinylang::back::tac
