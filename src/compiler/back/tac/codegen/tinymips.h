@@ -29,9 +29,16 @@ enum class TinyMIPSReg : std::uint8_t {
 
 struct TinyMIPSAsm {
   TinyMIPSAsm(TinyMIPSOpcode op) : opcode(op) {}
+  TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest)
+      : opcode(op), dest(dest) {}
   TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, TinyMIPSReg opr1,
               TinyMIPSReg opr2)
       : opcode(op), dest(dest), opr1(opr1), opr2(opr2) {}
+  TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, std::int16_t imm)
+      : opcode(op), dest(dest), imm(imm) {}
+  TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest,
+              const std::string imm_str)
+      : opcode(op), dest(dest), imm_str(imm_str) {}
   TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, TinyMIPSReg opr1,
               std::int16_t imm)
       : opcode(op), dest(dest), opr1(opr1), imm(imm) {}
@@ -69,16 +76,26 @@ struct TinyMIPSAsm {
       case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
       case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
       case Opcode::XOR: case Opcode::SLLV: case Opcode::SRAV:
-      case Opcode::SRLV: case Opcode::JALR: {
+      case Opcode::SRLV: {
         os << reg_str[static_cast<int>(dest)] << ", ";
         os << reg_str[static_cast<int>(opr1)] << ", ";
         os << reg_str[static_cast<int>(opr2)];
         break;
       }
-      case Opcode::ADDIU: case Opcode::LUI: case Opcode::BEQ:
-      case Opcode::BNE: case Opcode::SLL: {
+      case Opcode::ADDIU: case Opcode::BEQ: case Opcode::BNE:
+      case Opcode::SLL: {
         os << reg_str[static_cast<int>(dest)] << ", ";
         os << reg_str[static_cast<int>(opr1)] << ", ";
+        if (!imm_str.empty()) {
+          os << imm_str;
+        }
+        else {
+          os << imm;
+        }
+        break;
+      }
+      case Opcode::LUI: {
+        os << reg_str[static_cast<int>(dest)] << ", ";
         if (!imm_str.empty()) {
           os << imm_str;
         }
@@ -94,6 +111,10 @@ struct TinyMIPSAsm {
         else {
           os << index;
         }
+        break;
+      }
+      case Opcode::JALR: {
+        os << reg_str[static_cast<int>(dest)];
         break;
       }
       case Opcode::LB: case Opcode::LBU: case Opcode::LW:
