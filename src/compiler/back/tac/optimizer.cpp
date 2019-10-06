@@ -11,6 +11,9 @@ void Optimizer::Run() {
   if (!funcs_) return;
   // traverse all functions
   for (auto &&f : *funcs_) {
+    // skip entry function
+    if (!f.second.type) continue;
+    // run passes on current function
     bool changed;
     do {
       changed = false;
