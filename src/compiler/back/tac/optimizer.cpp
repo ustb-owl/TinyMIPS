@@ -9,7 +9,7 @@ std::list<PassInfo *> Optimizer::passes_;
 
 void Optimizer::Run() {
   if (!funcs_) return;
-  // traversal all functions
+  // traverse all functions
   for (auto &&f : *funcs_) {
     bool changed;
     do {
