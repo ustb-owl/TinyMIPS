@@ -600,3 +600,10 @@ void TACBuilder::RunOptimization(Optimizer &opt) {
   opt.set_cur_var_id(&cur_var_id_);
   opt.Run();
 }
+
+void TACBuilder::RunCodeGeneration(CodeGenerator &gen) {
+  gen.set_entry(entry_func_);
+  gen.set_funcs(&funcs_);
+  gen.set_datas(&datas_);
+  gen.Generate();
+}

@@ -12,6 +12,7 @@
 #include "back/tac/define.h"
 #include "back/tac/ir.h"
 #include "back/tac/optimizer.h"
+#include "back/tac/codegen.h"
 #include "util/nested.h"
 
 namespace tinylang::back::tac {
@@ -65,6 +66,8 @@ class TACBuilder : public IRBuilderInterface {
 
   // run TAC optimization
   void RunOptimization(Optimizer &opt);
+  // run code generation
+  void RunCodeGeneration(CodeGenerator &gen);
 
  private:
   // id of entry function
