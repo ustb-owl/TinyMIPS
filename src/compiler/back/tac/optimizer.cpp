@@ -11,8 +11,6 @@ void Optimizer::Run() {
   if (!funcs_) return;
   // traverse all functions
   for (auto &&f : *funcs_) {
-    // skip entry function
-    if (!f.second.type) continue;
     // run passes on current function
     bool changed;
     do {
@@ -67,5 +65,12 @@ void Optimizer::set_cur_var_id(std::size_t *cur_var_id) {
   // initialize all passes
   for (const auto &p : passes_) {
     p->pass()->set_cur_var_id(cur_var_id);
+  }
+}
+
+void Optimizer::set_entry_func(const FuncInfo *entry) {
+  // initialize all passes
+  for (const auto &p : passes_) {
+    p->pass()->set_entry_func(entry);
   }
 }
