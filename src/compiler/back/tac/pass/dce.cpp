@@ -52,17 +52,20 @@ class DeadCodeEliminationPass : public PassBase {
       }
       ++it;
     }
-    // check & remove local variables
-    for (auto it = func.vars.begin(); it != func.vars.end();) {
-      // find in vars
-      auto var_it = vars_.find(*it);
-      if (var_it != vars_.end() && !var_it->second) {
-        // remove
-        it = func.vars.erase(it);
-        if (!changed) changed = true;
-        continue;
+    // check & remove LOCAL variables
+    // NOTE: if 'type' is nullptr, all variables in 'var' is global
+    if (func.type) {
+      for (auto it = func.vars.begin(); it != func.vars.end();) {
+        // find in vars
+        auto var_it = vars_.find(*it);
+        if (var_it != vars_.end() && !var_it->second) {
+          // remove
+          it = func.vars.erase(it);
+          if (!changed) changed = true;
+          continue;
+        }
+        ++it;
       }
-      ++it;
     }
     return changed;
   }
@@ -103,8 +106,11 @@ class DeadCodeEliminationPass : public PassBase {
   }
 
   void RunOn(AssignTAC &tac) override {
-    auto must_remove = tac.var() == tac.value();
-    ADD_DEST(tac, var, must_remove);
+    // all assignments to global variables will be preserved
+    if (!IsGlobalVar(tac.var())) {
+      auto must_remove = tac.var() == tac.value();
+      ADD_DEST(tac, var, must_remove);
+    }
     CHECK_REF_COUNT(tac, value);
   }
 
