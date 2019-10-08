@@ -31,16 +31,10 @@ class VarAllocationPass : public PassBase {
   void RunOn(UnaryTAC &tac) override;
   void RunOn(LoadTAC &tac) override;
   void RunOn(StoreTAC &tac) override;
-  void RunOn(JumpTAC &tac) override;
   void RunOn(BranchTAC &tac) override;
   void RunOn(CallTAC &tac) override;
   void RunOn(ReturnTAC &tac) override;
   void RunOn(AssignTAC &tac) override;
-  void RunOn(VarRefTAC &tac) override;
-  void RunOn(DataTAC &tac) override;
-  void RunOn(LabelTAC &tac) override;
-  void RunOn(ArgGetTAC &tac) override;
-  void RunOn(NumberTAC &tac) override;
 
   // add available register to allocator
   void AddAvailableRegister(TinyMIPSReg reg) { avail_reg_.insert(reg); }

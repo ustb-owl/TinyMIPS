@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <cstdint>
 
 namespace tinylang::back::tac {
@@ -36,19 +37,18 @@ struct TinyMIPSAsm {
       : opcode(op), dest(dest), opr1(opr1), opr2(opr2) {}
   TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, std::int16_t imm)
       : opcode(op), dest(dest), imm(imm) {}
-  TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest,
-              const std::string imm_str)
+  TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, std::string_view imm_str)
       : opcode(op), dest(dest), imm_str(imm_str) {}
   TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, TinyMIPSReg opr1,
               std::int16_t imm)
       : opcode(op), dest(dest), opr1(opr1), imm(imm) {}
   TinyMIPSAsm(TinyMIPSOpcode op, TinyMIPSReg dest, TinyMIPSReg opr1,
-              const std::string imm_str)
+              std::string_view imm_str)
       : opcode(op), dest(dest), opr1(opr1), imm_str(imm_str) {}
   TinyMIPSAsm(TinyMIPSOpcode op, std::uint32_t index)
       : opcode(op), index(index) {}
-  TinyMIPSAsm(TinyMIPSOpcode op, const std::string index_str)
-      : opcode(op), imm_str(imm_str) {}
+  TinyMIPSAsm(TinyMIPSOpcode op, std::string_view index_str)
+      : opcode(op), imm_str(index_str) {}
 
   TinyMIPSOpcode opcode;
   TinyMIPSReg dest, opr1, opr2;
