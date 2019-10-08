@@ -3,16 +3,20 @@
 
 #include <ostream>
 #include <sstream>
+#include <string>
+#include <unordered_map>
 #include <cstddef>
 
 #include "back/tac/ir/tac.h"
 #include "back/tac/define.h"
+#include "back/tac/codegen/tmgen.h"
+#include "back/tac/codegen/varalloc.h"
 
 namespace tinylang::back::tac {
 
 class CodeGenerator {
  public:
-  CodeGenerator() : entry_(nullptr), funcs_(nullptr), datas_(nullptr) {}
+  CodeGenerator();
 
   // visitor methods
   void GenerateOn(BinaryTAC &tac);
@@ -47,15 +51,24 @@ class CodeGenerator {
   void GenerateGlobalVars();
   // generate all arrays
   void GenerateArrayData();
-  // do register allocation
-  void AllocateRegisters(FuncInfo &func);
+  // generate a specific function
+  void GenerateFunc(const std::string &name, const FuncInfo &info);
+  // generate prologue
+  void GeneratePrologue(const FuncInfo &info);
+  // generate epilogue
+  void GenerateEpilogue();
 
-  // put global variable name to stream
-  void PutGlobalVarName();
+  // put variable name to stream
+  std::string GetVarName(std::size_t id);
   // put data name to stream
-  void PutDataName(std::size_t id);
+  std::string GetDataName(std::size_t id);
   // put label name to stream
-  void PutLabelName(std::size_t id);
+  std::string GetLabelName(std::size_t id);
+
+  // get TAC's value
+  TinyMIPSReg GetValue(const TACPtr &tac);
+  // set register's value to TAC
+  void SetValue(const TACPtr &tac, TinyMIPSReg value);
 
   // function info of entry function
   FuncInfo *entry_;
@@ -65,8 +78,18 @@ class CodeGenerator {
   DataInfoList *datas_;
   // string stream of generated code
   std::ostringstream code_;
-  // last variable id
-  std::size_t last_var_id_;
+  // info of all funtion declarations
+  std::unordered_map<TACPtr, std::string> decls_;
+  // assembly code generator of function body
+  TinyMIPSAsmGen asm_gen_;
+  // variable allocator
+  VarAllocationPass var_alloc_;
+  // last TACs
+  VarRefTAC *last_var_;
+  DataTAC *last_data_;
+  LabelTAC *last_label_;
+  ArgGetTAC *last_arg_get_;
+  NumberTAC *last_num_;
 };
 
 }  // namespace tinylang::back::tac
