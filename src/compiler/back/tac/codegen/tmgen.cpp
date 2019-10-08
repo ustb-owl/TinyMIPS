@@ -153,7 +153,7 @@ void TinyMIPSAsmGen::PushNop() {
 }
 
 void TinyMIPSAsmGen::PushMove(Reg dest, Reg src) {
-  PushAsm(Opcode::OR, dest, src, Reg::Zero);
+  if (dest != src) PushAsm(Opcode::OR, dest, src, Reg::Zero);
 }
 
 void TinyMIPSAsmGen::PushLoadImm(Reg dest, std::uint32_t imm) {
