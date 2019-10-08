@@ -79,7 +79,7 @@ class PassInfo {
 // TAC IR optimizer
 class Optimizer {
  public:
-  Optimizer() : funcs_(nullptr), opt_level_(0) {}
+  Optimizer() : opt_level_(0), funcs_(nullptr) {}
 
   // register a new function pass
   static void RegisterPass(PassInfo *info) { passes_.push_back(info); }

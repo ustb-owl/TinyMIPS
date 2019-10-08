@@ -13,7 +13,7 @@ namespace tinylang::front {
 class Analyzer {
  public:
   Analyzer()
-      : env_(define::MakeEnvironment()), error_num_(0), while_count_(0) {}
+      : error_num_(0), while_count_(0), env_(define::MakeEnvironment()) {}
 
   define::TypePtr AnalyzeFunDef(const std::string &id,
                                 define::TypePtrList args,

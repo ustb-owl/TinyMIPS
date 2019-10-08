@@ -194,7 +194,7 @@ class BranchTAC : public TACBase {
 class CallTAC : public TACBase {
  public:
   CallTAC(const TACPtr &func, TACPtrList args, const TACPtr &dest)
-      : func_(func), args_(std::move(args)), dest_(dest) {}
+      : func_(func), dest_(dest), args_(std::move(args)) {}
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
