@@ -25,6 +25,8 @@ class TinyMIPSAsmGen {
 
   // push 'nop' pseudo instruction
   void PushNop();
+  // push a label
+  void PushLabel(std::string_view label);
   // push 'move' pseudo instruction
   void PushMove(TinyMIPSReg dest, TinyMIPSReg src);
   // push 'li' pseudo instruction

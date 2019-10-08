@@ -15,7 +15,7 @@ const char *opcode_str[] = {
   "sll", "sllv", "srav", "srlv",
   "beq", "bne", "jal", "jalr",
   "lb", "lbu", "lw", "sb", "sw",
-  "nop",
+  "nop", "",
 };
 
 const char *reg_str[] = {
@@ -32,7 +32,7 @@ const char *reg_str[] = {
 // dump content of asm to stream
 void DumpAsm(std::ostream &os, const TinyMIPSAsm &tm) {
   os << opcode_str[static_cast<int>(tm.opcode)];
-  if (tm.opcode != Opcode::NOP) os << '\t';
+  if (tm.opcode != Opcode::NOP || tm.opcode != Opcode::LABEL) os << '\t';
   switch (tm.opcode) {
     case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
     case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
@@ -88,6 +88,10 @@ void DumpAsm(std::ostream &os, const TinyMIPSAsm &tm) {
         os << tm.imm;
       }
       os << '(' << reg_str[static_cast<int>(tm.opr1)] << ')';
+      break;
+    }
+    case Opcode::LABEL: {
+      os << tm.imm_str << ':';
       break;
     }
     default:;
@@ -150,6 +154,10 @@ inline bool IsRelated(const TinyMIPSAsm &tm, Reg op) {
 
 void TinyMIPSAsmGen::PushNop() {
   PushAsm(Opcode::NOP);
+}
+
+void TinyMIPSAsmGen::PushLabel(std::string_view label) {
+  PushAsm(Opcode::LABEL, label);
 }
 
 void TinyMIPSAsmGen::PushMove(Reg dest, Reg src) {
@@ -215,7 +223,7 @@ void TinyMIPSAsmGen::PushJump(Reg dest) {
 
 void TinyMIPSAsmGen::Dump(std::ostream &os, std::string_view indent) {
   for (const auto &i : asms_) {
-    os << indent;
+    if (i.opcode != Opcode::LABEL) os << indent;
     DumpAsm(os, i);
     os << std::endl;
   }

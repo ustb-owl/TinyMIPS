@@ -13,7 +13,7 @@ enum class TinyMIPSOpcode : std::uint8_t {
   SLL, SLLV, SRAV, SRLV,
   BEQ, BNE, JAL, JALR,
   LB, LBU, LW, SB, SW,
-  NOP,
+  NOP, LABEL,
 };
 
 enum class TinyMIPSReg : std::uint8_t {
