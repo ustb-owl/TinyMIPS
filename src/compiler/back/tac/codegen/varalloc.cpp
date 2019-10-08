@@ -28,7 +28,7 @@ void VarAllocationPass::Reset() {
   for (const auto &i : avail_reg_) free_reg_.push_back(i);
   occup_slot_.clear();
   cur_pos_ = 0;
-  local_area_size_ = 0;
+  local_slot_count_ = 0;
   max_arg_count_ = 0;
 }
 
@@ -109,7 +109,7 @@ std::size_t VarAllocationPass::GetNewSlot() {
   for (std::size_t slot_id = 0;; ++slot_id) {
     if (occup_slot_.find(slot_id) == occup_slot_.end()) {
       occup_slot_.insert(slot_id);
-      if (slot_id + 1 > local_area_size_) local_area_size_ = slot_id + 1;
+      if (slot_id + 1 > local_slot_count_) local_slot_count_ = slot_id + 1;
       return slot_id;
     }
   }

@@ -68,9 +68,13 @@ class VarAllocationPass : public PassBase {
   }
 
   // size of local area in stack frame
-  std::size_t local_area_size() const { return local_area_size_; }
+  std::size_t local_area_size() const {
+    return ((local_slot_count_ * 4 + 7) / 8) * 8;
+  }
   // size of argument area in stack frame
-  std::size_t max_arg_count() const { return max_arg_count_; }
+  std::size_t arg_area_size() const {
+    return ((max_arg_count_ * 4 + 7) / 8) * 8;
+  }
 
  private:
   struct LiveInterval {
@@ -119,8 +123,8 @@ class VarAllocationPass : public PassBase {
   std::unordered_set<std::size_t> occup_slot_;
   // current position (used for live interval)
   std::size_t cur_pos_;
-  // local area size
-  std::size_t local_area_size_;
+  // slot count in local area
+  std::size_t local_slot_count_;
   // max argument count
   std::size_t max_arg_count_;
 };
