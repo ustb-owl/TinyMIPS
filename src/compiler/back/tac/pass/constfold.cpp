@@ -47,8 +47,7 @@ inline unsigned int DoCalc(UnaryOp op, unsigned int opr) {
     case UnaryOp::LogicNot: return !opr;
     case UnaryOp::Not: return ~opr;
     case UnaryOp::SExt: return static_cast<std::int8_t>(opr);
-    case UnaryOp::ZExt: return opr;
-    case UnaryOp::Trunc: return opr & 0xff;
+    case UnaryOp::ZExt: case UnaryOp::Trunc: return opr & 0xff;
     default: assert(false); return 0;
   }
 }
