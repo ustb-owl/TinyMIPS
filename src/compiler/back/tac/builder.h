@@ -61,7 +61,6 @@ class TACBuilder : public IRBuilderInterface {
   util::Guard EnterLogicRHS(front::Operator op) override;
   util::Guard MarkStore(const IRPtr &value) override;
 
-  void EndGeneration() override;
   void Dump(std::ostream &os) override;
 
   // run TAC optimization

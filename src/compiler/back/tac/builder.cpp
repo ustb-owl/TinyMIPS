@@ -493,7 +493,6 @@ Guard TACBuilder::EnterFunction(const std::string &id) {
   NewFuncInfo(id);
   NewVarMap();
   return Guard([this]{
-    AddInst(std::make_shared<ReturnTAC>(nullptr));
     RestoreFuncInfo();
     RestoreVarMap();
   });
@@ -555,10 +554,6 @@ Guard TACBuilder::EnterLogicRHS(Operator op) {
 Guard TACBuilder::MarkStore(const IRPtr &value) {
   store_ = TACCast(value);
   return Guard([this] { store_ = nullptr; });
-}
-
-void TACBuilder::EndGeneration() {
-  AddInst(std::make_shared<ReturnTAC>(nullptr));
 }
 
 void TACBuilder::Dump(std::ostream &os) {
