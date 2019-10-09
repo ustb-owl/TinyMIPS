@@ -237,6 +237,11 @@ void TinyMIPSAsmGen::PushNop() {
 }
 
 void TinyMIPSAsmGen::PushLabel(std::string_view label) {
+  // remove redundant jumps
+  while (asms_.back().opcode == Opcode::JAL &&
+         asms_.back().imm_str == label) {
+    asms_.pop_back();
+  }
   PushAsm(Opcode::LABEL, label);
 }
 
