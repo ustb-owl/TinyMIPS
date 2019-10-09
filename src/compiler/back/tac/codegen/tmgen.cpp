@@ -6,6 +6,7 @@ using namespace tinylang::back::tac;
 
 namespace {
 
+using Asm = TinyMIPSAsm;
 using Opcode = TinyMIPSOpcode;
 using Reg = TinyMIPSReg;
 
@@ -30,7 +31,7 @@ const char *reg_str[] = {
 };
 
 // dump content of asm to stream
-void DumpAsm(std::ostream &os, const TinyMIPSAsm &tm) {
+void DumpAsm(std::ostream &os, const Asm &tm) {
   os << opcode_str[static_cast<int>(tm.opcode)];
   if (tm.opcode != Opcode::NOP && tm.opcode != Opcode::LABEL) os << '\t';
   switch (tm.opcode) {
@@ -110,7 +111,7 @@ inline bool IsRegRelated(Reg r1, Reg r2) {
 }
 
 // check if registers and asm are related
-inline bool IsRelated(const TinyMIPSAsm &tm, Reg op, Reg dest) {
+inline bool IsRelated(const Asm &tm, Reg op, Reg dest) {
   switch (tm.opcode) {
     case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
     case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
@@ -146,11 +147,74 @@ inline bool IsRelated(const TinyMIPSAsm &tm, Reg op, Reg dest) {
 }
 
 // check if registers and asm are related
-inline bool IsRelated(const TinyMIPSAsm &tm, Reg op) {
+inline bool IsRelated(const Asm &tm, Reg op) {
   return IsRelated(tm, op, Reg::Zero);
 }
 
+// check if instruction and branch are related
+inline bool IsBranchRelated(const Asm &tm, const Asm &branch) {
+  return IsRelated(tm, branch.dest) || IsRelated(tm, branch.opr1);
+}
+
 }  // namespace
+
+void TinyMIPSAsmGen::ReorderJump() {
+  // check if is already reordered
+  if (is_reordered_) return;
+  is_reordered_ = true;
+  // record position and last elements
+  std::size_t pos = 0;
+  auto last = asms_.end(), last2 = asms_.end();
+  // traverse all instructions
+  for (auto it = asms_.begin(); it != asms_.end(); ++it, ++pos) {
+    switch (it->opcode) {
+      case Opcode::BEQ: case Opcode::BNE: {
+        // check if is related
+        if (!pos || (pos && IsBranchRelated(*last, *it)) ||
+            (pos > 1 && IsJump(last2->opcode))) {
+          // insert NOP after branch
+          last = it;
+          it = asms_.insert(++it, {Opcode::NOP});
+        }
+        else {
+          // just swap
+          std::swap(*last, *it);
+        }
+        break;
+      }
+      case Opcode::JAL: {
+        // check if is related
+        if (!pos || (pos > 1 && IsJump(last2->opcode))) {
+          // insert NOP after jump
+          last = it;
+          it = asms_.insert(++it, {Opcode::NOP});
+        }
+        else {
+          // just swap
+          std::swap(*last, *it);
+        }
+        break;
+      }
+      case Opcode::JALR: {
+        if (!pos || (pos && IsRelated(*last, it->dest, Reg::RA)) ||
+            (pos > 1 && IsJump(last2->opcode))) {
+          // insert NOP after jump
+          last = it;
+          it = asms_.insert(++it, {Opcode::NOP});
+        }
+        else {
+          // just swap
+          std::swap(*last, *it);
+        }
+        break;
+      }
+      default:;
+    }
+    // update iterators
+    last2 = last;
+    last = it;
+  }
+}
 
 void TinyMIPSAsmGen::PushNop() {
   PushAsm(Opcode::NOP);
@@ -188,41 +252,18 @@ void TinyMIPSAsmGen::PushLoadImm(Reg dest, std::string_view imm_str) {
 
 void TinyMIPSAsmGen::PushBranch(Reg cond, std::string_view label) {
   PushAsm(Opcode::BNE, cond, Reg::Zero, label);
-  if (asms_.size() <= 1 ||
-      (asms_.size() > 1 && IsRelated(asms_[asms_.size() - 2], cond)) ||
-      (asms_.size() > 2 && IsJump(asms_[asms_.size() - 3].opcode))) {
-    PushNop();
-  }
-  else {
-    std::swap(asms_[asms_.size() - 2], asms_.back());
-  }
 }
 
 void TinyMIPSAsmGen::PushJump(std::string_view label) {
   PushAsm(Opcode::JAL, label);
-  if (asms_.size() <= 1 ||
-      (asms_.size() > 2 && IsJump(asms_[asms_.size() - 3].opcode))) {
-    PushNop();
-  }
-  else {
-    std::swap(asms_[asms_.size() - 2], asms_.back());
-  }
 }
 
 void TinyMIPSAsmGen::PushJump(Reg dest) {
   PushAsm(Opcode::JALR, dest);
-  if (asms_.size() <= 1 ||
-      (asms_.size() > 1 &&
-       IsRelated(asms_[asms_.size() - 2], dest, Reg::RA)) ||
-      (asms_.size() > 2 && IsJump(asms_[asms_.size() - 3].opcode))) {
-    PushNop();
-  }
-  else {
-    std::swap(asms_[asms_.size() - 2], asms_.back());
-  }
 }
 
 void TinyMIPSAsmGen::Dump(std::ostream &os, std::string_view indent) {
+  ReorderJump();
   for (const auto &i : asms_) {
     if (i.opcode != Opcode::LABEL) os << indent;
     DumpAsm(os, i);

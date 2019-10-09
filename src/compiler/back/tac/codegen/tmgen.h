@@ -2,7 +2,7 @@
 #define TINYLANG_BACK_TAC_CODEGEN_TMGEN_H_
 
 #include <ostream>
-#include <vector>
+#include <list>
 #include <utility>
 #include <string_view>
 
@@ -15,7 +15,10 @@ class TinyMIPSAsmGen {
   TinyMIPSAsmGen() { Reset(); }
 
   // reset internal state
-  void Reset() { asms_.clear(); }
+  void Reset() {
+    asms_.clear();
+    is_reordered_ = false;
+  }
 
   // push a new assembly
   template <typename... Args>
@@ -43,7 +46,11 @@ class TinyMIPSAsmGen {
   void Dump(std::ostream &os, std::string_view indent);
 
  private:
-  std::vector<TinyMIPSAsm> asms_;
+  // reorder all jumps (make delay slots)
+  void ReorderJump();
+
+  std::list<TinyMIPSAsm> asms_;
+  bool is_reordered_;
 };
 
 }  // namespace tinylang::back::tac
