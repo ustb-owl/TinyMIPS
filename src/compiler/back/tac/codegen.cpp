@@ -577,12 +577,20 @@ void CodeGenerator::GenerateOn(BranchTAC &tac) {
 }
 
 void CodeGenerator::GenerateOn(CallTAC &tac) {
-  // generate label
-  last_label_ = nullptr;
-  tac.func()->GenerateCode(*this);
-  // generate function call
-  asm_gen_.PushJump(GetLabelName(last_label_->id()));
-  last_label_ = nullptr;
+  // check if label is an external function
+  auto it = decls_.find(tac.func());
+  if (it != decls_.end()) {
+    // calling an external function
+    asm_gen_.PushJump(it->second);
+  }
+  else {
+    // generate label
+    last_label_ = nullptr;
+    tac.func()->GenerateCode(*this);
+    // generate function call
+    asm_gen_.PushJump(GetLabelName(last_label_->id()));
+    last_label_ = nullptr;
+  }
   // set return value
   SetValue(tac.dest(), Reg::V0);
 }
