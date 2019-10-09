@@ -107,7 +107,7 @@ class DeadCodeEliminationPass : public PassBase {
 
   void RunOn(AssignTAC &tac) override {
     // all assignments to global variables will be preserved
-    if (!IsGlobalVar(tac.var())) {
+    if (!IsGlobalVar(tac.var()) || tac.var() == tac.value()) {
       auto must_remove = tac.var() == tac.value();
       ADD_DEST(tac, var, must_remove);
     }
