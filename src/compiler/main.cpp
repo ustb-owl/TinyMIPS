@@ -33,10 +33,11 @@ int main(int argc, const char *argv[]) {
   opt.set_opt_level(argc >= 3 ? atoi(argv[2]) : 1);
   opt.ShowInfo(cerr);
   irb.RunOptimization(opt);
+  // cerr << std::endl;
+  // irb.Dump(cerr);
   // generate code
-  irb.Dump(cout);
-  // CodeGenerator gen;
-  // irb.RunCodeGeneration(gen);
-  // gen.Dump(cout);
+  CodeGenerator gen;
+  irb.RunCodeGeneration(gen);
+  gen.Dump(cout);
   return 0;
 }

@@ -40,7 +40,10 @@ class CodeGenerator {
   void Dump(std::ostream &os);
 
   // set entry function's info
-  void set_entry(FuncInfo *entry) { entry_ = entry; }
+  void set_entry(FuncInfo *entry) {
+    entry_ = entry;
+    var_alloc_.set_entry_func(entry);
+  }
   // set function info map
   void set_funcs(FuncInfoMap *funcs) { funcs_ = funcs; }
   // set data info list
@@ -64,6 +67,10 @@ class CodeGenerator {
   std::string GetDataName(std::size_t id);
   // put label name to stream
   std::string GetLabelName(std::size_t id);
+  // get current epilogue label and switch to next
+  std::string NextEpilogueLabel();
+  // get current epilogue label
+  std::string GetEpilogueLabel();
 
   // get TAC's value
   TinyMIPSReg GetValue(const TACPtr &tac);
@@ -90,6 +97,8 @@ class CodeGenerator {
   LabelTAC *last_label_;
   ArgGetTAC *last_arg_get_;
   NumberTAC *last_num_;
+  // id of epilogue label
+  std::size_t epilogue_id_;
 };
 
 }  // namespace tinylang::back::tac

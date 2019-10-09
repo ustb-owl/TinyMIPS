@@ -36,7 +36,10 @@ using Opcode = TinyMIPSOpcode;
 using Reg = TinyMIPSReg;
 
 const char *kIndent = "\t";
-const char *kEpilogueLabel = "_epilogue";
+const char *kVarLabel = "_var_";
+const char *kDataLabel = "_data_";
+const char *kLabelLabel = "_label_";
+const char *kEpilogueLabel = "_epilogue_";
 const char *kMul = "_std_mul";
 const char *kDiv = "_std_div";
 const char *kMod = "_std_mod";
@@ -55,6 +58,7 @@ void CodeGenerator::GenerateGlobalVars() {
     code_ << kIndent << ".comm\t" << GetVarName(last_var_->id());
     code_ << ", 4, 4" << std::endl;
   }
+  code_ << std::endl;
 }
 
 void CodeGenerator::GenerateArrayData() {
@@ -100,6 +104,7 @@ void CodeGenerator::GenerateArrayData() {
       code_ << std::endl;
     }
   }
+  code_ << std::endl;
 }
 
 void CodeGenerator::GenerateFunc(const std::string &name,
@@ -138,6 +143,7 @@ void CodeGenerator::GenerateFunc(const std::string &name,
   asm_gen_.Dump(code_, kIndent);
   // generate end
   code_ << kIndent << ".end\t" << name << std::endl;
+  code_ << std::endl;
 }
 
 void CodeGenerator::GeneratePrologue(const FuncInfo &info) {
@@ -163,7 +169,7 @@ void CodeGenerator::GenerateEpilogue() {
   auto args_size = var_alloc_.arg_area_size();
   auto frame_size = 8 + local_size + args_size;
   // generate label
-  asm_gen_.PushLabel(kEpilogueLabel);
+  asm_gen_.PushLabel(NextEpilogueLabel());
   // restore stack pointer
   asm_gen_.PushMove(Reg::SP, Reg::FP);
   // restore return address and frame pointer
@@ -176,15 +182,23 @@ void CodeGenerator::GenerateEpilogue() {
 }
 
 std::string CodeGenerator::GetVarName(std::size_t id) {
-  return "_var_" + std::to_string(id);
+  return kVarLabel + std::to_string(id);
 }
 
 std::string CodeGenerator::GetDataName(std::size_t id) {
-  return "_data_" + std::to_string(id);
+  return kDataLabel + std::to_string(id);
 }
 
 std::string CodeGenerator::GetLabelName(std::size_t id) {
-  return "_label_" + std::to_string(id);
+  return kLabelLabel + std::to_string(id);
+}
+
+std::string CodeGenerator::NextEpilogueLabel() {
+  return kEpilogueLabel + std::to_string(epilogue_id_++);
+}
+
+std::string CodeGenerator::GetEpilogueLabel() {
+  return kEpilogueLabel + std::to_string(epilogue_id_);
 }
 
 Reg CodeGenerator::GetValue(const TACPtr &tac) {
@@ -291,6 +305,7 @@ CodeGenerator::CodeGenerator() {
   entry_ = nullptr;
   funcs_ = nullptr;
   datas_ = nullptr;
+  epilogue_id_ = 0;
   // add avaliable registers to allocator
   var_alloc_.AddAvailableRegister(Reg::T0);
   var_alloc_.AddAvailableRegister(Reg::T1);
@@ -306,7 +321,12 @@ CodeGenerator::CodeGenerator() {
 
 void CodeGenerator::GenerateOn(BinaryTAC &tac) {
   // get lhs & rhs
-  auto lhs = GetValue(tac.lhs()), rhs = GetValue(tac.rhs());
+  auto lhs = GetValue(tac.lhs());
+  if (lhs == Reg::V0) {
+    asm_gen_.PushMove(Reg::V1, lhs);
+    lhs = Reg::V1;
+  }
+  auto rhs = GetValue(tac.rhs());
   // generate operation
   switch (tac.op()) {
     case BinaryOp::Add: {
@@ -542,6 +562,7 @@ void CodeGenerator::GenerateOn(JumpTAC &tac) {
   tac.dest()->GenerateCode(*this);
   // generate jump
   asm_gen_.PushJump(GetLabelName(last_label_->id()));
+  last_label_ = nullptr;
 }
 
 void CodeGenerator::GenerateOn(BranchTAC &tac) {
@@ -552,6 +573,7 @@ void CodeGenerator::GenerateOn(BranchTAC &tac) {
   tac.dest()->GenerateCode(*this);
   // generate branch
   asm_gen_.PushBranch(cond, GetLabelName(last_label_->id()));
+  last_label_ = nullptr;
 }
 
 void CodeGenerator::GenerateOn(CallTAC &tac) {
@@ -560,6 +582,7 @@ void CodeGenerator::GenerateOn(CallTAC &tac) {
   tac.func()->GenerateCode(*this);
   // generate function call
   asm_gen_.PushJump(GetLabelName(last_label_->id()));
+  last_label_ = nullptr;
   // set return value
   SetValue(tac.dest(), Reg::V0);
 }
@@ -571,7 +594,7 @@ void CodeGenerator::GenerateOn(ReturnTAC &tac) {
     asm_gen_.PushMove(Reg::V0, value);
   }
   // generate return
-  asm_gen_.PushJump(kEpilogueLabel);
+  asm_gen_.PushJump(GetEpilogueLabel());
 }
 
 void CodeGenerator::GenerateOn(AssignTAC &tac) {
@@ -586,6 +609,7 @@ void CodeGenerator::GenerateOn(ArgGetTAC &tac) { last_arg_get_ = &tac; }
 void CodeGenerator::GenerateOn(NumberTAC &tac) { last_num_ = &tac; }
 
 void CodeGenerator::Generate() {
+  code_ << kIndent << ".abicalls" << std::endl;
   // generate global variables & arrays
   GenerateGlobalVars();
   GenerateArrayData();

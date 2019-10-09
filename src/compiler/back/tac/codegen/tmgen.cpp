@@ -32,7 +32,7 @@ const char *reg_str[] = {
 // dump content of asm to stream
 void DumpAsm(std::ostream &os, const TinyMIPSAsm &tm) {
   os << opcode_str[static_cast<int>(tm.opcode)];
-  if (tm.opcode != Opcode::NOP || tm.opcode != Opcode::LABEL) os << '\t';
+  if (tm.opcode != Opcode::NOP && tm.opcode != Opcode::LABEL) os << '\t';
   switch (tm.opcode) {
     case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
     case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
@@ -161,6 +161,7 @@ void TinyMIPSAsmGen::PushLabel(std::string_view label) {
 }
 
 void TinyMIPSAsmGen::PushMove(Reg dest, Reg src) {
+  // TODO: pseudo instruction optimization
   if (dest != src) PushAsm(Opcode::OR, dest, src, Reg::Zero);
 }
 
