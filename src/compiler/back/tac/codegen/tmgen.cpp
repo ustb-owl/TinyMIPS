@@ -30,10 +30,83 @@ const char *reg_str[] = {
   "$gp", "$sp", "$fp", "$ra",
 };
 
+// check if instruction is pseudo instruction
+inline bool IsPseudo(const Asm &tm) {
+  return static_cast<int>(tm.opcode) >= static_cast<int>(Opcode::NOP);
+}
+
+// check if instruction is jump or branch
+inline bool IsJump(const Asm &tm) {
+  const auto &op = tm.opcode;
+  return op == Opcode::BEQ || op == Opcode::BNE || op == Opcode::JAL ||
+         op == Opcode::JALR;
+}
+
+// check if instruction is store
+inline bool IsStore(const Asm &tm) {
+  return tm.opcode == Opcode::SB || tm.opcode == Opcode::SW;
+}
+
+// check if current instruction has dest
+inline bool HasDest(const Asm &tm) {
+  return !IsPseudo(tm) && !IsJump(tm) && !IsStore(tm);
+}
+
+// check if two registers are related
+inline bool IsRegRelated(Reg r1, Reg r2) {
+  return r1 != Reg::Zero && r1 == r2;
+}
+
+// check if registers and asm are related
+inline bool IsRelated(const Asm &tm, Reg op, Reg dest) {
+  switch (tm.opcode) {
+    case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
+    case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
+    case Opcode::XOR: case Opcode::SLLV: case Opcode::SRAV:
+    case Opcode::SRLV: {
+      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1) ||
+             IsRegRelated(dest, tm.opr2);
+    }
+    case Opcode::ADDIU: case Opcode::SLL: {
+      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1);
+    }
+    case Opcode::BEQ: case Opcode::BNE: {
+      return IsRegRelated(dest, tm.opr1) || IsRegRelated(dest, tm.opr2);
+    }
+    case Opcode::LUI: {
+      return IsRegRelated(tm.dest, op);
+    }
+    case Opcode::JAL: {
+      return IsRegRelated(Reg::RA, op);
+    }
+    case Opcode::JALR: {
+      return IsRegRelated(Reg::RA, op) || IsRegRelated(dest, tm.dest);
+    }
+    case Opcode::LB: case Opcode::LBU: case Opcode::LW: {
+      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1);
+    }
+    case Opcode::SB: case Opcode::SW: {
+      return IsRegRelated(dest, tm.dest) || IsRegRelated(dest, tm.opr1);
+    }
+    default:;
+  }
+  return false;
+}
+
+// check if registers and asm are related
+inline bool IsRelated(const Asm &tm, Reg op) {
+  return IsRelated(tm, op, Reg::Zero);
+}
+
+// check if instruction and branch are related
+inline bool IsBranchRelated(const Asm &tm, const Asm &branch) {
+  return IsRelated(tm, branch.dest) || IsRelated(tm, branch.opr1);
+}
+
 // dump content of asm to stream
 void DumpAsm(std::ostream &os, const Asm &tm) {
   os << opcode_str[static_cast<int>(tm.opcode)];
-  if (tm.opcode != Opcode::NOP && tm.opcode != Opcode::LABEL) os << '\t';
+  if (!IsPseudo(tm)) os << '\t';
   switch (tm.opcode) {
     case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
     case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
@@ -99,63 +172,6 @@ void DumpAsm(std::ostream &os, const Asm &tm) {
   }
 }
 
-// check if opcode is jump or branch
-inline bool IsJump(TinyMIPSOpcode op) {
-  return op == Opcode::BEQ || op == Opcode::BNE || op == Opcode::JAL ||
-         op == Opcode::JALR;
-}
-
-// check if two registers are related
-inline bool IsRegRelated(Reg r1, Reg r2) {
-  return r1 != Reg::Zero && r1 == r2;
-}
-
-// check if registers and asm are related
-inline bool IsRelated(const Asm &tm, Reg op, Reg dest) {
-  switch (tm.opcode) {
-    case Opcode::ADDU: case Opcode::SUBU: case Opcode::SLT:
-    case Opcode::SLTU: case Opcode::AND: case Opcode::OR:
-    case Opcode::XOR: case Opcode::SLLV: case Opcode::SRAV:
-    case Opcode::SRLV: {
-      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1) ||
-             IsRegRelated(dest, tm.opr2);
-    }
-    case Opcode::ADDIU: case Opcode::SLL: {
-      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1);
-    }
-    case Opcode::BEQ: case Opcode::BNE: {
-      return IsRegRelated(dest, tm.opr1) || IsRegRelated(dest, tm.opr2);
-    }
-    case Opcode::LUI: {
-      return IsRegRelated(tm.dest, op);
-    }
-    case Opcode::JAL: {
-      return IsRegRelated(Reg::RA, op);
-    }
-    case Opcode::JALR: {
-      return IsRegRelated(Reg::RA, op) || IsRegRelated(dest, tm.dest);
-    }
-    case Opcode::LB: case Opcode::LBU: case Opcode::LW: {
-      return IsRegRelated(tm.dest, op) || IsRegRelated(dest, tm.opr1);
-    }
-    case Opcode::SB: case Opcode::SW: {
-      return IsRegRelated(dest, tm.dest) || IsRegRelated(dest, tm.opr1);
-    }
-    default:;
-  }
-  return false;
-}
-
-// check if registers and asm are related
-inline bool IsRelated(const Asm &tm, Reg op) {
-  return IsRelated(tm, op, Reg::Zero);
-}
-
-// check if instruction and branch are related
-inline bool IsBranchRelated(const Asm &tm, const Asm &branch) {
-  return IsRelated(tm, branch.dest) || IsRelated(tm, branch.opr1);
-}
-
 }  // namespace
 
 void TinyMIPSAsmGen::ReorderJump() {
@@ -171,7 +187,7 @@ void TinyMIPSAsmGen::ReorderJump() {
       case Opcode::BEQ: case Opcode::BNE: {
         // check if is related
         if (!pos || (pos && IsBranchRelated(*last, *it)) ||
-            (pos > 1 && IsJump(last2->opcode))) {
+            (pos > 1 && IsJump(*last2))) {
           // insert NOP after branch
           last = it;
           it = asms_.insert(++it, {Opcode::NOP});
@@ -184,7 +200,7 @@ void TinyMIPSAsmGen::ReorderJump() {
       }
       case Opcode::JAL: {
         // check if is related
-        if (!pos || (pos > 1 && IsJump(last2->opcode))) {
+        if (!pos || (pos > 1 && IsJump(*last2))) {
           // insert NOP after jump
           last = it;
           it = asms_.insert(++it, {Opcode::NOP});
@@ -197,7 +213,7 @@ void TinyMIPSAsmGen::ReorderJump() {
       }
       case Opcode::JALR: {
         if (!pos || (pos && IsRelated(*last, it->dest, Reg::RA)) ||
-            (pos > 1 && IsJump(last2->opcode))) {
+            (pos > 1 && IsJump(*last2))) {
           // insert NOP after jump
           last = it;
           it = asms_.insert(++it, {Opcode::NOP});
@@ -225,8 +241,15 @@ void TinyMIPSAsmGen::PushLabel(std::string_view label) {
 }
 
 void TinyMIPSAsmGen::PushMove(Reg dest, Reg src) {
-  // TODO: pseudo instruction optimization
-  if (dest != src) PushAsm(Opcode::OR, dest, src, Reg::Zero);
+  // do not generate redundant move
+  if (dest == src) return;
+  // try to modify the dest of last instruction
+  if (HasDest(asms_.back()) && asms_.back().dest == src) {
+    asms_.back().dest = dest;
+  }
+  else {
+    PushAsm(Opcode::OR, dest, src, Reg::Zero);
+  }
 }
 
 void TinyMIPSAsmGen::PushLoadImm(Reg dest, std::uint32_t imm) {
