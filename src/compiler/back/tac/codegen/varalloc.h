@@ -2,7 +2,6 @@
 #define TINYMIPS_BACK_TAC_CODEGEN_VARALLOC_H_
 
 #include <variant>
-#include <optional>
 #include <map>
 #include <unordered_map>
 #include <vector>
@@ -31,6 +30,7 @@ class VarAllocationPass : public PassBase {
   void RunOn(UnaryTAC &tac) override;
   void RunOn(LoadTAC &tac) override;
   void RunOn(StoreTAC &tac) override;
+  void RunOn(ArgSetTAC &tac) override;
   void RunOn(BranchTAC &tac) override;
   void RunOn(CallTAC &tac) override;
   void RunOn(ReturnTAC &tac) override;
@@ -40,25 +40,10 @@ class VarAllocationPass : public PassBase {
   void AddAvailableRegister(TinyMIPSReg reg) { avail_reg_.insert(reg); }
 
   // get allocated position of local variables
-  const std::optional<VarPos> GetPosition(const TACPtr &var) const {
+  const VarPos &GetPosition(const TACPtr &var) const {
     auto it = var_pos_.find(var);
-    if (it != var_pos_.end()) {
-      return it->second;
-    }
-    else {
-      return {};
-    }
-  }
-
-  // get position of function arguments (temporary variable)
-  const std::optional<std::size_t> GetArgPosition(const TACPtr &var) const {
-    auto it = arg_pos_.find(var);
-    if (it != arg_pos_.end()) {
-      return it->second;
-    }
-    else {
-      return {};
-    }
+    assert(it != var_pos_.end());
+    return it->second;
   }
 
   // size of local area in stack frame
@@ -105,8 +90,6 @@ class VarAllocationPass : public PassBase {
 
   // live interval of variables
   std::unordered_map<TACPtr, LiveInterval> live_intervals_;
-  // argument info of variables
-  std::unordered_map<TACPtr, std::size_t> arg_pos_;
   // allocated position of all variables
   std::unordered_map<TACPtr, VarPos> var_pos_;
   // all free registers

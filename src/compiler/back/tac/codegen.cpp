@@ -221,8 +221,7 @@ Reg CodeGenerator::GetValue(const TACPtr &tac) {
     else {
       // get position of variable
       auto pos = var_alloc_.GetPosition(tac);
-      assert(pos);
-      if (auto slot = std::get_if<std::size_t>(&*pos)) {
+      if (auto slot = std::get_if<std::size_t>(&pos)) {
         // load from local area
         auto offset = var_alloc_.arg_area_size() + *slot * 4;
         asm_gen_.PushAsm(Opcode::LW, Reg::V0, Reg::FP, offset);
@@ -230,7 +229,7 @@ Reg CodeGenerator::GetValue(const TACPtr &tac) {
       }
       else {
         // just return
-        return *std::get_if<Reg>(&*pos);
+        return *std::get_if<Reg>(&pos);
       }
     }
   }
@@ -269,34 +268,15 @@ void CodeGenerator::SetValue(const TACPtr &tac, Reg value) {
   else {
     // get position of variable
     auto pos = var_alloc_.GetPosition(tac);
-    if (!pos) {
-      // get position of argument
-      auto arg_pos = var_alloc_.GetArgPosition(tac);
-      assert(arg_pos);
-      if (*arg_pos < 4) {
-        // just move
-        auto dest = static_cast<Reg>(static_cast<int>(Reg::A0) + *arg_pos);
-        asm_gen_.PushMove(dest, value);
-      }
-      else {
-        // store to stack
-        auto local_size = var_alloc_.local_area_size();
-        auto args_size = var_alloc_.arg_area_size();
-        auto offset = 8 + local_size + args_size + *arg_pos * 4;
-        asm_gen_.PushAsm(Opcode::SW, value, Reg::FP, offset);
-      }
+    if (auto slot = std::get_if<std::size_t>(&pos)) {
+      // store to local area
+      auto offset = var_alloc_.arg_area_size() + *slot * 4;
+      asm_gen_.PushAsm(Opcode::SW, value, Reg::FP, offset);
     }
     else {
-      if (auto slot = std::get_if<std::size_t>(&*pos)) {
-        // store to local area
-        auto offset = var_alloc_.arg_area_size() + *slot * 4;
-        asm_gen_.PushAsm(Opcode::SW, value, Reg::FP, offset);
-      }
-      else {
-        // just move
-        auto dest = *std::get_if<Reg>(&*pos);
-        asm_gen_.PushMove(dest, value);
-      }
+      // just move
+      auto dest = *std::get_if<Reg>(&pos);
+      asm_gen_.PushMove(dest, value);
     }
   }
 }
@@ -475,8 +455,7 @@ void CodeGenerator::GenerateOn(UnaryTAC &tac) {
     else {
       // get slot position of variable
       auto pos = var_alloc_.GetPosition(tac.opr());
-      assert(pos);
-      auto slot = std::get_if<std::size_t>(&*pos);
+      auto slot = std::get_if<std::size_t>(&pos);
       assert(slot);
       // get frame offset
       auto offset = var_alloc_.arg_area_size() + *slot * 4;
@@ -553,6 +532,24 @@ void CodeGenerator::GenerateOn(StoreTAC &tac) {
   }
   else {
     assert(false);
+  }
+}
+
+void CodeGenerator::GenerateOn(ArgSetTAC &tac) {
+  // get value
+  auto value = GetValue(tac.value());
+  // set argument
+  if (tac.pos() < 4) {
+    // just move
+    auto dest = static_cast<Reg>(static_cast<int>(Reg::A0) + tac.pos());
+    asm_gen_.PushMove(dest, value);
+  }
+  else {
+    // store to stack
+    auto local_size = var_alloc_.local_area_size();
+    auto args_size = var_alloc_.arg_area_size();
+    auto offset = 8 + local_size + args_size + tac.pos() * 4;
+    asm_gen_.PushAsm(Opcode::SW, value, Reg::FP, offset);
   }
 }
 

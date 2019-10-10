@@ -23,6 +23,7 @@ class CodeGenerator {
   void GenerateOn(UnaryTAC &tac);
   void GenerateOn(LoadTAC &tac);
   void GenerateOn(StoreTAC &tac);
+  void GenerateOn(ArgSetTAC &tac);
   void GenerateOn(JumpTAC &tac);
   void GenerateOn(BranchTAC &tac);
   void GenerateOn(CallTAC &tac);

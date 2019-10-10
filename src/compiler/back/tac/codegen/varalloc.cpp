@@ -22,7 +22,6 @@ using VarPos = VarAllocationPass::VarPos;
 
 void VarAllocationPass::Reset() {
   live_intervals_.clear();
-  arg_pos_.clear();
   var_pos_.clear();
   free_reg_.clear();
   for (const auto &i : avail_reg_) free_reg_.push_back(i);
@@ -153,19 +152,19 @@ void VarAllocationPass::RunOn(StoreTAC &tac) {
   CHECK_FIELD(tac, addr);
 }
 
+void VarAllocationPass::RunOn(ArgSetTAC &tac) {
+  CHECK_FIELD(tac, value);
+  // get argument position info
+  auto count = tac.pos() + 1;
+  if (count > max_arg_count_) max_arg_count_ = count;
+}
+
 void VarAllocationPass::RunOn(BranchTAC &tac) {
   CHECK_FIELD(tac, cond);
 }
 
 void VarAllocationPass::RunOn(CallTAC &tac) {
   CHECK_FIELD(tac, dest);
-  // get argument position info
-  std::size_t pos = 0;
-  for (const auto &i : tac.args()) {
-    live_intervals_.erase(i);
-    arg_pos_.insert({i, pos++});
-  }
-  if (pos > max_arg_count_) max_arg_count_ = pos;
 }
 
 void VarAllocationPass::RunOn(ReturnTAC &tac) {
