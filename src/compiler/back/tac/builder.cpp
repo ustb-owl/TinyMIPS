@@ -149,16 +149,14 @@ IRPtr TACBuilder::GenerateFunCall(const std::string &id, IRPtrList args) {
   auto args_type = funcs_[id].type->GetArgsType();
   auto types = opr_types_.top().lhs->GetArgsType();
   assert(args_type && types);
-  // get argument list
-  TACPtrList tac_args;
+  // generate argument setters
   for (std::size_t i = 0; i < args.size(); ++i) {
     auto tac = NewDataCast(TACCast(args[i]), (*types)[i], (*args_type)[i]);
-    tac_args.push_back(std::move(tac));
+    AddInst(std::make_shared<ArgSetTAC>(i, std::move(tac)));
   }
   // create function call
   auto dest = NewTempVar();
-  AddInst(std::make_shared<CallTAC>(funcs_[id].label, std::move(tac_args),
-                                    dest));
+  AddInst(std::make_shared<CallTAC>(funcs_[id].label, dest));
   return MakeTAC(dest);
 }
 
