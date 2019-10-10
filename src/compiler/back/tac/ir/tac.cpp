@@ -72,6 +72,14 @@ void StoreTAC::Dump(std::ostream &os) {
   os << std::endl;
 }
 
+void ArgSetTAC::Dump(std::ostream &os) {
+  os << kIndent;
+  os << "set " << pos_;
+  os << ", ";
+  value_->Dump(os);
+  os << std::endl;
+}
+
 void JumpTAC::Dump(std::ostream &os) {
   in_expr = true;
   os << kIndent;
@@ -98,10 +106,6 @@ void CallTAC::Dump(std::ostream &os) {
   dest_->Dump(os);
   os << " = call ";
   func_->Dump(os);
-  for (const auto &i : args_) {
-    os << ", ";
-    i->Dump(os);
-  }
   os << std::endl;
   in_expr = false;
 }
@@ -153,6 +157,7 @@ void BinaryTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void UnaryTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void LoadTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void StoreTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
+void ArgSetTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void JumpTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void BranchTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
 void CallTAC::RunPass(PassBase &pass) { pass.RunOn(*this); }
@@ -168,6 +173,7 @@ void BinaryTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void UnaryTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void LoadTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void StoreTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
+void ArgSetTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void JumpTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void BranchTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }
 void CallTAC::GenerateCode(CodeGenerator &gen) { gen.GenerateOn(*this); }

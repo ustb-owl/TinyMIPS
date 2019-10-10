@@ -152,6 +152,28 @@ class StoreTAC : public TACBase {
   std::size_t size_;
 };
 
+// argument setter
+class ArgSetTAC : public TACBase {
+ public:
+  ArgSetTAC(std::size_t pos, const TACPtr &value)
+      : pos_(pos), value_(value) {}
+
+  void Dump(std::ostream &os) override;
+  void RunPass(PassBase &pass) override;
+  void GenerateCode(CodeGenerator &gen) override;
+
+  bool IsConst() const override { return false; }
+
+  void set_value(const TACPtr &value) { value_ = value; }
+
+  std::size_t pos() const { return pos_; }
+  const TACPtr &value() const { return value_; }
+
+ private:
+  std::size_t pos_;
+  TACPtr value_;
+};
+
 // jump to label
 class JumpTAC : public TACBase {
  public:
@@ -193,8 +215,8 @@ class BranchTAC : public TACBase {
 // function call
 class CallTAC : public TACBase {
  public:
-  CallTAC(const TACPtr &func, TACPtrList args, const TACPtr &dest)
-      : func_(func), dest_(dest), args_(std::move(args)) {}
+  CallTAC(const TACPtr &func, const TACPtr &dest)
+      : func_(func), dest_(dest) {}
 
   void Dump(std::ostream &os) override;
   void RunPass(PassBase &pass) override;
@@ -206,11 +228,9 @@ class CallTAC : public TACBase {
 
   const TACPtr &func() const { return func_; }
   const TACPtr &dest() const { return dest_; }
-  const TACPtrList &args() const { return args_; }
 
  private:
   TACPtr func_, dest_;
-  TACPtrList args_;
 };
 
 // return from function
