@@ -1,6 +1,6 @@
 # Project TinyMIPS
 
-Project TinyMIPS is dedicated to enabling undergraduates to build a complete computer system from scratch, which including:
+The Project TinyMIPS is dedicated to enabling undergraduates to build a complete computer system from scratch, which including:
 
 * TinyMIPS, a streamlined 22-instruction MIPS ISA processor.
 * TinyLang, a C like programming language and its compiler.
