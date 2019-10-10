@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cctype>
+#include <cstring>
+#include <cstddef>
 
 #include "util/style.h"
 
@@ -33,7 +35,7 @@ const char *operators[] = {
 // get index of a string in string array
 template <typename T, std::size_t N>
 int GetIndex(const char *str, T (&str_array)[N]) {
-  for (int i = 0; i < N; ++i) {
+  for (std::size_t i = 0; i < N; ++i) {
     if (!strcmp(str, str_array[i])) return i;
   }
   return -1;

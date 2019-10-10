@@ -4,6 +4,7 @@
 #include <istream>
 #include <string>
 #include <cstdint>
+#include <cassert>
 
 namespace tinylang::front {
 

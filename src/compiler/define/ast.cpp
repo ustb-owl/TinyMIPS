@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <cassert>
+#include <cstddef>
 
 using namespace tinylang::define;
 
@@ -47,7 +48,7 @@ void FunDefAST::Dump(std::ostream &os) {
     os << "void";
   }
   os << ' ' << id_ << '(';
-  for (int i = 0; i < args_.size(); ++i) {
+  for (std::size_t i = 0; i < args_.size(); ++i) {
     if (i) os << ", ";
     args_[i]->Dump(os);
   }

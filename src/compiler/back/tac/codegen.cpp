@@ -158,7 +158,7 @@ void CodeGenerator::GeneratePrologue(const FuncInfo &info) {
   // set current frame pointer
   asm_gen_.PushMove(Reg::FP, Reg::SP);
   // store arguments
-  for (int i = 0; i < 4 && i < info.args.size(); ++i) {
+  for (std::size_t i = 0; i < 4 && i < info.args.size(); ++i) {
     auto arg_reg = static_cast<Reg>(static_cast<int>(Reg::A0) + i);
     asm_gen_.PushAsm(Opcode::SW, arg_reg, Reg::FP, frame_size + i * 4);
   }
