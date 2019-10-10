@@ -90,15 +90,12 @@ class DeadCodeEliminationPass : public PassBase {
     CHECK_REF_COUNT(tac, addr);
   }
 
-  void RunOn(BranchTAC &tac) override {
-    CHECK_REF_COUNT(tac, cond);
+  void RunOn(ArgSetTAC &tac) override {
+    CHECK_REF_COUNT(tac, value);
   }
 
-  void RunOn(CallTAC &tac) override {
-    for (const auto &i : tac.args()) {
-      auto it = vars_.find(i);
-      if (it != vars_.end()) ++it->second;
-    }
+  void RunOn(BranchTAC &tac) override {
+    CHECK_REF_COUNT(tac, cond);
   }
 
   void RunOn(ReturnTAC &tac) override {

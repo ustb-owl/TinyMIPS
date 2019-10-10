@@ -88,6 +88,10 @@ class CopyPropPass : public PassBase {
     CHECK_REF_COUNT(tac, addr);
   }
 
+  void RunOn(ArgSetTAC &tac) override {
+    CHECK_REF_COUNT(tac, value);
+  }
+
   void RunOn(BranchTAC &tac) override {
     CHECK_REF_COUNT(tac, cond);
   }
@@ -98,10 +102,6 @@ class CopyPropPass : public PassBase {
     }
     else {
       ADD_NEW_INFO(tac, dest);
-      for (const auto &i : tac.args()) {
-        auto it = vars_.find(i);
-        if (it != vars_.end()) ++it->second.ref_count;
-      }
     }
   }
 

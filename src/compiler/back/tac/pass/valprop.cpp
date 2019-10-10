@@ -45,6 +45,10 @@ class ValuePropPass : public PassBase {
     CHECK_FIELD(tac, addr);
   }
 
+  void RunOn(ArgSetTAC &tac) override {
+    CHECK_FIELD(tac, value);
+  }
+
   void RunOn(BranchTAC &tac) override {
     CHECK_FIELD(tac, cond);
   }

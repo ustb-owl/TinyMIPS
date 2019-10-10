@@ -26,6 +26,7 @@ class PassBase {
   virtual void RunOn(UnaryTAC &tac) {}
   virtual void RunOn(LoadTAC &tac) {}
   virtual void RunOn(StoreTAC &tac) {}
+  virtual void RunOn(ArgSetTAC &tac) {}
   virtual void RunOn(JumpTAC &tac) {}
   virtual void RunOn(BranchTAC &tac) {}
   virtual void RunOn(CallTAC &tac) {}
