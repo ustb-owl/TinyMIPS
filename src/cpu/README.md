@@ -40,7 +40,3 @@ With no exceptions/interrupts supported.
 5. Jump/Branch instructions;
 6. Memory accessing instructions;
 7. Handle data dependencies again (pipeline controller).
-
-## Copyright and License
-
-Copyright (C) 2019 USTB NSCSCC Team. License GPLv3.
