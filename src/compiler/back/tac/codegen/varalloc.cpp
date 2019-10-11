@@ -2,60 +2,108 @@
 
 using namespace tinylang::back::tac;
 
-#define CHECK_FIELD(tac, field)                                          \
-  do {                                                                   \
-    if (IsGlobalVar(tac.field())) break;                                 \
-    auto it = live_intervals_.find(tac.field());                         \
-    if (it != live_intervals_.end()) {                                   \
-      it->second.end_pos = cur_pos_;                                     \
-    }                                                                    \
-    else {                                                               \
-      live_intervals_.insert({tac.field(), {cur_pos_, cur_pos_, true}}); \
-    }                                                                    \
-  } while (0)
-
 namespace {
 
 using VarPos = VarAllocationPass::VarPos;
+using Reg = TinyMIPSReg;
 
 }  // namespace
 
 void VarAllocationPass::Reset() {
   live_intervals_.clear();
   var_pos_.clear();
-  free_reg_.clear();
-  for (const auto &i : avail_reg_) free_reg_.push_back(i);
-  occup_slot_.clear();
   cur_pos_ = 0;
+  last_call_pos_ = 0;
+  saved_reg_.clear();
+  saved_reg_.insert(Reg::RA);
+  saved_reg_.insert(Reg::FP);
   local_slot_count_ = 0;
   max_arg_count_ = 0;
 }
 
-void VarAllocationPass::LinearScanAlloc() {
+void VarAllocationPass::InitFreeReg(bool is_preserved) {
+  free_reg_.clear();
+  // set range of registers
+  Reg begin, end;
+  if (is_preserved) {
+    begin = Reg::S7;
+    end = Reg::S0;
+  }
+  else {
+    begin = Reg::T9;
+    end = Reg::T0;
+  }
+  // push to 'free_reg_'
+  for (auto r = static_cast<int>(begin); r >= static_cast<int>(end); --r) {
+    free_reg_.push_back(static_cast<Reg>(r));
+  }
+}
+
+void VarAllocationPass::LogLiveInterval(const TACPtr &var) {
+  // do not try to allocate register for all global variables
+  if (IsGlobalVar(var)) return;
+  // get live interval info
+  auto it = live_intervals_.find(var);
+  if (it != live_intervals_.end()) {
+    auto &info = it->second;
+    // update end position
+    info.end_pos = cur_pos_;
+    // check if there are function calls in current interval
+    if (last_call_pos_ > info.start_pos && last_call_pos_ < cur_pos_) {
+      info.must_preserve = true;
+    }
+  }
+  else {
+    // add new live interval info
+    live_intervals_.insert({var, {cur_pos_, cur_pos_, true, false}});
+  }
+}
+
+void VarAllocationPass::RunVarAlloc() {
   IntervalStartMap start_map;
-  // check variables that cannot be allocated to registers & build map
+  // build map for all normal variables
   for (const auto &i : live_intervals_) {
     if (!i.second.can_alloc_reg) {
-      // allocate a new slot and remove
+      // allocate a new slot now
       var_pos_.insert({i.first, GetNewSlot()});
     }
-    else {
-      // build start map
+    else if (!i.second.must_preserve) {
+      // insert to start map
       start_map.insert({&i.second, i.first});
     }
   }
-  // do allocation
+  // run first allocation
+  InitFreeReg(false);
+  LinearScanAlloc(start_map, false);
+  // build map for all preserved variables
+  start_map.clear();
+  for (const auto &i : live_intervals_) {
+    if (i.second.must_preserve) {
+      // insert to start map
+      start_map.insert({&i.second, i.first});
+    }
+  }
+  // run second allocation
+  InitFreeReg(true);
+  LinearScanAlloc(start_map, true);
+}
+
+void VarAllocationPass::LinearScanAlloc(const IntervalStartMap &start_map,
+                                        bool save) {
   IntervalEndMap active;
   for (const auto &i : start_map) {
     ExpireOldIntervals(active, i.first);
-    if (active.size() == avail_reg_.size()) {
+    if (free_reg_.empty()) {
       // need to spill
       SpillAtInterval(active, i.first, i.second);
     }
     else {
       // allocate to a free register
-      var_pos_[i.second] = free_reg_.back();
+      auto reg = free_reg_.back();
       free_reg_.pop_back();
+      var_pos_[i.second] = reg;
+      // add to saved registers
+      if (save) saved_reg_.insert(reg);
       // add to active
       active.insert({i.first, i.second});
     }
@@ -66,14 +114,10 @@ void VarAllocationPass::ExpireOldIntervals(IntervalEndMap &active,
                                            const LiveInterval *i) {
   for (auto it = active.begin(); it != active.end();) {
     if (it->first->end_pos >= i->start_pos) return;
-    // free current element's register/slot
+    // free current element's register
     const auto &pos = var_pos_[it->second];
     if (auto reg = std::get_if<TinyMIPSReg>(&pos)) {
       free_reg_.push_back(*reg);
-    }
-    else {
-      auto slot = std::get_if<std::size_t>(&pos);
-      occup_slot_.erase(*slot);
     }
     // remove current element from active
     it = active.erase(it);
@@ -105,13 +149,7 @@ void VarAllocationPass::SpillAtInterval(IntervalEndMap &active,
 }
 
 std::size_t VarAllocationPass::GetNewSlot() {
-  for (std::size_t slot_id = 0;; ++slot_id) {
-    if (occup_slot_.find(slot_id) == occup_slot_.end()) {
-      occup_slot_.insert(slot_id);
-      if (slot_id + 1 > local_slot_count_) local_slot_count_ = slot_id + 1;
-      return slot_id;
-    }
-  }
+  return local_slot_count_++;
 }
 
 bool VarAllocationPass::Run(FuncInfo &func) {
@@ -121,57 +159,59 @@ bool VarAllocationPass::Run(FuncInfo &func) {
     i->RunPass(*this);
     ++cur_pos_;
   }
-  // do register allocation
-  LinearScanAlloc();
+  // run allocation
+  RunVarAlloc();
   return false;
 }
 
 void VarAllocationPass::RunOn(BinaryTAC &tac) {
-  CHECK_FIELD(tac, dest);
-  CHECK_FIELD(tac, lhs);
-  CHECK_FIELD(tac, rhs);
+  LogLiveInterval(tac.dest());
+  LogLiveInterval(tac.lhs());
+  LogLiveInterval(tac.rhs());
 }
 
 void VarAllocationPass::RunOn(UnaryTAC &tac) {
-  CHECK_FIELD(tac, dest);
+  LogLiveInterval(tac.dest());
   if (tac.op() == UnaryOp::AddressOf) {
     live_intervals_[tac.opr()].can_alloc_reg = false;
   }
   else {
-    CHECK_FIELD(tac, opr);
+    LogLiveInterval(tac.opr());
   }
 }
 
 void VarAllocationPass::RunOn(LoadTAC &tac) {
-  CHECK_FIELD(tac, addr);
-  CHECK_FIELD(tac, dest);
+  LogLiveInterval(tac.addr());
+  LogLiveInterval(tac.dest());
 }
 
 void VarAllocationPass::RunOn(StoreTAC &tac) {
-  CHECK_FIELD(tac, value);
-  CHECK_FIELD(tac, addr);
+  LogLiveInterval(tac.value());
+  LogLiveInterval(tac.addr());
 }
 
 void VarAllocationPass::RunOn(ArgSetTAC &tac) {
-  CHECK_FIELD(tac, value);
+  LogLiveInterval(tac.value());
   // get argument position info
   auto count = tac.pos() + 1;
   if (count > max_arg_count_) max_arg_count_ = count;
 }
 
 void VarAllocationPass::RunOn(BranchTAC &tac) {
-  CHECK_FIELD(tac, cond);
+  LogLiveInterval(tac.cond());
 }
 
 void VarAllocationPass::RunOn(CallTAC &tac) {
-  CHECK_FIELD(tac, dest);
+  // log a function call
+  last_call_pos_ = cur_pos_;
+  LogLiveInterval(tac.dest());
 }
 
 void VarAllocationPass::RunOn(ReturnTAC &tac) {
-  CHECK_FIELD(tac, value);
+  LogLiveInterval(tac.value());
 }
 
 void VarAllocationPass::RunOn(AssignTAC &tac) {
-  CHECK_FIELD(tac, value);
-  CHECK_FIELD(tac, var);
+  LogLiveInterval(tac.value());
+  LogLiveInterval(tac.var());
 }

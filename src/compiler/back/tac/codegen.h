@@ -57,6 +57,8 @@ class CodeGenerator {
   void GenerateArrayData();
   // generate a specific function
   void GenerateFunc(const std::string &name, const FuncInfo &info);
+  // generate info in function's header
+  void GenerateHeaderInfo();
   // generate prologue
   void GeneratePrologue(const FuncInfo &info);
   // generate epilogue
@@ -72,6 +74,8 @@ class CodeGenerator {
   std::string NextEpilogueLabel();
   // get current epilogue label
   std::string GetEpilogueLabel();
+  // get size of current frame
+  std::size_t GetFrameSize();
 
   // get TAC's value
   TinyMIPSReg GetValue(const TACPtr &tac);

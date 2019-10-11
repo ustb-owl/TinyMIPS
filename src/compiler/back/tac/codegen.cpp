@@ -1,6 +1,7 @@
 #include "back/tac/codegen.h"
 
 #include <cassert>
+#include <cstdint>
 
 using namespace tinylang::back::tac;
 
@@ -8,17 +9,25 @@ using namespace tinylang::back::tac;
 
   Stack Organization of TinyLang:
 
+    frame size: n * 8
+
   +--------------------+  <- last fp
   |   return address   |  4
   +--------------------+
   | last frame pointer |  4
   +--------------------+
   |                    |
-  |  local  variables  |  n * 8
+  |  saved  registers  |  n * 4
+  |                    |
+  +--------------------+
+  |      padding       |  0/4
+  +--------------------+
+  |                    |
+  |  local  variables  |  n * 4
   |                    |
   +--------------------+
   |                    |
-  |  arguments  (max)  |  n * 8
+  |  arguments  (max)  |  n * 4
   |                    |
   +--------------------+  <- sp, fp
 
@@ -43,6 +52,10 @@ const char *kEpilogueLabel = "_epilogue_";
 const char *kMul = "_std_mul";
 const char *kDiv = "_std_div";
 const char *kMod = "_std_mod";
+
+inline std::size_t RoundUpTo8(std::size_t num) {
+  return ((num + 7) / 8) * 8;
+}
 
 }  // namespace
 
@@ -119,11 +132,8 @@ void CodeGenerator::GenerateFunc(const std::string &name,
   last_label_ = nullptr;
   info.label->GenerateCode(*this);
   code_ << GetLabelName(last_label_->id()) << ':' << std::endl;
-  // generate frame info
-  auto local_size = var_alloc_.local_area_size();
-  auto args_size = var_alloc_.arg_area_size();
-  auto frame_size = 8 + local_size + args_size;
-  code_ << kIndent << ".frame\t$fp, " << frame_size << ", $ra" << std::endl;
+  // generator info
+  GenerateHeaderInfo();
   // reset state
   asm_gen_.Reset();
   // generate prologue
@@ -146,15 +156,28 @@ void CodeGenerator::GenerateFunc(const std::string &name,
   code_ << std::endl;
 }
 
+void CodeGenerator::GenerateHeaderInfo() {
+  // generate frame info
+  auto frame_size = GetFrameSize();
+  code_ << kIndent << ".frame\t$fp, " << frame_size << ", $ra" << std::endl;
+  // generate mask info
+  std::uint32_t mask = 0;
+  for (const auto &i : var_alloc_.saved_reg()) {
+    mask |= 1 << static_cast<int>(i);
+  }
+  code_ << kIndent << ".mask\t0x";
+  code_ << std::hex << mask << ", -4" << std::dec << std::endl;
+}
+
 void CodeGenerator::GeneratePrologue(const FuncInfo &info) {
-  auto local_size = var_alloc_.local_area_size();
-  auto args_size = var_alloc_.arg_area_size();
-  auto frame_size = 8 + local_size + args_size;
+  auto frame_size = GetFrameSize();
   // initialize stack pointer
   asm_gen_.PushAsm(Opcode::ADDIU, Reg::SP, Reg::SP, -frame_size);
-  // store return address and last frame pointer
-  asm_gen_.PushAsm(Opcode::SW, Reg::RA, Reg::SP, frame_size - 4);
-  asm_gen_.PushAsm(Opcode::SW, Reg::FP, Reg::SP, frame_size - 8);
+  // store all saved registers
+  std::size_t offset = 0;
+  for (const auto &i : var_alloc_.saved_reg()) {
+    asm_gen_.PushAsm(Opcode::SW, i, Reg::SP, frame_size - 4 * offset++);
+  }
   // set current frame pointer
   asm_gen_.PushMove(Reg::FP, Reg::SP);
   // store arguments
@@ -165,16 +188,16 @@ void CodeGenerator::GeneratePrologue(const FuncInfo &info) {
 }
 
 void CodeGenerator::GenerateEpilogue() {
-  auto local_size = var_alloc_.local_area_size();
-  auto args_size = var_alloc_.arg_area_size();
-  auto frame_size = 8 + local_size + args_size;
+  auto frame_size = GetFrameSize();
   // generate label
   asm_gen_.PushLabel(NextEpilogueLabel());
   // restore stack pointer
   asm_gen_.PushMove(Reg::SP, Reg::FP);
-  // restore return address and frame pointer
-  asm_gen_.PushAsm(Opcode::LW, Reg::RA, Reg::SP, frame_size - 4);
-  asm_gen_.PushAsm(Opcode::LW, Reg::FP, Reg::SP, frame_size - 8);
+  // restore all saved registers
+  std::size_t offset = 0;
+  for (const auto &i : var_alloc_.saved_reg()) {
+    asm_gen_.PushAsm(Opcode::SW, i, Reg::SP, frame_size - 4 * offset++);
+  }
   // release current stack frame
   asm_gen_.PushAsm(Opcode::ADDIU, Reg::SP, Reg::SP, frame_size);
   // return to last function
@@ -199,6 +222,13 @@ std::string CodeGenerator::NextEpilogueLabel() {
 
 std::string CodeGenerator::GetEpilogueLabel() {
   return kEpilogueLabel + std::to_string(epilogue_id_);
+}
+
+std::size_t CodeGenerator::GetFrameSize() {
+  auto save_size = var_alloc_.save_area_size();
+  auto local_size = var_alloc_.local_area_size();
+  auto args_size = var_alloc_.arg_area_size();
+  return RoundUpTo8(save_size + local_size + args_size);
 }
 
 Reg CodeGenerator::GetValue(const TACPtr &tac) {
@@ -239,9 +269,7 @@ Reg CodeGenerator::GetValue(const TACPtr &tac) {
     return Reg::V0;
   }
   else if (last_arg_get_) {
-    auto local_size = var_alloc_.local_area_size();
-    auto args_size = var_alloc_.arg_area_size();
-    auto offset = 8 + local_size + args_size + last_arg_get_->pos() * 4;
+    auto offset = GetFrameSize() + last_arg_get_->pos() * 4;
     // load argument from argument area
     asm_gen_.PushAsm(Opcode::LW, Reg::V0, Reg::FP, offset);
     return Reg::V0;
@@ -286,17 +314,6 @@ CodeGenerator::CodeGenerator() {
   funcs_ = nullptr;
   datas_ = nullptr;
   epilogue_id_ = 0;
-  // add avaliable registers to allocator
-  var_alloc_.AddAvailableRegister(Reg::T0);
-  var_alloc_.AddAvailableRegister(Reg::T1);
-  var_alloc_.AddAvailableRegister(Reg::T2);
-  var_alloc_.AddAvailableRegister(Reg::T3);
-  var_alloc_.AddAvailableRegister(Reg::T4);
-  var_alloc_.AddAvailableRegister(Reg::T5);
-  var_alloc_.AddAvailableRegister(Reg::T6);
-  var_alloc_.AddAvailableRegister(Reg::T7);
-  var_alloc_.AddAvailableRegister(Reg::T8);
-  var_alloc_.AddAvailableRegister(Reg::T9);
 }
 
 void CodeGenerator::GenerateOn(BinaryTAC &tac) {
@@ -538,9 +555,7 @@ void CodeGenerator::GenerateOn(ArgSetTAC &tac) {
   }
   else {
     // store to stack
-    auto local_size = var_alloc_.local_area_size();
-    auto args_size = var_alloc_.arg_area_size();
-    auto offset = 8 + local_size + args_size + tac.pos() * 4;
+    auto offset = GetFrameSize() + tac.pos() * 4;
     asm_gen_.PushAsm(Opcode::SW, value, Reg::FP, offset);
   }
 }
