@@ -149,7 +149,7 @@ void DumpAsm(std::ostream &os, const Asm &tm) {
       break;
     }
     case Opcode::JALR: {
-      os << reg_str[static_cast<int>(tm.dest)];
+      os << "$0, " << reg_str[static_cast<int>(tm.dest)];
       break;
     }
     case Opcode::LB: case Opcode::LBU: case Opcode::LW:
