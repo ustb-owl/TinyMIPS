@@ -23,7 +23,7 @@ using namespace tinylang::back::tac;
   +--------------------+  <- sp, fp
 
   Standard Functions of TinyLang:
-    mul(lhs, rhs, is_unsigned)
+    mul(lhs, rhs)
     div(lhs, rhs, is_unsigned)
     mod(lhs, rhs, is_unsigned)
 
@@ -317,17 +317,9 @@ void CodeGenerator::GenerateOn(BinaryTAC &tac) {
       asm_gen_.PushAsm(Opcode::SUBU, Reg::V0, lhs, rhs);
       break;
     }
-    case BinaryOp::Mul: {
+    case BinaryOp::Mul: case BinaryOp::UMul: {
       asm_gen_.PushMove(Reg::A0, lhs);
       asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 0);
-      asm_gen_.PushJump(kMul);
-      break;
-    }
-    case BinaryOp::UMul: {
-      asm_gen_.PushMove(Reg::A0, lhs);
-      asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 1);
       asm_gen_.PushJump(kMul);
       break;
     }
