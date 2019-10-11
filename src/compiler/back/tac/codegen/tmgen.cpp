@@ -35,6 +35,11 @@ inline bool IsPseudo(const Asm &tm) {
   return static_cast<int>(tm.opcode) >= static_cast<int>(Opcode::NOP);
 }
 
+// check if instruction is just a label
+inline bool IsLabel(const Asm &tm) {
+  return tm.opcode == Opcode::LABEL;
+}
+
 // check if instruction is jump or branch
 inline bool IsJump(const Asm &tm) {
   const auto &op = tm.opcode;
@@ -186,7 +191,8 @@ void TinyMIPSAsmGen::ReorderJump() {
     switch (it->opcode) {
       case Opcode::BEQ: case Opcode::BNE: {
         // check if is related
-        if (!pos || (pos && IsBranchRelated(*last, *it)) ||
+        if (!pos ||
+            (pos && (IsBranchRelated(*last, *it) || IsLabel(*last))) ||
             (pos > 1 && IsJump(*last2))) {
           // insert NOP after branch
           last = it;
@@ -200,7 +206,8 @@ void TinyMIPSAsmGen::ReorderJump() {
       }
       case Opcode::JAL: {
         // check if is related
-        if (!pos || (pos > 1 && IsJump(*last2))) {
+        if (!pos || (pos && IsLabel(*last)) ||
+            (pos > 1 && IsJump(*last2))) {
           // insert NOP after jump
           last = it;
           it = asms_.insert(++it, {Opcode::NOP});
@@ -212,7 +219,9 @@ void TinyMIPSAsmGen::ReorderJump() {
         break;
       }
       case Opcode::JALR: {
-        if (!pos || (pos && IsRelated(*last, it->dest, Reg::RA)) ||
+        if (!pos ||
+            (pos &&
+             (IsRelated(*last, it->dest, Reg::RA) || IsLabel(*last))) ||
             (pos > 1 && IsJump(*last2))) {
           // insert NOP after jump
           last = it;
