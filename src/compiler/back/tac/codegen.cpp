@@ -614,6 +614,7 @@ void CodeGenerator::GenerateOn(ArgGetTAC &tac) { last_arg_get_ = &tac; }
 void CodeGenerator::GenerateOn(NumberTAC &tac) { last_num_ = &tac; }
 
 void CodeGenerator::Generate() {
+  code_ << kIndent << ".set\tnoreorder" << std::endl;
   code_ << kIndent << ".abicalls" << std::endl;
   // generate global variables & arrays
   GenerateGlobalVars();
