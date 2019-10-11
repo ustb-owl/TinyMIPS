@@ -196,7 +196,7 @@ void CodeGenerator::GenerateEpilogue() {
   // restore all saved registers
   std::size_t offset = 0;
   for (const auto &i : var_alloc_.saved_reg()) {
-    asm_gen_.PushAsm(Opcode::SW, i, Reg::SP, frame_size - 4 * offset++);
+    asm_gen_.PushAsm(Opcode::LW, i, Reg::SP, frame_size - 4 * offset++);
   }
   // release current stack frame
   asm_gen_.PushAsm(Opcode::ADDIU, Reg::SP, Reg::SP, frame_size);
