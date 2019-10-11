@@ -1,5 +1,6 @@
-def readInt(): i32 {}
-def printInt(i: i32) {}
+# function declarations
+def readInt(): i32
+def printInt(i: i32)
 
 def fib(n: i32): i32 {
   if n <= 2 {
