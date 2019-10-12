@@ -64,7 +64,7 @@ inline UnaryOp UnaryOperatorCast(Operator op) {
 }  // namespace
 
 // definition of in-class constant
-const char *TACBuilder::kEntryFuncId = "_start";
+const char *TACBuilder::kEntryFuncId = "__start";
 
 void TACBuilder::NewFuncInfo(const std::string &id) {
   // insert function info
