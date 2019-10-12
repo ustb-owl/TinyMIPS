@@ -141,6 +141,7 @@ IRPtr TACBuilder::GenerateFunDecl(const std::string &id) {
   const auto &type = opr_types_.top().lhs;
   auto result = funcs_.insert({id, {NewLabel(), type, {}, {}}});
   assert(result.second);
+  static_cast<void>(result);
   return nullptr;
 }
 
