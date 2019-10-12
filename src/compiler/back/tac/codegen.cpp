@@ -45,10 +45,10 @@ using Opcode = TinyMIPSOpcode;
 using Reg = TinyMIPSReg;
 
 const char *kIndent = "\t";
-const char *kVarLabel = "_var_";
-const char *kDataLabel = "_data_";
-const char *kLabelLabel = "_label_";
-const char *kEpilogueLabel = "_epilogue_";
+const char *kVarLabel = "$_var_";
+const char *kDataLabel = "$_data_";
+const char *kLabelLabel = "$_label_";
+const char *kEpilogueLabel = "$_epilogue_";
 const char *kMul = "_std_mul";
 const char *kDiv = "_std_div";
 const char *kMod = "_std_mod";
