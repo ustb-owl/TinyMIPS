@@ -23,7 +23,7 @@ void PrintVersion() {
   cout << APP_NAME << " version " << APP_VERSION << endl;
   cout << "Compiler of the TinyLang programming language." << endl;
   cout << endl;
-  cout << "Copyright (C) 2010-2019 USTB NSCSCC team. License GPLv3.";
+  cout << "Copyright (C) 2019 USTB NSCSCC team. License GPLv3.";
   cout << endl;
 }
 
