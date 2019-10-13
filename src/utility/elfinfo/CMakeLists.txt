@@ -1,4 +1,4 @@
-project(TinyLang VERSION "0.0.2")
+project(ELFInfo VERSION "0.0.1")
 
 # some definitions
 add_compile_definitions(APP_NAME="${PROJECT_NAME}")
@@ -13,9 +13,5 @@ include_directories(.)
 # all of C++ source files
 file(GLOB_RECURSE SOURCES "*.cpp")
 
-# remove SSA backend temporarily
-file(GLOB_RECURSE SSA_SOURCES "back/ssa/*.cpp")
-list(REMOVE_ITEM SOURCES ${SSA_SOURCES})
-
 # executable
-add_executable(tlc ${SOURCES})
+add_executable(elfinfo ${SOURCES})
