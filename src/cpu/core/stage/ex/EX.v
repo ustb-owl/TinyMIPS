@@ -41,7 +41,7 @@ module EX(
   assign mem_sel_out = mem_sel_in;
   assign mem_write_data_out = mem_write_data_in;
   // to WB stage
-  assign reg_write_en_out = !mem_write_flag_in;
+  assign reg_write_en_out = reg_write_en_in && !mem_write_flag_in;
   assign reg_write_addr_out = reg_write_addr_in;
   assign current_pc_addr_out = current_pc_addr_in;
 
