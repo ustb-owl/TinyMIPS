@@ -74,7 +74,6 @@ module ID(
   FunctGen funct_gen(
     .op       (inst_op),
     .funct_in (inst_funct),
-    .rt       (inst_rt),
     .funct    (funct)
   );
 

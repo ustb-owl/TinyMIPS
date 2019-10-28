@@ -7,7 +7,6 @@
 module FunctGen(
   input       [`INST_OP_BUS]  op,
   input       [`FUNCT_BUS]    funct_in,
-  input       [`REG_ADDR_BUS] rt,
   output  reg [`FUNCT_BUS]    funct
 );
 
