@@ -40,3 +40,10 @@ With no exceptions/interrupts supported.
 5. Jump/Branch instructions;
 6. Memory accessing instructions;
 7. Handle data dependencies again (pipeline controller).
+
+## Note
+
+If you are using Vivado, after importing source files, you may need to do the following things:
+
+1. Go to "Tools - Settings... - General - Verilog options", add `src\cpu\include` to search paths.
+2. Select all include files in "Project Manager", then right click and click "Set Global Include".
