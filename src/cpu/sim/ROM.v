@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "bus.v"
-`include "pc.v"
+`include "pcdef.v"
 `include "sim.v"
 
 module ROM(
