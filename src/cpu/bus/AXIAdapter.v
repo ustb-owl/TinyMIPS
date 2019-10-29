@@ -15,7 +15,7 @@ module AXIAdapter(
   // AXI read address channel
   output  [3:0]           arid,
   output  [31:0]          araddr,
-  output  [7:0]           arlen,
+  output  [3:0]           arlen,
   output  [2:0]           arsize,
   output  [1:0]           arburst,
   output  [1:0]           arlock,
@@ -33,7 +33,7 @@ module AXIAdapter(
   // AXI write address channel
   output  [3:0]           awid,
   output  [31:0]          awaddr,
-  output  [7:0]           awlen,
+  output  [3:0]           awlen,
   output  [2:0]           awsize,
   output  [1:0]           awburst,
   output  [1:0]           awlock,
@@ -63,7 +63,7 @@ module AXIAdapter(
   // read address
   assign arid     = 4'b0;
   assign araddr   = axi_addr;
-  assign arlen    = 8'd0;
+  assign arlen    = 4'd0;
   assign arsize   = axi_size;
   assign arburst  = 2'b00;
   assign arlock   = 2'b0;
@@ -77,7 +77,7 @@ module AXIAdapter(
   // write address
   assign awid     = 4'b0;
   assign awaddr   = axi_addr;
-  assign awlen    = 8'd0;
+  assign awlen    = 4'd0;
   assign awsize   = axi_size;
   assign awburst  = 2'b00;
   assign awlock   = 2'b0;
