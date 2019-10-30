@@ -56,34 +56,34 @@ module AXIAdapter(
 );
 
   // AXI control
-  reg [31:0]  axi_addr;
-  reg [2:0]   axi_size;
-  reg         axi_ren, axi_wen, axi_wvalid;
+  reg [31:0]  locked_addr, axi_waddr;
+  reg [2:0]   axi_wsize;
+  reg         axi_wvalid;
 
   // read address
   assign arid     = 4'b0;
-  assign araddr   = axi_addr;
+  assign araddr   = locked_addr;
   assign arlen    = 4'd0;
-  assign arsize   = axi_size;
+  assign arsize   = 3'b010;
   assign arburst  = 2'b00;
   assign arlock   = 2'b0;
   assign arcache  = 4'b0;
   assign arprot   = 3'b0;
-  assign arvalid  = axi_ren;
+  assign arvalid  = state == kStateRAddr && !arready;
 
   // read data
   assign rready   = 1'b1;
 
   // write address
   assign awid     = 4'b0;
-  assign awaddr   = axi_addr;
+  assign awaddr   = axi_waddr;
   assign awlen    = 4'd0;
-  assign awsize   = axi_size;
+  assign awsize   = axi_wsize;
   assign awburst  = 2'b00;
   assign awlock   = 2'b0;
   assign awcache  = 4'b0;
   assign awprot   = 3'b0;
-  assign awvalid  = axi_wen;
+  assign awvalid  = state == kStateWAddr && !awready;
 
   // write data
   assign wid      = 4'b0;
@@ -95,40 +95,40 @@ module AXIAdapter(
   // write response
   assign bready   = 1'b1;
 
-  // generate read/write size & address
+  // generate write size & address
   always @(*) begin
     case (sram_write_en)
       4'b0001: begin
-        axi_size <= 3'b000;
-        axi_addr <= {sram_addr[31:2], 2'b00};
+        axi_wsize <= 3'b000;
+        axi_waddr <= {locked_addr[31:2], 2'b00};
       end
       4'b0010: begin
-        axi_size <= 3'b000;
-        axi_addr <= {sram_addr[31:2], 2'b01};
+        axi_wsize <= 3'b000;
+        axi_waddr <= {locked_addr[31:2], 2'b01};
       end
       4'b0100: begin
-        axi_size <= 3'b000;
-        axi_addr <= {sram_addr[31:2], 2'b10};
+        axi_wsize <= 3'b000;
+        axi_waddr <= {locked_addr[31:2], 2'b10};
       end
       4'b1000: begin
-        axi_size <= 3'b000;
-        axi_addr <= {sram_addr[31:2], 2'b11};
+        axi_wsize <= 3'b000;
+        axi_waddr <= {locked_addr[31:2], 2'b11};
       end
       4'b0011: begin
-        axi_size <= 3'b001;
-        axi_addr <= {sram_addr[31:2], 2'b00};
+        axi_wsize <= 3'b001;
+        axi_waddr <= {locked_addr[31:2], 2'b00};
       end
       4'b1100: begin
-        axi_size <= 3'b001;
-        axi_addr <= {sram_addr[31:2], 2'b10};
+        axi_wsize <= 3'b001;
+        axi_waddr <= {locked_addr[31:2], 2'b10};
       end
       4'b1111: begin
-        axi_size <= 3'b010;
-        axi_addr <= {sram_addr[31:2], 2'b00};
+        axi_wsize <= 3'b010;
+        axi_waddr <= {locked_addr[31:2], 2'b00};
       end
       default: begin
-        axi_size <= 3'b000;
-        axi_addr <= 32'h00000000;
+        axi_wsize <= 3'b000;
+        axi_waddr <= 32'h00000000;
       end
     endcase
   end
@@ -155,7 +155,7 @@ module AXIAdapter(
     case (state)
       kStateIdle: begin
         if (sram_en) begin
-          next_state <= |sram_write_en ? kStateRAddr : kStateWAddr;
+          next_state <= |sram_write_en ? kStateWAddr : kStateRAddr;
         end
         else begin
           next_state <= kStateIdle;
@@ -165,7 +165,7 @@ module AXIAdapter(
         next_state <= arready ? kStateRData : kStateRAddr;
       end
       kStateRData: begin
-        next_state <= rlast ? kStateIdle : kStateRData;
+        next_state <= rvalid && rlast ? kStateIdle : kStateRData;
       end
       kStateWAddr: begin
         next_state <= awready ? kStateWData : kStateWAddr;
@@ -179,6 +179,19 @@ module AXIAdapter(
     endcase
   end
 
+  // lock address of SRAM interface
+  always @(posedge clk) begin
+    if (rst) begin
+      locked_addr <= sram_addr;
+    end
+    else if (sram_en && state == kStateIdle) begin
+      locked_addr <= sram_addr;
+    end
+    else begin
+      locked_addr <= locked_addr;
+    end
+  end
+
   // send/receive data to/from AXI bus
   reg [31:0]  read_data;
   assign sram_ready     = state == kStateIdle;
@@ -186,40 +199,28 @@ module AXIAdapter(
 
   always @(posedge clk) begin
     if (rst) begin
-      axi_ren     <= 0;
-      axi_wen     <= 0;
       axi_wvalid  <= 0;
       read_data   <= 0;
     end
     else begin
       case (state)
         kStateRAddr: begin
-          axi_ren     <= 1;
-          axi_wen     <= 0;
           axi_wvalid  <= 0;
           read_data   <= 0;
         end
         kStateRData: begin
-          axi_ren     <= 0;
-          axi_wen     <= 0;
           axi_wvalid  <= 0;
           read_data   <= rvalid ? rdata : read_data;
         end
         kStateWAddr: begin
-          axi_ren     <= 0;
-          axi_wen     <= 1;
           axi_wvalid  <= 0;
           read_data   <= 0;
         end
         kStateWData: begin
-          axi_ren     <= 0;
-          axi_wen     <= 0;
           axi_wvalid  <= wready && !wlast;
           read_data   <= 0;
         end
         default: begin
-          axi_ren     <= 0;
-          axi_wen     <= 0;
           axi_wvalid  <= 0;
           read_data   <= read_data;
         end
