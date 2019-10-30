@@ -241,11 +241,18 @@ module TinyMIPS(
   );
 
 
-  // some combinational logic signals
+  // control signals
+  reg   ram_en_delay;
+  wire  ram_en = core_ram_en & core_stall;
+
   assign core_stall         = !rom_adapter_ready || !ram_adapter_ready;
   assign debug_reg_write_en = core_stall ? 0 : core_debug_reg_write_en;
   assign rom_adapter_en     = !core_stall && core_rom_en;
-  assign ram_adapter_en     = !core_stall && core_ram_en;
+  assign ram_adapter_en     = (ram_en_delay ^ ram_en) & ram_en;
+
+  always @(posedge clk) begin
+    ram_en_delay <= ram_en;
+  end
 
 
 endmodule // TinyMIPS
