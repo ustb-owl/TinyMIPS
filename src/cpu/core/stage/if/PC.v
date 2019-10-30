@@ -22,7 +22,7 @@ module PC(
 
   reg[`ADDR_BUS] next_pc;
 
-  assign rom_addr = pc;
+  assign rom_addr = next_pc;
   assign rom_write_en = 0;
   assign rom_write_data = 0;
 
@@ -48,7 +48,7 @@ module PC(
 
   always @(posedge clk) begin
     if (!rom_en) begin
-      pc <= `INIT_PC;
+      pc <= `INIT_PC - 4;
     end
     else if (!stall_pc) begin
       pc <= next_pc;
