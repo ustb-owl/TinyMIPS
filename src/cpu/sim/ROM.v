@@ -5,11 +5,12 @@
 `include "sim.v"
 
 module ROM(
-  input                   rom_en,
-  input   [`MEM_SEL_BUS]  rom_write_en,
-  input   [`ADDR_BUS]     rom_addr,
-  input   [`DATA_BUS]     rom_write_data,
-  output  [`DATA_BUS]     rom_read_data
+  input                       clk,
+  input                       rom_en,
+  input       [`MEM_SEL_BUS]  rom_write_en,
+  input       [`ADDR_BUS]     rom_addr,
+  input       [`DATA_BUS]     rom_write_data,
+  output  reg [`DATA_BUS]     rom_read_data
 );
 
   reg[7:0] inst_mem[`INST_MEM_BUS];
@@ -21,9 +22,18 @@ module ROM(
 
   wire[`ADDR_BUS] addr = rom_addr - `INIT_PC;
 
-  assign rom_read_data[7:0] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 3] : 0;
-  assign rom_read_data[15:8] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 2] : 0;
-  assign rom_read_data[23:16] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 1] : 0;
-  assign rom_read_data[31:24] = rom_en ? inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 0] : 0;
+  always @(posedge clk) begin
+    if (!rom_en) begin
+      rom_read_data <= 0;
+    end
+    else begin
+      rom_read_data <= {
+        inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 0],
+        inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 1],
+        inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 2],
+        inst_mem[addr[`INST_MEM_ADDR_WIDTH - 1:0] + 3]
+      };
+    end
+  end
 
 endmodule // ROM

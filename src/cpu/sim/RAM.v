@@ -5,7 +5,6 @@
 
 module RAM(
   input                       clk,
-  input                       rst,
   input                       ram_en,
   input       [`MEM_SEL_BUS]  ram_write_en,
   input       [`ADDR_BUS]     ram_addr,
@@ -29,7 +28,7 @@ module RAM(
   end
 
   // read operation
-  always @(posedge clk) begin
+  always @(*) begin
     if (!ram_en || |ram_write_en) begin
       ram_read_data <= 0;
     end
