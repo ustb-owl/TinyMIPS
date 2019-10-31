@@ -49,7 +49,6 @@ module Core_tb(
 
   RAM ram(
     .clk            (clk),
-    .rst            (rst),
     .ram_en         (ram_en),
     .ram_write_en   (ram_write_en),
     .ram_addr       (ram_addr),
@@ -58,6 +57,7 @@ module Core_tb(
   );
 
   ROM rom(
+    .clk            (clk),
     .rom_en         (rom_en),
     .rom_write_en   (rom_write_en),
     .rom_addr       (rom_addr),
