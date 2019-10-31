@@ -33,7 +33,7 @@ module MEMWB(
   output  [`ADDR_BUS]     current_pc_addr_out
 );
 
-  PipelineDeliverAsyn #(`DATA_BUS_WIDTH) ff_ram_read_data(
+  PipelineDeliver #(`DATA_BUS_WIDTH) ff_ram_read_data(
     clk, rst,
     stall_current_stage, stall_next_stage,
     ram_read_data_in, ram_read_data_out
