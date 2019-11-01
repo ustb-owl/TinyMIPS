@@ -274,7 +274,7 @@ TypePtr Analyzer::AnalyzeUnary(Operator op, const TypePtr &opr) {
     }
     // logic operations
     case Operator::LogicNot: {
-      if (!opr->IsInteger() || !opr->IsPointer()) {
+      if (!opr->IsInteger() && !opr->IsPointer()) {
         return LogError("expected integer/pointer types");
       }
       return std::make_shared<ConstType>(
