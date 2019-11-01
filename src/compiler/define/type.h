@@ -215,7 +215,7 @@ inline TypePtr MakePlainType(front::Keyword key, bool is_right) {
 
 // create a new void type
 inline TypePtr MakeVoidType() {
-  return std::make_shared<PlainType>(PlainType::Type::Void, true);
+  return std::make_shared<PlainType>(PlainType::Type::Void, false);
 }
 
 // check if 2 pointers are compatible
