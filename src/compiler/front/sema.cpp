@@ -4,21 +4,17 @@ using namespace tinylang::front;
 using namespace tinylang::define;
 
 TypePtr VarDefAST::SemaAnalyze(Analyzer &ana) {
-  TypePtrList defs;
   for (const auto &i : defs_) {
     auto type = i->SemaAnalyze(ana);
     if (!type) return nullptr;
-    defs.push_back(type);
   }
   return set_type(MakeVoidType());
 }
 
 TypePtr LetDefAST::SemaAnalyze(Analyzer &ana) {
-  TypePtrList defs;
   for (const auto &i : defs_) {
     auto type = i->SemaAnalyze(ana);
     if (!type) return nullptr;
-    defs.push_back(type);
   }
   return set_type(MakeVoidType());
 }
