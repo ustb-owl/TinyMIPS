@@ -70,3 +70,7 @@
 !*.xmp
 
 # End of https://www.gitignore.io/api/vivado
+
+
+# Markdown
+!*.md
