@@ -30,7 +30,9 @@ void VarAllocationPass::InitFreeReg(bool is_preserved) {
     end = Reg::S0;
   }
   else {
-    begin = Reg::T9;
+    free_reg_.push_back(Reg::T9);
+    free_reg_.push_back(Reg::T8);
+    begin = Reg::T7;
     end = Reg::T0;
   }
   // push to 'free_reg_'
