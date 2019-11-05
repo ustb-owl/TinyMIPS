@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "bus.v"
+`include "debug.v"
 
 module TinyMIPS(
   input                   clk,
@@ -87,11 +88,11 @@ module TinyMIPS(
 );
 
   // CPU core
-  wire                    core_stall;
-  wire                    core_rom_en;
+  `DEBUG wire             core_stall;
+  `DEBUG wire             core_rom_en;
   wire[`MEM_SEL_BUS]      core_rom_write_en;
-  wire[`ADDR_BUS]         core_rom_addr;
-  wire[`DATA_BUS]         core_rom_read_data;
+  `DEBUG wire[`ADDR_BUS]  core_rom_addr;
+  `DEBUG wire[`DATA_BUS]  core_rom_read_data;
   wire[`DATA_BUS]         core_rom_write_data;
   wire                    core_ram_en;
   wire[`MEM_SEL_BUS]      core_ram_write_en;

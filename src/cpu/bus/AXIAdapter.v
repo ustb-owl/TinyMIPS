@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "bus.v"
+`include "debug.v"
 
 module AXIAdapter(
   input                   clk,
@@ -134,7 +135,8 @@ module AXIAdapter(
   end
 
   // FSM of adapter
-  reg [2:0] state, next_state;
+  `DEBUG reg [2:0] state;
+  reg [2:0] next_state;
 
   // state definition
   localparam kStateIdle = 0, kStateRAddr = 1, kStateRData = 2,
