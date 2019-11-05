@@ -11,7 +11,7 @@ TinySoC is a simple system-on-chip based on TinyMIPS CPU. This design can be syn
 
 | Peripheral            | Start       | End         | Length  | Type      |
 | -                     | -           | -           | -       | -         |
-| On-chip ROM           | 0x1FC00000  | 0x1FC7FFFF  | 32KB    | Memory    |
+| On-chip ROM           | 0x1FC00000  | 0x1FC07FFF  | 32KB    | Memory    |
 | DDR3 Controller       | 0x00000000  | 0x07FFFFFF  | 128MB   | Memory    |
 | CFG Flash Controller  | 0x1A000000  | 0x1AFFFFFF  | 16MB    | Memory    |
 | SPI Flash Controller  | 0x1C000000  | 0x1C000FFF  | 4KB     | Register  |
