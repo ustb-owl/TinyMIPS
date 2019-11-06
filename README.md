@@ -9,7 +9,7 @@ The Project TinyMIPS is dedicated to enabling undergraduates to build a complete
 ## To-Do List
 
 - [x] TinyMIPS processor
-- [ ] TinyMIPS SoC
+- [x] TinyMIPS SoC (TinySoC)
 - [x] TinyLang compiler (backend based on TAC IR)
 - [ ] TinyLang compiler (backend based on SSA IR)
 - [ ] TinyLang standard library
