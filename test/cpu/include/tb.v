@@ -1,5 +1,5 @@
-`ifndef OOPA_TEST_INCLUDE_TB_V_
-`define OOPA_TEST_INCLUDE_TB_V_
+`ifndef TINYMIPS_TEST_INCLUDE_TB_V_
+`define TINYMIPS_TEST_INCLUDE_TB_V_
 
 `define TICK  _tb_tick
 
@@ -24,9 +24,9 @@
                "expected = 0x%8h, actual = 0x%8h",                \
                expect, val);                                      \
       $finish;                                                    \
-    end                                                           \
+    end
 
 `define END_AT_TICK(tick)                                         \
     if (`TICK >= tick) $finish
 
-`endif  // OOPA_TEST_INCLUDE_TB_V_
+`endif  // TINYMIPS_TEST_INCLUDE_TB_V_
