@@ -174,7 +174,7 @@ void CodeGenerator::GeneratePrologue(const FuncInfo &info) {
   // initialize stack pointer
   asm_gen_.PushAsm(Opcode::ADDIU, Reg::SP, Reg::SP, -frame_size);
   // store all saved registers
-  std::size_t offset = 0;
+  std::size_t offset = 1;
   for (const auto &i : var_alloc_.saved_reg()) {
     asm_gen_.PushAsm(Opcode::SW, i, Reg::SP, frame_size - 4 * offset++);
   }
@@ -194,7 +194,7 @@ void CodeGenerator::GenerateEpilogue() {
   // restore stack pointer
   asm_gen_.PushMove(Reg::SP, Reg::FP);
   // restore all saved registers
-  std::size_t offset = 0;
+  std::size_t offset = 1;
   for (const auto &i : var_alloc_.saved_reg()) {
     asm_gen_.PushAsm(Opcode::LW, i, Reg::SP, frame_size - 4 * offset++);
   }
