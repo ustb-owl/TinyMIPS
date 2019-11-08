@@ -2,6 +2,8 @@
 
 TinySoC is a simple system-on-chip based on TinyMIPS CPU. This design can be synthesised and implemented on development board with Xilinx 7 Series FPGA.
 
+TinySoC has already been tested on Loongson FPGA development board (with Xilinx XC7A200TFBG676-2).
+
 ## Requirement
 
 * Xilinx Vivado 2018.3.
