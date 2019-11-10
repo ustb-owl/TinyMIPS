@@ -51,7 +51,7 @@ const char *kLabelLabel = "$_label_";
 const char *kEpilogueLabel = "$_epilogue_";
 const char *kMul = "_std_mul";
 const char *kDiv = "_std_div";
-const char *kMod = "_std_mod";
+const char *kUDiv = "_std_divu";
 
 inline std::size_t RoundUpTo8(std::size_t num) {
   return ((num + 7) / 8) * 8;
@@ -343,29 +343,27 @@ void CodeGenerator::GenerateOn(BinaryTAC &tac) {
     case BinaryOp::Div: {
       asm_gen_.PushMove(Reg::A0, lhs);
       asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 0);
       asm_gen_.PushJump(kDiv);
       break;
     }
     case BinaryOp::UDiv: {
       asm_gen_.PushMove(Reg::A0, lhs);
       asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 1);
-      asm_gen_.PushJump(kDiv);
+      asm_gen_.PushJump(kUDiv);
       break;
     }
     case BinaryOp::Mod: {
       asm_gen_.PushMove(Reg::A0, lhs);
       asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 0);
-      asm_gen_.PushJump(kMod);
+      asm_gen_.PushJump(kDiv);
+      asm_gen_.PushMove(Reg::V0, Reg::V1);
       break;
     }
     case BinaryOp::UMod: {
       asm_gen_.PushMove(Reg::A0, lhs);
       asm_gen_.PushMove(Reg::A1, rhs);
-      asm_gen_.PushLoadImm(Reg::A2, 1);
-      asm_gen_.PushJump(kMod);
+      asm_gen_.PushJump(kUDiv);
+      asm_gen_.PushMove(Reg::V0, Reg::V1);
       break;
     }
     case BinaryOp::Equal: {
