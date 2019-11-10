@@ -72,5 +72,9 @@
 # End of https://www.gitignore.io/api/vivado
 
 
+# sim & synth
+sim
+synth
+
 # Markdown
 !*.md
