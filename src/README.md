@@ -6,5 +6,5 @@ This directory is used to place all source code for Project TinyMIPS, and is str
 * `compiler`: compiler of TinyLang.
 * `cpu`: HDL source code of TinyMIPS.
 * `soc`: Xilinx Vivado project of TinySoC.
-* `stdlib`: source code of TinyLang standard library.
+* `runtime`: source code of TinyLang runtime library.
 * `utility`: some utilities, including host program of TinySoC.
