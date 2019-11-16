@@ -26,7 +26,8 @@ include toolchain.mk
 export rwildcard = $$(foreach d, $$(wildcard $$(1:=/*)), $$(call rwildcard, $$d, $$2) $$(filter $$(subst *, %, $$2), $$d))
 
 # all sub-makes
-SUB_MAKE := $(SRC_DIR)/compiler
+TLBUILD := $(SRC_DIR)/compiler $(SRC_DIR)/runtime
+SUB_MAKE := $(TLBUILD)
 SUB_MAKE += $(SRC_DIR)/utility/elfinfo
 SUB_MAKE += $(EXAMPLE_DIR)/serial
 
@@ -37,10 +38,13 @@ all: $(TARGET_DIR) $(SUB_MAKE)
 
 clean: $(SUB_MAKE)
 
+# rules of sub-makes
 $(SUB_MAKE):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
 
-$(EXAMPLE_DIR)/serial: $(SRC_DIR)/compiler
+# dependencies of all sub-makes
+$(EXAMPLE_DIR)/serial: $(TLBUILD)
 
+# rules for directories
 $(TARGET_DIR):
 	mkdir $@
