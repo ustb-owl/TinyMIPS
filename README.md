@@ -6,6 +6,22 @@ The Project TinyMIPS is dedicated to enabling undergraduates to build a complete
 * TinyLang, a C like programming language and its compiler.
 * TinyOS, a tiny embedded operating system kernel.
 
+## How to Build?
+
+You may want to configure your cross compile toolchain first. If so, you should modify the file `toolchain.mk`.
+
+To build entire project, just run:
+
+```
+make
+```
+
+Or build with release mode:
+
+```
+make DEBUG=0
+```
+
 ## To-Do List
 
 - [x] TinyMIPS processor
