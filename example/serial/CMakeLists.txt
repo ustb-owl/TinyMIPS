@@ -1,3 +1,0 @@
-project(SerialExample)
-
-# TODO
