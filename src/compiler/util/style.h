@@ -62,6 +62,7 @@ class StreamWrapper {
     auto process_color = [this, &first_color](Style color) {
       if (first_color) {
         operator<<(color);
+        first_color = false;
       }
       else {
         operator<<(static_cast<Style>(static_cast<int>(color) + 10));
