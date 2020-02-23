@@ -1,7 +1,7 @@
 #ifndef TINYLANG_VERSION_H_
 #define TINYLANG_VERSION_H_
 
-// version information of Ionia
+// version information of TinyLang
 
 #ifndef APP_NAME
 #define APP_NAME            "TinyLang"
