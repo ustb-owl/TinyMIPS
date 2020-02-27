@@ -3,7 +3,6 @@
 #include <iostream>
 #include <utility>
 #include <stack>
-#include <cassert>
 
 #include "util/style.h"
 
