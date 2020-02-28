@@ -1,9 +1,7 @@
 #ifndef TINYLANG_DEFINE_SYMBOL_H_
 #define TINYLANG_DEFINE_SYMBOL_H_
 
-#include <unordered_map>
 #include <string>
-#include <memory>
 
 #include "define/type.h"
 #include "util/nested.h"
